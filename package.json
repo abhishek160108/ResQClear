@@ -1,0 +1,20 @@
+{
+  "name": "resqclear-prototype",
+  "version": "1.0.0",
+  "description": "resQClear - AI-Powered Emergency Traffic Coordination Prototype",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "serve": "python -m http.server 3000"
+  },
+  "keywords": [
+    "emergency-traffic",
+    "smart-city",
+    "ai-route-optimization",
+    "ambulance-tracking",
+    "traffic-simulation"
+  ],
+  "author": "resQClear Technologies",
+  "license": "MIT"
+}

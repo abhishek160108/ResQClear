@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>resQClear — AI-Powered Emergency Traffic Coordination</title>
+  <meta name="description" content="AI-powered emergency traffic coordination prototype helping ambulances navigate congestion and coordinate safer, faster emergency routes." />
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><path d='M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2'/><path d='M19 18h2a1 1 0 0 0 1-1v-3.28a1 1 0 0 0-.684-.948l-2.92-1.026A1 1 0 0 0 18 13v5'/><circle cx='7' cy='18' r='2'/><circle cx='17' cy='18' r='2'/></svg>" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              emerald: '#10b981',
+              cyan: '#06b6d4',
+              red: '#ef4444',
+              amber: '#f59e0b',
+              dark: '#030712'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- React 18 & ReactDOM 18 -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <!-- Leaflet CSS & JS for Real-World Live Traffic Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Babel Standalone for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Custom CSS Styling -->
+  <link rel="stylesheet" href="src/styles.css" />
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-emerald-500 selection:text-black">
+  <div id="root"></div>
+
+  <!-- Sound & Simulation Scripts -->
+  <script src="src/sound.js"></script>
+  <script src="src/data.js"></script>
+  <script src="src/simulation.js"></script>
+
+  <!-- React Components (Compiled via Babel) -->
+  <script type="text/babel" src="src/components.js"></script>
+  <script type="text/babel" src="src/LiveMap.js"></script>
+  <script type="text/babel" src="src/ConflictEngineModal.js"></script>
+  <script type="text/babel" src="src/RightStatusPanel.js"></script>
+  <script type="text/babel" src="src/AmbulanceFleetView.js"></script>
+  <script type="text/babel" src="src/HospitalView.js"></script>
+  <script type="text/babel" src="src/AnalyticsView.js"></script>
+  <script type="text/babel" src="src/TrafficNetworkView.js"></script>
+  <script type="text/babel" src="src/SettingsView.js"></script>
+  <script type="text/babel" src="src/DemoControls.js"></script>
+  <script type="text/babel" src="src/PresentationMode.js"></script>
+  <script type="text/babel" src="src/TopNav.js"></script>
+  <script type="text/babel" src="src/Sidebar.js"></script>
+  <script type="text/babel" src="src/LandingPage.js"></script>
+  <script type="text/babel" src="src/app.js"></script>
+</body>
+</html>
