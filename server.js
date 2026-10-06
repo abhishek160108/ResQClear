@@ -75,9 +75,10 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`\n=================================================`);
   console.log(`  RESQCLEAR - AI Emergency Traffic Platform`);
   console.log(`  Prototype Server running at: http://localhost:${PORT}`);
+  console.log(`  Also accessible at: http://127.0.0.1:${PORT}`);
   console.log(`=================================================\n`);
 });
