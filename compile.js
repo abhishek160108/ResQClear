@@ -1,7 +1,6 @@
-// Build & Precompile resQClear for 100% Instant Zero-Dependency Execution
+// Production Build Script for resQClear (100% Offline, Precompiled, and Self-Healing)
 const fs = require('fs');
 const path = require('path');
-const vm = require('vm');
 
 const srcDir = path.join(__dirname, 'src');
 
@@ -47,13 +46,8 @@ rawBundle += `
 
 fs.writeFileSync(path.join(srcDir, 'bundle.js'), rawBundle, 'utf8');
 
-// Use precompiled JS from test_babel or compile directly
-let compiledCode = '';
-if (fs.existsSync(path.join(srcDir, 'app.compiled.js'))) {
-  compiledCode = fs.readFileSync(path.join(srcDir, 'app.compiled.js'), 'utf8');
-} else {
-  compiledCode = rawBundle;
-}
+// Read precompiled JavaScript from src/app.compiled.js
+let compiledCode = fs.readFileSync(path.join(srcDir, 'app.compiled.js'), 'utf8');
 
 const htmlContent = `<!DOCTYPE html>
 <html lang="en" class="dark">
@@ -66,38 +60,47 @@ const htmlContent = `<!DOCTYPE html>
   <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><path d='M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2'/><path d='M19 18h2a1 1 0 0 0 1-1v-3.28a1 1 0 0 0-.684-.948l-2.92-1.026A1 1 0 0 0 18 13v5'/><circle cx='7' cy='18' r='2'/><circle cx='17' cy='18' r='2'/></svg>" />
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Global Diagnostic Error Handler -->
   <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              emerald: '#10b981',
-              cyan: '#06b6d4',
-              red: '#ef4444',
-              amber: '#f59e0b',
-              dark: '#030712'
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace']
-          }
-        }
-      }
+    window.onerror = function(msg, url, line, col, error) {
+      console.error('GLOBAL ERROR:', msg, 'Line:', line, error);
     };
   </script>
 
-  <!-- React 18 & ReactDOM 18 -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Local Offline Tailwind CSS -->
+  <script src="src/vendor/tailwind.js"></script>
+  <script>
+    if (window.tailwind) {
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                emerald: '#10b981',
+                cyan: '#06b6d4',
+                red: '#ef4444',
+                amber: '#f59e0b',
+                dark: '#030712'
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace']
+            }
+          }
+        }
+      };
+    }
+  </script>
 
-  <!-- Leaflet CSS & JS for Real-World Live Traffic Map -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Local Offline React 18 & ReactDOM 18 -->
+  <script src="src/vendor/react.production.min.js"></script>
+  <script src="src/vendor/react-dom.production.min.js"></script>
+
+  <!-- Local Offline Leaflet CSS & JS -->
+  <link rel="stylesheet" href="src/vendor/leaflet.css" />
+  <script src="src/vendor/leaflet.js"></script>
 
   <!-- Custom CSS Styling -->
   <link rel="stylesheet" href="src/styles.css" />
@@ -105,7 +108,7 @@ const htmlContent = `<!DOCTYPE html>
 <body class="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-emerald-500 selection:text-black">
   <div id="root"></div>
 
-  <!-- Precompiled Pure JavaScript Application (Instant 0ms Execution) -->
+  <!-- Precompiled Pure JavaScript Application -->
   <script>
 ${compiledCode}
   </script>
@@ -114,4 +117,4 @@ ${compiledCode}
 `;
 
 fs.writeFileSync(path.join(__dirname, 'index.html'), htmlContent, 'utf8');
-console.log('✅ Generated standalone precompiled index.html (' + (htmlContent.length / 1024).toFixed(1) + ' KB)');
+console.log('✅ Generated 100% offline standalone index.html (' + (htmlContent.length / 1024).toFixed(1) + ' KB)');
