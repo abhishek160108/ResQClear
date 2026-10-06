@@ -1,4 +1,4 @@
-// AmbuClear Operations Center Left Sidebar Navigation
+// resQClear Operations Center Left Sidebar Navigation
 const { useState } = React;
 
 function Sidebar({ currentTab, setTab, simState, onTogglePresentation, onOpenLanding }) {
@@ -77,7 +77,7 @@ function Sidebar({ currentTab, setTab, simState, onTogglePresentation, onOpenLan
         </button>
 
         <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-[10px] font-mono text-slate-400 leading-tight text-center">
-          Prototype v1.0.0 • AI-V2X Sim
+          resQClear Prototype v1.2 • AI-V2X Sim
         </div>
       </div>
     </aside>

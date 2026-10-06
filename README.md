@@ -1,7 +1,7 @@
-# resQClear — AI-Powered Emergency Traffic Coordination
+# resQClear — Emergency Traffic Coordination
 
 > **“Clear the way. Save lives.”**  
-> *AI-powered emergency traffic coordination that helps ambulances navigate congestion, resolve intersection conflicts, and coordinate safer, faster emergency routes.*
+> *An AI-assisted emergency traffic coordination platform designed to coordinate ambulance movement through congested urban intersections.*
 
 ---
 
@@ -9,70 +9,89 @@
 
 **resQClear** is a professional, startup-quality web application prototype built for smart city emergency traffic management. It simulates how an intelligent V2X (Vehicle-to-Everything) and predictive AI traffic network coordinates emergency green corridors for critical Advanced Life Support (ALS) ambulances while safely arbitrating multi-vehicle intersection conflicts.
 
-> ⚠️ **DEMO / SIMULATION DISCLAIMER:**  
-> resQClear is a prototype demonstration and simulation platform. Traffic-signal control and emergency coordination demonstrated in this application are visual simulations and are **not connected to real-world municipal infrastructure**.
+> ⚠️ **MANDATORY SIMULATION DISCLAIMER:**  
+> **resQClear is a simulation prototype. Traffic-signal actions shown in this demo are not connected to real-world traffic infrastructure.**
 
 ---
 
-## ✨ Key Features
+## ✨ Key Capabilities
 
-### 1. 🚦 Dual-Ambulance Intersection Conflict Resolution (Centerpiece)
-- Simulates the critical real-world scenario where **Ambulance A (AMB-104)** and **Ambulance B (AMB-208)** converge simultaneously on the same central crossroads (**Intersection 4**).
-- **Automated AI Conflict Engine**:
-  - Computes sub-second arrival ETAs (12s vs 19s), distance, velocity, and patient triage urgency.
-  - Grants sequential clearance: **AMBULANCE A (Priority 01) → AMBULANCE B (Priority 02)**.
-  - Dynamically controls traffic signal lamps (Red → Yellow → Green Emergency Override) and releases corridors once cleared with zero close-call collisions.
+### 1. 🚦 Multi-Ambulance Intersection Conflict Resolution (Centerpiece Hero Demo)
+- Simulates the critical real-world scenario where **AMB-104 (Ambulance A)** and **AMB-208 (Ambulance B)** converge simultaneously on the same central crossroads (**Intersection 4 / INT-04**).
+- **AI-Assisted Conflict Resolution Engine**:
+  - Transparent scoring model evaluating: ETA to intersection, distance, emergency severity (provided by authorized personnel), conflict probability, and intersection occupancy.
+  - Grants sequential coordination: **AMB-104 (Priority 01) → AMB-208 (Priority 02)**.
+  - Reason: *"AMB-104 reaches the conflict zone earlier. Sequential clearance minimizes intersection occupancy conflict."*
+  - Dynamically transitions signals (Normal → Emergency Priority Request [Yellow] → Green Wave Lock) and returns to normal cycle once cleared.
 
-### 2. 🗺️ High-Fidelity 60FPS City Map Simulation & Real-World Live Traffic Demo
-- **Real-World Geographic Map Layer (Leaflet / OpenStreetMap / CartoDB Dark Matter)**:
-  - Toggle between Real-World Cartography and Digital Twin Tactical Simulation.
-  - Actual city coordinates for Chennai medical corridors: Anna Nagar, Poonamallee High Rd, Central Station, Greams Road, Apollo Emergency Center, Rajiv Gandhi Govt General Hospital.
-  - Live traffic congestion layers, dynamic route polylines, and real-world incident simulations.
+### 2. 🗺️ High-Fidelity 60FPS Digital Twin Simulation Map
 - **Digital Twin Tactical View**:
   - Real-time road network with asphalt styling, dashed lane dividers, pedestrian crosswalks, and sector zone boundaries.
-  - Live civilian traffic that autonomously detects sirens and performs yielding maneuvers.
-  - Ambulances with flashing red/blue light bars, directional headlight beams, siren sound waves, and forward green-wave corridors.
-  - **Picture-in-Picture CCTV Camera Feed (CAM-04)** showing a close-up street view of Central Conflict Junction 4.
+  - Clear Intersection IDs (**INT-01** through **INT-06**).
+  - Clear Map Legend: Green (Emergency corridor), Red (Critical congestion), Amber (Moderate congestion), Blue (Normal route).
+  - Live civilian traffic autonomously yielding to approaching sirens.
+  - Ambulances with flashing beacons, directional headlight beams, and forward green-wave corridors.
+  - **Picture-in-Picture CCTV Stream (CAM-04)** showing a live simulated camera view of Central Conflict Junction 4.
+- **Real-World Live Map (Locked / Future Modal)**:
+  - Transparently explains future municipal integration roadmap subject to technical and regulatory approval.
 
-### 3. 📊 Emergency Operations Center Dashboard
-- **Live Emergencies & Chronological Event Stream**: Real-time dispatch telemetry and milestone logging.
-- **Ambulance Fleet Telematics**: Cardiac vitals (HR, BP, SpO2), driver details, speed gauges, and battery/O2 levels.
-- **Hospital Receiving Triage**: ER trauma bay readiness checklist, cath-lab pre-warming, and direct patient vital sync.
-- **Traffic Analytics**: Comparison charts of baseline vs resQClear transit times, delay reduction distributions, and corridor benchmarks (clearly labeled **SIMULATION DATA**).
-- **AI Insights Panel**: Real-time traffic alerts with interactive **"Apply Route"** bypass triggers.
+### 3. 🔄 "From Detection to Coordination" (Why resQClear?)
+1. **DETECT**: Emergency vehicle detected via connected telemetry
+2. **PREDICT**: Traffic congestion and ETA to intersection analyzed
+3. **RESOLVE**: Conflicting emergency routes coordinated by AI decision model
+4. **COORDINATE**: Emergency corridor sequence simulated with dynamic green wave
+5. **INFORM**: Hospital and control-room status updated in real-time
 
-### 4. 🎬 Startup Presentation & Pitch Mode
-- Fullscreen cinematic pitch deck overlay demonstrating the 8-phase narrative:
-  1. *Ambulance Emergency Detected*
+### 4. 📊 Emergency Operations Center Suite
+- **Live Operations Chronology**: Real-time dispatch telemetry and milestone event logging.
+- **Ambulance Fleet Telematics**: Cardiac vitals (HR, BP, SpO2), driver details, speed gauges, and intersection ETAs (labeled **SIMULATION DATA**).
+- **Hospital Receiving Triage**: Trauma bay readiness checklist, cath-lab pre-warming, and direct patient vital sync (*Hospital notification simulated*).
+- **Traffic Analytics**: Comparison charts of baseline vs resQClear transit times, delay reduction distributions, and corridor benchmarks (labeled **SIMULATION DATA**).
+- **AI Traffic Insights**: Real-time congestion alerts with interactive **"SIMULATE ALTERNATE ROUTE"** bypass trigger.
+
+### 5. 🎬 Startup Presentation & Pitch Mode (10-Step Narrative)
+- Fullscreen cinematic pitch deck overlay demonstrating the 10-step sequence:
+  1. *Emergency Detected*
   2. *Traffic Congestion Predicted*
   3. *Multiple Emergency Vehicles Detected*
-  4. *AI Conflict Resolution*
-  5. *Emergency Corridor Created*
-  6. *Ambulance A Cleared*
-  7. *Ambulance B Cleared*
-  8. *Route Complete (3.6 min Simulated Time Saved)*
+  4. *Conflict Intersection Identified*
+  5. *AI-Assisted Conflict Resolution*
+  6. *AMB-104 — Priority 01*
+  7. *Intersection Cleared*
+  8. *AMB-208 — Priority 02*
+  9. *Intersection Cleared*
+  10. *Emergency Routes Coordinated*
+- Final Screen with verified simulated demo impact metrics.
 
-### 5. 🎮 Dedicated Demo Controls
+### 6. 🎮 Dedicated Demo Controls
 - **RUN EMERGENCY SCENARIO**: One-click automated 12-step hero sequence.
 - Manual triggers for Ambulance A, Ambulance B, Both Emergencies, Traffic Jam injection, Speed Multipliers (1x to 4x), and Procedural Web Audio radio effects.
 
 ---
 
+## 🗺️ Product Roadmap
+
+- **Phase 1: Digital Twin Simulation** (✓ Current - Complete)
+- **Phase 2: Ambulance GPS MVP** (Next)
+- **Phase 3: Real-Time Traffic Data** (Planned)
+- **Phase 4: Hospital / Ambulance Pilot** (Planned)
+- **Phase 5: Authorized Traffic Infrastructure Integration** (Future)
+
+---
+
 ## 🚀 Quick Start (Local Setup)
 
-The prototype is built with **zero external server dependencies** and can be run immediately using either Node.js or Python:
+The prototype is built with **zero external server dependencies** and can be run immediately:
 
-### Option A: Using Node.js
+### Option A: Using Python
 ```bash
-# Run the built-in HTTP server
-node server.js
+python -m http.server 3000
 ```
 Open your browser at **`http://localhost:3000`**
 
-### Option B: Using Python
+### Option B: Using Node.js
 ```bash
-# Run via Python's built-in HTTP server
-python -m http.server 3000
+node server.js
 ```
 Open your browser at **`http://localhost:3000`**
 
@@ -81,7 +100,6 @@ Open your browser at **`http://localhost:3000`**
 ## 🛠️ Technology Stack
 
 - **Frontend Core:** React 18, HTML5 Canvas, SVG Vector Graphics, Leaflet.js
-- **Map Cartography:** OpenStreetMap & CartoDB Dark Matter tiles (free, zero API key)
 - **Styling & HUD:** Tailwind CSS, Glassmorphism, Custom CSS Radar/Pulse Keyframes
 - **Icons:** Scalable Lucide-style SVG icon system
 - **Audio Engine:** HTML5 Web Audio API (procedural emergency chimes, radio squelch, and conflict pulses)

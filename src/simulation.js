@@ -4,18 +4,18 @@ class SimulationEngine {
   constructor() {
     this.isRunning = true;
     this.speedMultiplier = 1.0;
-    this.ambulances = JSON.parse(JSON.stringify(AMBUCLEAR_DATA.initialAmbulances));
-    this.intersections = JSON.parse(JSON.stringify(AMBUCLEAR_DATA.intersections));
-    this.congestionZones = JSON.parse(JSON.stringify(AMBUCLEAR_DATA.congestionZones));
-    this.hospitals = JSON.parse(JSON.stringify(AMBUCLEAR_DATA.hospitals));
+    this.ambulances = JSON.parse(JSON.stringify(RESQCLEAR_DATA.initialAmbulances));
+    this.intersections = JSON.parse(JSON.stringify(RESQCLEAR_DATA.intersections));
+    this.congestionZones = JSON.parse(JSON.stringify(RESQCLEAR_DATA.congestionZones));
+    this.hospitals = JSON.parse(JSON.stringify(RESQCLEAR_DATA.hospitals));
     
     // Civilian traffic
     this.civilianVehicles = this.initCivilianTraffic();
 
-    // Event Log
+    // Event Log (Realistic operations chronology)
     this.events = [
-      { id: 1, time: '18:42:00', type: 'system', message: 'resQClear Central Grid Engine Initialized' },
-      { id: 2, time: '18:42:05', type: 'info', message: 'Traffic Signal Network Synced — 6 Intersections Online' }
+      { id: 1, time: '18:42:00', type: 'system', message: 'resQClear Simulation Grid Engine Initialized • 6 Signal Nodes Online' },
+      { id: 2, time: '18:42:05', type: 'info', message: 'V2X Conflict Arbitration Engine Ready (Simulation Mode)' }
     ];
 
     // Conflict State
@@ -38,16 +38,19 @@ class SimulationEngine {
     // AI Insight state
     this.aiInsight = {
       visible: true,
-      title: 'AI Traffic Congestion Insight',
-      message: 'High traffic density detected on Anna Salai North link (+2.4 min delay). Adaptive corridor switch active for AMB-104.',
+      title: 'AI Traffic Insight',
+      message: 'High traffic density detected on Anna Salai North Link. Predicted delay: +2.4 min. Alternative route may reduce simulated delay.',
       applied: false,
       savings: '2 min 18 sec'
     };
 
-    // Metrics counter
+    // Metrics counter (Simulation Estimates)
     this.liveMetrics = {
-      timeSavedSec: 168, // 2.8 min
-      intersectionsCoordinated: 14,
+      timeSavedSec: 138, // 2m 18s
+      intersectionsCoordinated: 4,
+      ambulancesCoordinated: 2,
+      emergencyEventsSimulated: 12,
+      decisionConfidence: '96%',
       avgSpeed: 44.2,
       activeCorridors: 2
     };
@@ -158,9 +161,9 @@ class SimulationEngine {
   }
 
   reset() {
-    this.ambulances = JSON.parse(JSON.stringify(AMBUCLEAR_DATA.initialAmbulances));
-    this.intersections = JSON.parse(JSON.stringify(AMBUCLEAR_DATA.intersections));
-    this.congestionZones = JSON.parse(JSON.stringify(AMBUCLEAR_DATA.congestionZones));
+    this.ambulances = JSON.parse(JSON.stringify(RESQCLEAR_DATA.initialAmbulances));
+    this.intersections = JSON.parse(JSON.stringify(RESQCLEAR_DATA.intersections));
+    this.congestionZones = JSON.parse(JSON.stringify(RESQCLEAR_DATA.congestionZones));
     this.civilianVehicles = this.initCivilianTraffic();
     this.conflictState = {
       detected: false,
@@ -175,11 +178,11 @@ class SimulationEngine {
     this.scenarioRunning = false;
     this.scenarioStep = 0;
     this.scenarioTimer = 0;
+    this.aiInsight.applied = false;
     this.logEvent('info', 'Simulation reset to default corridor parameters.');
     this.notify();
   }
 
-  // Calculate coordinates along polyline given progress [0, 1]
   getPointOnPath(path, progress) {
     if (!path || path.length < 2) return path[0] || { x: 0, y: 0 };
     const totalSegments = path.length - 1;
@@ -192,8 +195,6 @@ class SimulationEngine {
 
     const x = p1.x + (p2.x - p1.x) * segProgress;
     const y = p1.y + (p2.y - p1.y) * segProgress;
-
-    // Angle calculation
     const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
 
     return { x, y, angle, currentSegment: segIndex };
@@ -212,6 +213,7 @@ class SimulationEngine {
           inter.timer = 12 + Math.random() * 8;
           inter.northSouth = inter.northSouth === 'GREEN' ? 'RED' : 'GREEN';
           inter.eastWest = inter.northSouth === 'GREEN' ? 'RED' : 'GREEN';
+          inter.modeLabel = 'NORMAL CYCLE';
         }
       }
     });
@@ -222,22 +224,20 @@ class SimulationEngine {
 
     // Move ambulances along paths
     this.ambulances.forEach(amb => {
-      // Base speed factor
       let speedFactor = 0.035;
 
-      // In conflict resolution stage, AMB-B holds/decelerates while AMB-A clears!
+      // In conflict resolution stage, AMB-B holds/decelerates while AMB-A clears
       if (amb.id === 'AMB-208' && this.conflictState.stage === 'PRIORITY_A' && amb.progress > 0.45 && amb.progress < 0.52) {
-        // Slow down before intersection while A crosses
         speedFactor = 0.006;
       } else if (amb.id === 'AMB-104' && this.conflictState.stage === 'PRIORITY_A') {
         speedFactor = 0.048; // Accelerated priority clearance
       } else if (amb.id === 'AMB-208' && this.conflictState.stage === 'PRIORITY_B') {
-        speedFactor = 0.052; // Now B rushes through
+        speedFactor = 0.052; // Now B proceeds through
       }
 
       amb.progress += speedFactor * dt;
       if (amb.progress > 0.98) {
-        amb.progress = 0.98; // Arrived at hospital
+        amb.progress = 0.98;
       }
 
       // Update current position
@@ -248,15 +248,22 @@ class SimulationEngine {
 
       // Distance and ETA to conflict junction (Intersection 4 is at x: 450, y: 350)
       const targetDist = Math.hypot(450 - pos.x, 350 - pos.y);
-      amb.distanceToConflict = Math.round(targetDist * 1.5); // scaled meters
-      amb.currentIntersectionEta = Math.max(1, Math.round(amb.distanceToConflict / (amb.speed / 3.6)));
+      amb.distanceToConflict = Math.round(targetDist * 1.5);
+      
+      // Calculate realistic ETA to intersection
+      if (amb.id === 'AMB-104') {
+        amb.currentIntersectionEta = Math.max(2, Math.round(43 * (1 - Math.min(1, amb.progress / 0.5))));
+      } else if (amb.id === 'AMB-208') {
+        amb.currentIntersectionEta = Math.max(4, Math.round(50 * (1 - Math.min(1, amb.progress / 0.5))));
+      } else {
+        amb.currentIntersectionEta = Math.max(5, Math.round(amb.distanceToConflict / (amb.speed / 3.6)));
+      }
     });
 
     // Update Civilian Cars & Yielding Behavior
     this.civilianVehicles.forEach(car => {
       let isYielding = false;
 
-      // Check distance to any active ambulance
       this.ambulances.forEach(amb => {
         if (amb.currentX && amb.currentY) {
           const dist = Math.hypot(car.x - amb.currentX, car.y - amb.currentY);
@@ -290,65 +297,69 @@ class SimulationEngine {
 
     const int4 = this.intersections.find(i => i.id === 'int-4');
 
-    // Both are approaching intersection 4 (progress between 0.35 and 0.65)
-    const aApproaching = ambA.progress >= 0.32 && ambA.progress < 0.58;
-    const bApproaching = ambB.progress >= 0.30 && ambB.progress < 0.58;
-
-    const aCleared = ambA.progress >= 0.58;
-    const bCleared = ambB.progress >= 0.58;
+    const aApproaching = ambA.progress >= 0.30 && ambA.progress < 0.58;
+    const bApproaching = ambB.progress >= 0.28 && ambB.progress < 0.58;
 
     if (aApproaching && bApproaching && this.conflictState.stage === 'IDLE') {
-      // TRIGGER CONFLICT DETECTED
+      // 1. CONFLICT DETECTED
       this.conflictState.detected = true;
       this.conflictState.stage = 'DETECTED';
       this.conflictState.ambA = ambA;
       this.conflictState.ambB = ambB;
       this.conflictState.bannerText = 'MULTIPLE EMERGENCY CONFLICT DETECTED';
-      this.conflictState.bannerSubtext = 'Two Critical ALS Ambulances approaching Central Conflict Junction simultaneously.';
+      this.conflictState.bannerSubtext = 'AMB-104 (North) & AMB-208 (South) converging on Intersection 4 simultaneously.';
       this.conflictState.bannerType = 'alert';
 
       int4.hasConflict = true;
-      int4.state = 'EMERGENCY_REQUESTED';
+      int4.state = 'EMERGENCY_REQUEST';
+      int4.modeLabel = 'EMERGENCY PRIORITY REQUEST';
       int4.northSouth = 'YELLOW';
       int4.eastWest = 'RED';
 
-      this.logEvent('alert', 'CONFLICT DETECTED: AMB-104 (North) & AMB-208 (South) converging at Int. 4');
-      window.soundEngine.playConflictAlert();
+      this.logEvent('alert', 'MULTI-AMBULANCE CONFLICT DETECTED: AMB-104 & AMB-208 approaching Intersection 4');
+      if (window.soundEngine) window.soundEngine.playConflictAlert();
 
-      // Transition to AI resolving after 1.5s
+      // 2. AI RESOLUTION & DECISION MATRIX
       setTimeout(() => {
         if (this.conflictState.stage === 'DETECTED') {
           this.conflictState.stage = 'RESOLVING';
-          this.conflictState.bannerText = 'AI ROUTE COORDINATION';
-          this.conflictState.bannerSubtext = 'Resolving intersection priority based on telemetry, distance, & patient acuity...';
+          this.conflictState.bannerText = 'AI-ASSISTED CONFLICT RESOLUTION';
+          this.conflictState.bannerSubtext = 'Evaluating ETA, distance, and intersection occupancy. Resolving traffic coordination priority...';
           this.conflictState.bannerType = 'warning';
+          this.logEvent('info', 'AI-ASSISTED SEQUENCE GENERATED: Transparent scoring model evaluated.');
           this.notify();
 
+          // 3. PRIORITY 01 TO AMBULANCE A
           setTimeout(() => {
             if (this.conflictState.stage === 'RESOLVING') {
-              // Priority Decision: AMB-A first, then AMB-B
               this.conflictState.stage = 'PRIORITY_A';
-              this.conflictState.bannerText = 'AMBULANCE A — PRIORITY 01';
-              this.conflictState.bannerSubtext = 'Reason: 12 seconds to intersection (ETA advantage) • Green corridor locked.';
+              this.conflictState.bannerText = 'AMB-104 — PRIORITY 01';
+              this.conflictState.bannerSubtext = 'Reason: AMB-104 reaches conflict zone earlier (43s vs 50s). Simulated emergency corridor active.';
               this.conflictState.bannerType = 'success';
               this.conflictState.decision = {
-                primary: 'AMBULANCE A (AMB-104)',
-                secondary: 'AMBULANCE B (AMB-208)',
-                order: 'A → B',
-                confidence: '96.4%',
-                reason: 'Safest sequential clearance based on predicted arrival time (12s vs 19s) and cross-axis conflict.',
-                clearanceWindowA: '4.8 sec',
-                clearanceWindowB: '5.2 sec'
+                primary: 'AMB-104',
+                secondary: 'AMB-208',
+                order: 'AMB-104 → AMB-208',
+                confidence: '96%',
+                reason: 'AMB-104 reaches the conflict zone earlier. Sequential clearance minimizes intersection occupancy conflict.',
+                factors: {
+                  etaA: '43 sec',
+                  etaB: '50 sec',
+                  severityA: 'Critical (Verified)',
+                  severityB: 'Critical (Verified)',
+                  conflictProb: 'HIGH',
+                  trafficDensity: 'High (North Sector)'
+                }
               };
 
               int4.state = 'PRIORITY_A';
+              int4.modeLabel = 'SIMULATED EMERGENCY CORRIDOR';
               int4.northSouth = 'GREEN';
               int4.eastWest = 'RED';
               int4.priorityVehicle = 'AMB-104';
 
-              this.logEvent('priority', 'AI DECISION: AMB-104 granted Priority 01. Green wave locked on North corridor.');
-              this.logEvent('info', 'AMB-208 assigned Priority 02 — speed regulated for zero-stop secondary clearance.');
-              window.soundEngine.playPriorityChime();
+              this.logEvent('priority', 'AMB-104 PRIORITY 01 ACTIVATED: Simulated green wave active for North corridor.');
+              if (window.soundEngine) window.soundEngine.playPriorityChime();
               this.notify();
             }
           }, 2000);
@@ -356,137 +367,92 @@ class SimulationEngine {
       }, 1500);
     }
 
-    // Check if Ambulance A cleared intersection
+    // 4. AMBULANCE A CLEARED INTERSECTION
     if (this.conflictState.stage === 'PRIORITY_A' && ambA.progress >= 0.54) {
       this.conflictState.stage = 'A_CLEARED';
-      this.conflictState.bannerText = 'AMBULANCE A — INTERSECTION CLEARED';
-      this.conflictState.bannerSubtext = 'Ambulance A safely exited junction. Transferring priority to Ambulance B...';
+      this.conflictState.bannerText = 'AMB-104 — INTERSECTION CLEARED';
+      this.conflictState.bannerSubtext = 'AMB-104 safely cleared conflict junction. Engaging Priority 02 for AMB-208...';
       this.conflictState.bannerType = 'info';
 
+      int4.modeLabel = 'CORRIDOR CLEARED';
       int4.northSouth = 'YELLOW';
       int4.eastWest = 'RED';
 
-      this.logEvent('success', 'AMB-104 safely cleared Central Junction. Signal phase shifting.');
-      window.soundEngine.playClearChime();
+      this.logEvent('success', 'AMB-104 INTERSECTION CLEARED: Transitioning signal phase to secondary corridor.');
+      if (window.soundEngine) window.soundEngine.playClearChime();
       this.notify();
 
-      // Switch to Ambulance B priority
+      // 5. SWITCH TO PRIORITY 02 (AMB-208)
       setTimeout(() => {
         if (this.conflictState.stage === 'A_CLEARED') {
           this.conflictState.stage = 'PRIORITY_B';
-          this.conflictState.bannerText = 'AMBULANCE B — PRIORITY 02';
-          this.conflictState.bannerSubtext = 'South corridor green wave engaged. AMB-208 accelerating through junction.';
+          this.conflictState.bannerText = 'AMB-208 — PRIORITY 02';
+          this.conflictState.bannerSubtext = 'South corridor green wave active. AMB-208 clearing intersection...';
           this.conflictState.bannerType = 'success';
 
           int4.state = 'PRIORITY_B';
+          int4.modeLabel = 'SIMULATED EMERGENCY CORRIDOR';
           int4.northSouth = 'GREEN';
           int4.eastWest = 'RED';
           int4.priorityVehicle = 'AMB-208';
 
-          this.logEvent('priority', 'AMB-208 Priority 02 Activated. Green corridor open.');
-          window.soundEngine.playPriorityChime();
+          this.logEvent('priority', 'AMB-208 PRIORITY 02 ACTIVATED: South corridor clearance engaged.');
+          if (window.soundEngine) window.soundEngine.playPriorityChime();
           this.notify();
         }
-      }, 1200);
+      }, 1500);
     }
 
-    // Check if Ambulance B cleared
+    // 6. AMBULANCE B CLEARED INTERSECTION
     if (this.conflictState.stage === 'PRIORITY_B' && ambB.progress >= 0.54) {
       this.conflictState.stage = 'BOTH_CLEARED';
-      this.conflictState.bannerText = 'BOTH EMERGENCY ROUTES CLEARED';
-      this.conflictState.bannerSubtext = 'Multi-ambulance conflict resolved with 0 delays and 100% safety clearance.';
+      this.conflictState.bannerText = 'CONFLICT RESOLVED';
+      this.conflictState.bannerSubtext = 'Both emergency routes coordinated successfully. Returning to normal traffic cycle.';
       this.conflictState.bannerType = 'success';
 
+      int4.state = 'ALL_CLEAR';
+      int4.modeLabel = 'RETURNING TO NORMAL CYCLE';
       int4.hasConflict = false;
-      int4.state = 'NORMAL_CYCLE';
       int4.priorityVehicle = null;
-      int4.timer = 10;
-      int4.northSouth = 'RED';
-      int4.eastWest = 'GREEN';
 
-      this.liveMetrics.timeSavedSec += 42;
-      this.liveMetrics.intersectionsCoordinated += 2;
+      this.logEvent('success', 'AMB-208 INTERSECTION CLEARED: Secondary emergency vehicle cleared without complete stop.');
+      this.logEvent('success', 'CONFLICT RESOLVED: Both emergency routes coordinated successfully.');
+      if (window.soundEngine) window.soundEngine.playClearChime();
 
-      this.logEvent('success', 'BOTH EMERGENCY CORRIDORS CLEARED. Returning to standard adaptive traffic cycling.');
-      window.soundEngine.playClearChime();
+      // Return traffic signal to normal cycle
+      setTimeout(() => {
+        if (this.conflictState.stage === 'BOTH_CLEARED') {
+          int4.state = 'NORMAL_CYCLE';
+          int4.modeLabel = 'NORMAL CYCLE';
+          int4.northSouth = 'GREEN';
+          int4.eastWest = 'RED';
+          this.notify();
+        }
+      }, 2500);
+
       this.notify();
     }
   }
 
-  // One-click Automated Scenario Execution (12-step script)
-  runEmergencyScenario() {
-    this.reset();
-    this.scenarioRunning = true;
-    this.scenarioStep = 1;
-    this.scenarioTimer = 0;
-    this.speedMultiplier = 1.2;
-
-    // Position ambulances at starts
+  // AI Route Application
+  applyAiRoute() {
+    this.aiInsight.applied = true;
     const ambA = this.ambulances.find(a => a.id === 'AMB-104');
-    const ambB = this.ambulances.find(a => a.id === 'AMB-208');
-    if (ambA) ambA.progress = 0.15;
-    if (ambB) ambB.progress = 0.12;
-
-    this.logEvent('info', 'DEMO SCENARIO INITIALIZED: Dual ALS Emergency Dispatch');
-    window.soundEngine.playBeep(660, 0.15);
-    this.notify();
-  }
-
-  updateScenarioScript(dt) {
-    this.scenarioTimer += dt;
-
-    // Step 1: Ambulances moving
-    if (this.scenarioStep === 1 && this.scenarioTimer > 2.0) {
-      this.scenarioStep = 2;
-      this.logEvent('info', 'Step 2: Predictive traffic radar scanning North & South corridors');
-      this.notify();
-    }
-    // Step 2: Traffic congestion highlighted
-    else if (this.scenarioStep === 2 && this.scenarioTimer > 4.5) {
-      this.scenarioStep = 3;
-      this.congestionZones[0].active = true;
-      this.logEvent('alert', 'Step 3: Congestion detected on primary arterial. Alternate corridor pre-cleared.');
-      window.soundEngine.playBeep(440, 0.1);
-      this.notify();
-    }
-    // Step 3: Approaching intersection & conflict detection
-    else if (this.scenarioStep === 3 && this.scenarioTimer > 7.0) {
-      this.scenarioStep = 4;
-      this.notify();
-    }
-    // Step 4: System detects conflict (handled by engine)
-    else if (this.conflictState.stage === 'PRIORITY_A' && this.scenarioStep < 6) {
-      this.scenarioStep = 6;
-      this.notify();
-    }
-    else if (this.conflictState.stage === 'A_CLEARED' && this.scenarioStep < 8) {
-      this.scenarioStep = 8;
-      this.notify();
-    }
-    else if (this.conflictState.stage === 'PRIORITY_B' && this.scenarioStep < 9) {
-      this.scenarioStep = 9;
-      this.notify();
-    }
-    else if (this.conflictState.stage === 'BOTH_CLEARED' && this.scenarioStep < 11) {
-      this.scenarioStep = 11;
-      this.notify();
-    }
-    // Step 12: Arrived at hospitals
-    const ambA = this.ambulances.find(a => a.id === 'AMB-104');
-    const ambB = this.ambulances.find(a => a.id === 'AMB-208');
-    if (ambA && ambB && ambA.progress >= 0.95 && ambB.progress >= 0.95 && this.scenarioStep === 11) {
-      this.scenarioStep = 12;
-      this.logEvent('success', 'Step 12: Both ambulances successfully delivered patients to ER Bays.');
+    if (ambA) {
+      ambA.routeStatus = 'ALTERNATE ROUTE APPLIED';
+      ambA.eta = '05:24'; // -1m 18s
+      this.liveMetrics.timeSavedSec = 178; // Increased simulated savings
+      this.logEvent('info', 'SIMULATION ESTIMATE: Alternate corridor applied for AMB-104. Estimated delay avoided: 2m 18s.');
       this.notify();
     }
   }
 
+  // Trigger Individual Events
   triggerAmbulanceA() {
     const ambA = this.ambulances.find(a => a.id === 'AMB-104');
     if (ambA) {
-      ambA.progress = 0.2;
-      this.logEvent('priority', 'MANUAL TRIGGER: Ambulance A (AMB-104) dispatch initiated.');
-      window.soundEngine.playSirenBlip();
+      ambA.progress = 0.1;
+      this.logEvent('info', 'AMB-104 dispatched from Anna Nagar West (Simulated).');
       this.notify();
     }
   }
@@ -494,63 +460,132 @@ class SimulationEngine {
   triggerAmbulanceB() {
     const ambB = this.ambulances.find(a => a.id === 'AMB-208');
     if (ambB) {
-      ambB.progress = 0.18;
-      this.logEvent('priority', 'MANUAL TRIGGER: Ambulance B (AMB-208) dispatch initiated.');
-      window.soundEngine.playSirenBlip();
+      ambB.progress = 0.1;
+      this.logEvent('info', 'AMB-208 dispatched from T. Nagar Panagal Park (Simulated).');
       this.notify();
     }
   }
 
   triggerBothEmergencies() {
+    this.reset();
     const ambA = this.ambulances.find(a => a.id === 'AMB-104');
     const ambB = this.ambulances.find(a => a.id === 'AMB-208');
-    if (ambA) ambA.progress = 0.28;
-    if (ambB) ambB.progress = 0.25;
-    this.logEvent('alert', 'MANUAL TRIGGER: Dual Emergency Convergence initiated at Int. 4');
-    window.soundEngine.playConflictAlert();
-    this.notify();
+    if (ambA && ambB) {
+      ambA.progress = 0.25;
+      ambB.progress = 0.22;
+      this.logEvent('alert', 'CRITICAL MULTI-AMBULANCE EVENT: Simultaneous dispatch simulated.');
+      this.notify();
+    }
   }
 
   createTrafficJam() {
     this.congestionZones.forEach(z => z.active = true);
-    this.logEvent('alert', 'TRAFFIC INJECTION: High-density congestion generated across central corridors.');
+    this.logEvent('warning', 'SIMULATION: Peak congestion surge injected along Anna Salai link (+2.4 min delay).');
     this.notify();
   }
 
   clearTraffic() {
     this.congestionZones.forEach(z => z.active = false);
-    this.logEvent('success', 'TRAFFIC CLEARANCE: Artificial bottlenecks removed.');
+    this.logEvent('info', 'SIMULATION: Traffic congestion cleared. Free flow transit restored.');
     this.notify();
   }
 
-  applyAiRoute() {
-    this.aiInsight.applied = true;
+  // AUTOMATED HERO SCENARIO (12 Sequential Steps)
+  runEmergencyScenario() {
+    this.reset();
+    this.scenarioRunning = true;
+    this.scenarioStep = 1;
+    this.scenarioTimer = 0;
+    this.speedMultiplier = 1.2;
+
     const ambA = this.ambulances.find(a => a.id === 'AMB-104');
-    if (ambA) {
-      ambA.speed = 52;
-      ambA.routeStatus = 'AI DYNAMIC BYPASS';
+    const ambB = this.ambulances.find(a => a.id === 'AMB-208');
+
+    if (ambA && ambB) {
+      ambA.progress = 0.15;
+      ambB.progress = 0.12;
     }
-    this.liveMetrics.timeSavedSec += 138;
-    this.logEvent('success', 'AI INSIGHT APPLIED: High-congestion bypass corridor locked. Delay reduced by 2m 18s.');
-    window.soundEngine.playPriorityChime();
+
+    this.logEvent('alert', 'CRITICAL MULTI-AMBULANCE EVENT INITIALIZED: Scenario demo executing.');
     this.notify();
   }
 
-  loop(currentTime) {
-    const deltaTime = Math.min(currentTime - this.lastTimestamp, 100);
-    this.lastTimestamp = currentTime;
+  updateScenarioScript(dt) {
+    this.scenarioTimer += dt;
+
+    // Step 1: Initial Movement
+    if (this.scenarioStep === 1 && this.scenarioTimer > 2.0) {
+      this.scenarioStep = 2;
+      this.logEvent('info', 'STEP 2: Traffic congestion predicted along primary arterial route.');
+      this.notify();
+    }
+    // Step 3: Conflict Convergence Detected
+    else if (this.scenarioStep === 2 && this.scenarioTimer > 4.5) {
+      this.scenarioStep = 3;
+      this.logEvent('alert', 'STEP 3: Multiple emergency vehicles converging on Intersection 4.');
+      this.notify();
+    }
+    // Step 4: AI Decision Arbitration
+    else if (this.scenarioStep === 3 && this.scenarioTimer > 7.0) {
+      this.scenarioStep = 4;
+      this.logEvent('info', 'STEP 4: AI-assisted conflict resolution matrix computed (AMB-104 → Priority 01).');
+      this.notify();
+    }
+    // Step 5: Green Corridor Locked
+    else if (this.scenarioStep === 4 && this.scenarioTimer > 9.5) {
+      this.scenarioStep = 5;
+      this.logEvent('priority', 'STEP 5: Simulated emergency corridor locked for AMB-104.');
+      this.notify();
+    }
+    // Step 6: AMB-A Crossing
+    else if (this.scenarioStep === 5 && this.scenarioTimer > 12.0) {
+      this.scenarioStep = 6;
+      this.notify();
+    }
+    // Step 7: AMB-A Cleared
+    else if (this.scenarioStep === 6 && this.scenarioTimer > 14.5) {
+      this.scenarioStep = 7;
+      this.notify();
+    }
+    // Step 8: Priority Transfer to AMB-B
+    else if (this.scenarioStep === 7 && this.scenarioTimer > 17.0) {
+      this.scenarioStep = 8;
+      this.notify();
+    }
+    // Step 9: AMB-B Crossing
+    else if (this.scenarioStep === 8 && this.scenarioTimer > 19.5) {
+      this.scenarioStep = 9;
+      this.notify();
+    }
+    // Step 10: Both Cleared
+    else if (this.scenarioStep === 9 && this.scenarioTimer > 22.0) {
+      this.scenarioStep = 10;
+      this.notify();
+    }
+    // Step 11: Normal Signal Resumed
+    else if (this.scenarioStep === 10 && this.scenarioTimer > 24.5) {
+      this.scenarioStep = 11;
+      this.notify();
+    }
+    // Step 12: Scenario Complete
+    else if (this.scenarioStep === 11 && this.scenarioTimer > 27.0) {
+      this.scenarioStep = 12;
+      this.scenarioRunning = false;
+      this.logEvent('success', 'STEP 12: Scenario demonstration completed successfully (Simulation Estimate: 2m 18s avoided).');
+      this.notify();
+    }
+  }
+
+  loop(timestamp) {
+    const deltaTime = timestamp - this.lastTimestamp;
+    this.lastTimestamp = timestamp;
 
     this.update(deltaTime);
     this.notify();
 
     this.requestFrameId = requestAnimationFrame(this.loop);
   }
-
-  destroy() {
-    if (this.requestFrameId) {
-      cancelAnimationFrame(this.requestFrameId);
-    }
-  }
 }
 
+// Instantiate global simulation engine
 window.simulationEngine = new SimulationEngine();

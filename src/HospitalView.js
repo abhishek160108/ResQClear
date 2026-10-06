@@ -9,15 +9,22 @@ function HospitalView({ simState }) {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
-          <h2 className="text-2xl font-extrabold text-white">Hospital Emergency Receiving Hubs</h2>
-          <p className="text-sm text-slate-400">Direct Telemetry Link & Trauma Room Preparation Coordination</p>
+          <div className="flex items-center space-x-3">
+            <h2 className="text-2xl font-extrabold text-white">Hospital Emergency Receiving Hubs</h2>
+            <span className="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold">
+              SIMULATION
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 font-mono mt-1">
+            Hospital notification simulated • Telemetry synchronized for ER bay preparation
+          </p>
         </div>
         <div className="flex items-center space-x-3 text-xs font-mono">
           <span className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">
             RECEIVING HOSPITALS: <strong className="text-white">{hospitals.length}</strong>
           </span>
           <span className="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
-            ALL TRAUMA BAYS PREPPED
+            TRAUMA BAYS PREPARED
           </span>
         </div>
       </div>
@@ -70,7 +77,7 @@ function HospitalView({ simState }) {
                       <div className="text-2xl font-extrabold text-white font-mono">{incomingAmb.eta || hosp.eta} <span className="text-xs font-normal text-slate-400">min</span></div>
                     </div>
                     <div className="text-right">
-                      <div className="text-[10px] font-mono text-slate-400 uppercase">PATIENT CONDITION</div>
+                      <div className="text-[10px] font-mono text-slate-400 uppercase">EMERGENCY STATUS</div>
                       <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-red-500/20 text-red-400 border border-red-500/30 font-bold">
                         {incomingAmb.status || 'CRITICAL'}
                       </span>
@@ -96,15 +103,20 @@ function HospitalView({ simState }) {
                 </div>
               </div>
 
-              {/* Lead Doctor & Bed Capacity */}
-              <div className="pt-4 border-t border-slate-800/80 text-xs font-mono text-slate-400 flex items-center justify-between">
-                <div>
-                  <span className="block text-[10px]">LEAD PHYSICIAN:</span>
-                  <strong className="text-slate-200">{hosp.leadDoctor}</strong>
+              {/* Lead Doctor & Bed Capacity & Note */}
+              <div className="pt-4 border-t border-slate-800/80 text-xs font-mono text-slate-400 flex flex-col space-y-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="block text-[10px]">LEAD PHYSICIAN:</span>
+                    <strong className="text-slate-200">{hosp.leadDoctor}</strong>
+                  </div>
+                  <div className="text-right">
+                    <span className="block text-[10px]">ICU BEDS FREE:</span>
+                    <strong className="text-emerald-400">{hosp.icuFree} Available</strong>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span className="block text-[10px]">ICU BEDS FREE:</span>
-                  <strong className="text-emerald-400">{hosp.icuFree} Available</strong>
+                <div className="text-[10px] text-slate-400 text-center pt-1 border-t border-slate-900">
+                  {hosp.integrationNote || 'Hospital notification simulated'}
                 </div>
               </div>
             </div>

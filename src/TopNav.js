@@ -17,10 +17,10 @@ function TopNav({ simState, onLaunchScenario, onTogglePresentation, onToggleSoun
 
   const getSystemStatus = () => {
     if (conflictState.stage === 'DETECTED' || conflictState.stage === 'RESOLVING') {
-      return { text: 'CONFLICT ARBITRATION ACTIVE', color: 'text-red-400', bg: 'bg-red-500/15', border: 'border-red-500/40', dot: 'bg-red-500 animate-ping' };
+      return { text: 'AI CONFLICT ARBITRATION ACTIVE', color: 'text-red-400', bg: 'bg-red-500/15', border: 'border-red-500/40', dot: 'bg-red-500 animate-ping' };
     }
     if (conflictState.stage === 'PRIORITY_A' || conflictState.stage === 'PRIORITY_B') {
-      return { text: 'EMERGENCY CORRIDOR ENGAGED', color: 'text-emerald-400', bg: 'bg-emerald-500/15', border: 'border-emerald-500/40', dot: 'bg-emerald-400 animate-pulse' };
+      return { text: 'SIMULATED EMERGENCY CORRIDOR ENGAGED', color: 'text-emerald-400', bg: 'bg-emerald-500/15', border: 'border-emerald-500/40', dot: 'bg-emerald-400 animate-pulse' };
     }
     return { text: 'GRID NORMAL • 6 SIGNALS ONLINE', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', dot: 'bg-emerald-400' };
   };
@@ -29,15 +29,15 @@ function TopNav({ simState, onLaunchScenario, onTogglePresentation, onToggleSoun
 
   return (
     <header className="h-16 border-b border-slate-800 bg-slate-950/90 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between z-30 sticky top-0">
-      {/* Left: Logo & Live Simulation Badge */}
+      {/* Left: Logo & Persistent SIMULATION MODE Badge */}
       <div className="flex items-center space-x-4">
         <div onClick={onOpenLanding} className="cursor-pointer" title="Go to Landing Page">
           <ResQClearLogo size="default" />
         </div>
 
         <div className="hidden lg:flex items-center space-x-2 px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-[11px] font-mono">
-          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-          <span className="text-white font-bold">LIVE SIMULATION</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="text-white font-bold">SIMULATION MODE</span>
           <span className="text-slate-500">|</span>
           <span className="text-slate-400">CHENNAI METRO GRID</span>
         </div>
@@ -99,7 +99,7 @@ function TopNav({ simState, onLaunchScenario, onTogglePresentation, onToggleSoun
           </div>
           <div className="hidden xl:block text-left text-xs font-mono">
             <div className="text-white font-bold leading-tight">Cmdr. S. Ramanathan</div>
-            <div className="text-[10px] text-slate-400">City Operations Lead</div>
+            <div className="text-[10px] text-slate-400">Emergency Ops Lead</div>
           </div>
         </div>
       </div>

@@ -10,8 +10,15 @@ function AmbulanceFleetView({ simState, onTriggerAmbulance }) {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
-          <h2 className="text-2xl font-extrabold text-white">Active Emergency Fleet Management</h2>
-          <p className="text-sm text-slate-400">Advanced Life Support (ALS) & Critical Care Transport Units</p>
+          <div className="flex items-center space-x-3">
+            <h2 className="text-2xl font-extrabold text-white">Active Emergency Fleet Telemetry</h2>
+            <span className="px-2.5 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-mono font-bold">
+              SIMULATION DATA
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 font-mono mt-1">
+            Emergency severity provided by authorized emergency personnel • Traffic coordination priority
+          </p>
         </div>
         <div className="flex items-center space-x-3 text-xs font-mono">
           <span className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">
@@ -55,7 +62,7 @@ function AmbulanceFleetView({ simState, onTriggerAmbulance }) {
 
                 <div className="text-right">
                   <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
-                    isCritical ? 'bg-red-500/20 text-red-400 border-red-500/40' : 'bg-amber-500/20 text-amber-400 border-amber-500/40'
+                    isCritical ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
                   }`}>
                     {amb.status}
                   </span>
@@ -78,20 +85,24 @@ function AmbulanceFleetView({ simState, onTriggerAmbulance }) {
                   <span className="text-slate-200 font-medium">{amb.distance}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[10px]">ROUTE STATUS:</span>
-                  <span className="text-teal-300 font-medium">{amb.routeStatus}</span>
+                  <span className="text-slate-400 block text-[10px]">INTERSECTION ETA:</span>
+                  <span className="text-cyan-400 font-bold">{amb.currentIntersectionEta || 43} sec</span>
                 </div>
               </div>
 
               {/* Transit Details */}
               <div className="space-y-2 text-xs font-mono mb-4 text-slate-300">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">Current Origin:</span>
+                  <span className="text-slate-400">Current Location:</span>
                   <span className="text-white font-medium">{amb.origin}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">Target Hospital:</span>
+                  <span className="text-slate-400">Destination:</span>
                   <span className="text-emerald-400 font-bold">{amb.destination}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Route Status:</span>
+                  <span className="text-teal-300 font-medium">{amb.routeStatus}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-400">Driver / Paramedic:</span>
@@ -103,7 +114,7 @@ function AmbulanceFleetView({ simState, onTriggerAmbulance }) {
               {amb.patient && (
                 <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-slate-400 font-mono text-[10px]">PATIENT TRIAGE:</span>
+                    <span className="text-slate-400 font-mono text-[10px]">AUTHORIZED TRIAGE:</span>
                     <span className="text-red-400 font-mono font-bold text-[10px]">{amb.patient.age}</span>
                   </div>
                   <div className="font-semibold text-white mb-2">{amb.patient.condition}</div>

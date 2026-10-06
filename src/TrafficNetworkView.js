@@ -9,15 +9,22 @@ function TrafficNetworkView({ simState }) {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
-          <h2 className="text-2xl font-extrabold text-white">Smart Traffic Signal Network</h2>
-          <p className="text-sm text-slate-400">Adaptive Signal Timing & Emergency Green Wave Phasing</p>
+          <div className="flex items-center space-x-3">
+            <h2 className="text-2xl font-extrabold text-white">Smart Traffic Signal Network (Simulated)</h2>
+            <span className="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold">
+              SIMULATION
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 font-mono mt-1">
+            Simulated signal phase timing & emergency green-wave corridor transitions
+          </p>
         </div>
         <div className="flex items-center space-x-3 text-xs font-mono">
           <span className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">
             TOTAL NODES: <strong className="text-white">{intersections.length}</strong>
           </span>
           <span className="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
-            100% V2X TELEMETRY SYNC
+            V2X SIMULATION SYNC
           </span>
         </div>
       </div>
@@ -47,7 +54,7 @@ function TrafficNetworkView({ simState }) {
                   </div>
                   <div>
                     <h3 className="font-extrabold text-base text-white">{inter.name}</h3>
-                    <p className="text-xs text-slate-400 font-mono">ID: {inter.id.toUpperCase()} • Grid Point: ({inter.x}, {inter.y})</p>
+                    <p className="text-xs text-slate-400 font-mono">{inter.code || inter.id.toUpperCase()} • Simulation Coordinates: ({inter.x}, {inter.y})</p>
                   </div>
                 </div>
               </div>
@@ -90,14 +97,14 @@ function TrafficNetworkView({ simState }) {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">V2X Mesh Status:</span>
-                  <span className="text-teal-300 font-medium">99.8% Packet Delivery</span>
+                  <span className="text-slate-400">Cycle Mode:</span>
+                  <span className="text-teal-300 font-medium">{inter.modeLabel || 'NORMAL CYCLE'}</span>
                 </div>
               </div>
 
               {/* Footer */}
               <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
-                <span>FAILSAFE: <strong className="text-emerald-400">Auto-Rollback OK</strong></span>
+                <span>SIMULATION INTEGRATION: <strong className="text-emerald-400">OK</strong></span>
                 <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300">
                   LATENCY: 18ms
                 </span>

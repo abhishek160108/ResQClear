@@ -29,7 +29,7 @@ function App() {
   };
 
   const handleToggleSound = () => {
-    const newState = window.soundEngine.toggle();
+    const newState = window.soundEngine ? window.soundEngine.toggle() : false;
     setSoundEnabled(newState);
   };
 
@@ -168,7 +168,7 @@ function App() {
 
               {/* Mandatory Simulation Disclaimer Footer */}
               <div className="mt-auto pt-4 pb-2 border-t border-slate-900 text-center text-xs font-mono text-slate-400">
-                “resQClear is a simulation prototype. Traffic-signal control shown in this demo is not connected to real-world infrastructure.”
+                “resQClear is a simulation prototype. Traffic-signal actions shown in this demo are not connected to real-world traffic infrastructure.”
               </div>
             </main>
 

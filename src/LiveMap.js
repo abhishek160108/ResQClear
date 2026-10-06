@@ -1,17 +1,12 @@
-// resQClear Interactive City Road Simulation & Real-World Live Traffic Map Component
+// resQClear Interactive City Digital Twin Simulation & Future Infrastructure Modal
 const { useState, useEffect, useRef } = React;
 
 function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
   const canvasRef = useRef(null);
-  const leafletContainerRef = useRef(null);
-  const mapInstanceRef = useRef(null);
-  const markersRef = useRef({});
-  const polylineLayerRef = useRef(null);
-
-  const [mapMode, setMapMode] = useState('TACTICAL'); // 'TACTICAL' (Digital Twin) | 'REAL_WORLD' (Leaflet OpenStreetMap)
-  const [activeCam, setActiveCam] = useState('ALL'); // ALL, AMB_A, AMB_B, INT_4
+  const [mapMode, setMapMode] = useState('TACTICAL'); // 'TACTICAL' (Digital Twin Simulation - Active)
+  const [showRealWorldLockedModal, setShowRealWorldLockedModal] = useState(false);
   const [cctvExpanded, setCctvExpanded] = useState(false);
-  const [trafficLayerActive, setTrafficLayerActive] = useState(true);
+  const [showLegend, setShowLegend] = useState(true);
 
   const {
     ambulances = [],
@@ -29,7 +24,6 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
 
   // --- 1. TACTICAL CANVAS DIGITAL TWIN RENDERER (60 FPS) ---
   useEffect(() => {
-    if (mapMode !== 'TACTICAL') return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -112,7 +106,7 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
       ctx.setLineDash([]);
     });
 
-    // Congestion Zones
+    // Congestion Zones (RED: Critical, AMBER: Moderate)
     congestionZones.forEach(zone => {
       if (!zone.active) return;
       const grad = ctx.createRadialGradient(zone.x, zone.y, 5, zone.x, zone.y, zone.radius);
@@ -127,15 +121,16 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
 
       ctx.fillStyle = zone.severity === 'HIGH' ? '#ef4444' : '#f59e0b';
       ctx.font = 'bold 9px "JetBrains Mono", monospace';
-      ctx.fillText(`SLOW ${zone.delayImpact}`, zone.x - 24, zone.y - zone.radius - 4);
+      ctx.fillText(`CONGESTION ${zone.delayImpact}`, zone.x - 30, zone.y - zone.radius - 4);
     });
 
-    // Green Wave Routes
+    // Green Wave Emergency Corridors & Normal Routes
     ambulances.forEach(amb => {
       if (!amb.path || amb.path.length < 2) return;
       
-      ctx.strokeStyle = 'rgba(16, 185, 129, 0.2)';
-      ctx.lineWidth = 6;
+      // Normal Route Path (Blue tint baseline)
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+      ctx.lineWidth = 5;
       ctx.beginPath();
       amb.path.forEach((pt, i) => {
         if (i === 0) ctx.moveTo(pt.x, pt.y);
@@ -143,13 +138,16 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
       });
       ctx.stroke();
 
+      // Active Green Wave Simulated Emergency Corridor
       if (amb.currentX && amb.currentY) {
-        ctx.strokeStyle = amb.id === 'AMB-104' && conflictState.stage === 'PRIORITY_A' ? '#10b981' : 
-                          amb.id === 'AMB-208' && conflictState.stage === 'PRIORITY_B' ? '#10b981' : 
-                          'rgba(16, 185, 129, 0.7)';
-        ctx.lineWidth = 8;
+        const isPriorityA = amb.id === 'AMB-104' && conflictState.stage === 'PRIORITY_A';
+        const isPriorityB = amb.id === 'AMB-208' && conflictState.stage === 'PRIORITY_B';
+        const isGreenWave = isPriorityA || isPriorityB;
+
+        ctx.strokeStyle = isGreenWave ? '#10b981' : 'rgba(16, 185, 129, 0.65)';
+        ctx.lineWidth = isGreenWave ? 8 : 6;
         ctx.shadowColor = '#10b981';
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = isGreenWave ? 14 : 6;
         ctx.beginPath();
         ctx.moveTo(amb.currentX, amb.currentY);
         const nextIdx = Math.min(amb.path.length - 1, (amb.progress > 0.5 ? 4 : 3));
@@ -158,112 +156,140 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
         }
         ctx.stroke();
         ctx.shadowBlur = 0;
+
+        // Route Direction Arrows
+        if (amb.heading !== undefined) {
+          const arrowX = amb.currentX + Math.cos(amb.heading) * 20;
+          const arrowY = amb.currentY + Math.sin(amb.heading) * 20;
+          ctx.fillStyle = '#10b981';
+          ctx.beginPath();
+          ctx.arc(arrowX, arrowY, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
     });
 
-    // Intersections & Signals
-    intersections.forEach(inter => {
-      const isCentral = inter.id === 'int-4';
-      ctx.fillStyle = '#0f172a';
-      ctx.strokeStyle = isCentral && inter.hasConflict ? '#ef4444' : isCentral ? '#10b981' : '#334155';
-      ctx.lineWidth = isCentral ? 2.5 : 1.5;
-      ctx.fillRect(inter.x - 22, inter.y - 22, 44, 44);
-      ctx.strokeRect(inter.x - 22, inter.y - 22, 44, 44);
-
-      if (isCentral && (conflictState.stage === 'DETECTED' || conflictState.stage === 'RESOLVING')) {
-        ctx.strokeStyle = 'rgba(239, 68, 68, 0.6)';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath();
-        ctx.arc(inter.x, inter.y, 48 + (Math.sin(Date.now() / 200) * 8), 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.setLineDash([]);
-      } else if (isCentral && (conflictState.stage === 'PRIORITY_A' || conflictState.stage === 'PRIORITY_B')) {
-        ctx.strokeStyle = 'rgba(16, 185, 129, 0.6)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(inter.x, inter.y, 44, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-
-      let nsColor = '#ef4444';
-      if (inter.northSouth === 'GREEN') nsColor = '#10b981';
-      else if (inter.northSouth === 'YELLOW') nsColor = '#f59e0b';
-
-      let ewColor = '#ef4444';
-      if (inter.eastWest === 'GREEN') ewColor = '#10b981';
-      else if (inter.eastWest === 'YELLOW') ewColor = '#f59e0b';
-
-      ctx.fillStyle = '#020617';
-      ctx.fillRect(inter.x - 6, inter.y - 34, 12, 10);
-      ctx.fillStyle = nsColor;
-      ctx.beginPath();
-      ctx.arc(inter.x, inter.y - 29, 3.5, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#020617';
-      ctx.fillRect(inter.x + 24, inter.y - 6, 10, 12);
-      ctx.fillStyle = ewColor;
-      ctx.beginPath();
-      ctx.arc(inter.x + 29, inter.y, 3.5, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.font = '8px "JetBrains Mono", monospace';
-      ctx.fillStyle = '#94a3b8';
-      ctx.fillText(inter.id.toUpperCase(), inter.x - 12, inter.y + 4);
-
-      if (isCentral && inter.priorityVehicle) {
-        ctx.font = 'bold 8px "JetBrains Mono", monospace';
-        ctx.fillStyle = '#10b981';
-        ctx.fillText(`PRIORITY: ${inter.priorityVehicle}`, inter.x - 30, inter.y + 32);
-      }
-    });
-
-    // Civilian Cars
+    // Civilian Vehicles
     civilianVehicles.forEach(car => {
       ctx.save();
       ctx.translate(car.x, car.y);
       ctx.fillStyle = car.yielding ? '#f59e0b' : car.color;
-      ctx.fillRect(-4, -2.5, 8, 5);
-      ctx.fillStyle = '#f8fafc';
-      ctx.fillRect(3, -2, 1.5, 1.5);
-      ctx.fillRect(3, 0.5, 1.5, 1.5);
+      ctx.fillRect(-5, -3, 10, 6);
+      
+      if (car.yielding) {
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(-7, -5, 14, 10);
+      }
       ctx.restore();
     });
 
-    // Hospitals
+    // Intersections with Clear IDs and Simulated Signals
+    intersections.forEach(inter => {
+      ctx.save();
+      ctx.translate(inter.x, inter.y);
+
+      // Junction ID Label
+      ctx.font = 'bold 9px "JetBrains Mono", monospace';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText(inter.code || inter.id.toUpperCase(), -18, -28);
+
+      // Conflict Junction Special Highlight
+      if (inter.id === 'int-4') {
+        const isConflict = conflictState.stage && conflictState.stage !== 'IDLE' && conflictState.stage !== 'BOTH_CLEARED';
+        ctx.strokeStyle = isConflict ? 'rgba(239, 68, 68, 0.7)' : 'rgba(16, 185, 129, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, 32, 0, Math.PI * 2);
+        ctx.stroke();
+
+        if (isConflict) {
+          ctx.strokeStyle = '#ef4444';
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.arc(0, 0, 42, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
+        // Mode Status Box
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        ctx.fillRect(-65, 26, 130, 18);
+        ctx.strokeStyle = isConflict ? '#ef4444' : '#10b981';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(-65, 26, 130, 18);
+        ctx.fillStyle = isConflict ? '#ef4444' : '#10b981';
+        ctx.font = 'bold 8px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(inter.modeLabel || 'NORMAL CYCLE', 0, 38);
+        ctx.textAlign = 'left';
+      }
+
+      // Signal Lamps Box
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(-8, -20, 16, 40);
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(-8, -20, 16, 40);
+
+      // Red Lamp
+      const isRed = inter.northSouth === 'RED';
+      ctx.fillStyle = isRed ? '#ef4444' : '#450a0a';
+      ctx.beginPath();
+      ctx.arc(0, -12, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Yellow Lamp
+      const isYellow = inter.northSouth === 'YELLOW';
+      ctx.fillStyle = isYellow ? '#f59e0b' : '#451a03';
+      ctx.beginPath();
+      ctx.arc(0, 0, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Green Lamp
+      const isGreen = inter.northSouth === 'GREEN';
+      ctx.fillStyle = isGreen ? '#10b981' : '#022c22';
+      ctx.beginPath();
+      ctx.arc(0, 12, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    });
+
+    // Destination Hospitals
     hospitals.forEach(hosp => {
       ctx.save();
       ctx.translate(hosp.x, hosp.y);
-      ctx.fillStyle = '#0f172a';
+
+      // Outer glow
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+      ctx.beginPath();
+      ctx.arc(0, 0, 24, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Hospital base
+      ctx.fillStyle = '#064e3b';
+      ctx.beginPath();
+      ctx.arc(0, 0, 16, 0, Math.PI * 2);
+      ctx.fill();
       ctx.strokeStyle = '#10b981';
       ctx.lineWidth = 2;
-      ctx.fillRect(-28, -28, 56, 56);
-      ctx.strokeRect(-28, -28, 56, 56);
-
-      ctx.strokeStyle = 'rgba(16, 185, 129, 0.5)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(0, 0, 18, 0, Math.PI * 2);
       ctx.stroke();
 
-      ctx.fillStyle = '#10b981';
-      ctx.font = 'bold 16px "Inter", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('H', 0, 0);
+      // Hospital Cross Icon
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(-2, -8, 4, 16);
+      ctx.fillRect(-8, -2, 16, 4);
 
+      // Hospital Label
       ctx.font = 'bold 9px "JetBrains Mono", monospace';
-      ctx.fillStyle = '#f8fafc';
-      ctx.fillText(hosp.shortName, 0, 38);
+      ctx.fillStyle = '#10b981';
+      ctx.fillText(hosp.shortName, -20, -22);
 
-      ctx.font = '8px "JetBrains Mono", monospace';
-      ctx.fillStyle = hosp.erStatus === 'READY' ? '#10b981' : '#f59e0b';
-      ctx.fillText(`ER: ${hosp.erStatus}`, 0, 48);
       ctx.restore();
     });
 
-    // Ambulances
+    // Ambulances (ALS Vehicles)
     ambulances.forEach(amb => {
       if (!amb.currentX || !amb.currentY) return;
 
@@ -271,371 +297,199 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
       ctx.translate(amb.currentX, amb.currentY);
       ctx.rotate(amb.heading || 0);
 
-      const pulseRadius = 24 + Math.sin(Date.now() / 150) * 8;
-      ctx.strokeStyle = amb.color === '#ef4444' ? 'rgba(239, 68, 68, 0.4)' : 'rgba(245, 158, 11, 0.4)';
-      ctx.lineWidth = 2;
+      // Beacon Pulse
+      ctx.fillStyle = amb.id === 'AMB-104' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(245, 158, 11, 0.3)';
       ctx.beginPath();
-      ctx.arc(0, 0, pulseRadius, 0, Math.PI * 2);
-      ctx.stroke();
-
-      const lightGrad = ctx.createRadialGradient(0, 0, 10, 40, 0, 50);
-      lightGrad.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
-      lightGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-      ctx.fillStyle = lightGrad;
-      ctx.beginPath();
-      ctx.moveTo(10, -8);
-      ctx.lineTo(55, -25);
-      ctx.lineTo(55, 25);
-      ctx.lineTo(10, 8);
-      ctx.closePath();
+      ctx.arc(0, 0, 18, 0, Math.PI * 2);
       ctx.fill();
 
+      // Ambulance Body
       ctx.fillStyle = '#ffffff';
+      ctx.fillRect(-10, -6, 20, 12);
       ctx.strokeStyle = '#0f172a';
       ctx.lineWidth = 1;
-      ctx.fillRect(-14, -8, 28, 16);
-      ctx.strokeRect(-14, -8, 28, 16);
+      ctx.strokeRect(-10, -6, 20, 12);
 
-      ctx.fillStyle = '#0284c7';
-      ctx.fillRect(4, -6, 6, 12);
-      ctx.fillRect(-10, -7, 10, 2);
-      ctx.fillRect(-10, 5, 10, 2);
+      // Red Stripe
+      ctx.fillStyle = amb.id === 'AMB-104' ? '#ef4444' : '#f59e0b';
+      ctx.fillRect(-10, -2, 20, 4);
 
+      // Flashing Siren
       ctx.fillStyle = '#ef4444';
-      ctx.fillRect(-4, -2, 8, 4);
-      ctx.fillRect(-2, -4, 4, 8);
+      ctx.beginPath();
+      ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
+      ctx.fill();
 
-      const isRedPhase = Math.floor(Date.now() / 120) % 2 === 0;
-      ctx.fillStyle = isRedPhase ? '#ef4444' : '#3b82f6';
-      ctx.fillRect(1, -7, 3, 4);
-      ctx.fillStyle = isRedPhase ? '#3b82f6' : '#ef4444';
-      ctx.fillRect(1, 3, 3, 4);
       ctx.restore();
 
+      // Label above ambulance
       ctx.font = 'bold 10px "JetBrains Mono", monospace';
       ctx.fillStyle = '#ffffff';
-      ctx.fillText(`${amb.id} (${amb.name})`, amb.currentX - 30, amb.currentY - 24);
-
-      ctx.font = '9px "JetBrains Mono", monospace';
-      ctx.fillStyle = amb.status === 'CRITICAL' ? '#ef4444' : '#f59e0b';
-      ctx.fillText(`${amb.status} • ${amb.speed} km/h`, amb.currentX - 30, amb.currentY - 14);
+      ctx.fillText(`${amb.id} (${amb.name})`, amb.currentX - 28, amb.currentY - 18);
     });
 
-  }, [simState, mapMode]);
-
-  // --- 2. REAL-WORLD LIVE TRAFFIC LEAFLET MAP INITIALIZER & UPDATER ---
-  useEffect(() => {
-    if (mapMode !== 'REAL_WORLD') return;
-    if (!leafletContainerRef.current) return;
-    if (typeof L === 'undefined') return;
-
-    // Initialize map once
-    if (!mapInstanceRef.current) {
-      const map = L.map(leafletContainerRef.current, {
-        center: [13.0650, 80.2450],
-        zoom: 13,
-        zoomControl: false,
-        attributionControl: false
-      });
-
-      L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-      // CartoDB Dark Matter base layer
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19,
-        subdomains: 'abcd'
-      }).addTo(map);
-
-      // Add Hospital Markers
-      hospitals.forEach(hosp => {
-        if (!hosp.lat || !hosp.lng) return;
-        const iconHtml = `
-          <div class="relative flex items-center justify-center w-8 h-8 rounded-xl bg-slate-950 border-2 border-emerald-500 shadow-lg shadow-emerald-500/50 text-emerald-400 font-bold text-xs">
-            H
-            <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-          </div>
-        `;
-        const icon = L.divIcon({ html: iconHtml, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
-        L.marker([hosp.lat, hosp.lng], { icon })
-          .addTo(map)
-          .bindPopup(`<strong style="color:#0f172a;">${hosp.name}</strong><br/><span style="color:#059669; font-weight:bold;">ER Status: ${hosp.erStatus}</span>`);
-      });
-
-      // Add Real Congestion Heat Polylines (Anna Salai, Poonamallee Rd)
-      const congestionPolylines = [
-        // Heavy bottleneck on Anna Salai North
-        {
-          coords: [[13.0720, 80.2520], [13.0680, 80.2550], [13.0620, 80.2500]],
-          color: '#ef4444',
-          label: 'Anna Salai Heavy Delay (+2.4 min)'
-        },
-        // Moderate traffic on Usman Road
-        {
-          coords: [[13.0418, 80.2341], [13.0480, 80.2390], [13.0550, 80.2440]],
-          color: '#f59e0b',
-          label: 'Usman Flyover Moderate Congestion'
-        },
-        // Flowing green corridor
-        {
-          coords: [[13.0780, 80.2420], [13.0750, 80.2580], [13.0790, 80.2680], [13.0827, 80.2785]],
-          color: '#10b981',
-          label: 'resQClear Green Wave Corridor'
-        }
-      ];
-
-      congestionPolylines.forEach(c => {
-        L.polyline(c.coords, {
-          color: c.color,
-          weight: 6,
-          opacity: 0.85,
-          lineCap: 'round'
-        }).addTo(map).bindPopup(`<strong>${c.label}</strong>`);
-      });
-
-      mapInstanceRef.current = map;
-    }
-
-    const map = mapInstanceRef.current;
-    if (!map) return;
-
-    // Update Live Ambulance GPS Markers
-    ambulances.forEach(amb => {
-      if (!amb.geoPath || amb.geoPath.length < 2) return;
-      
-      // Calculate current geo lat/lng from progress
-      const totalSeg = amb.geoPath.length - 1;
-      const scaled = amb.progress * totalSeg;
-      const idx = Math.min(Math.floor(scaled), totalSeg - 1);
-      const segT = scaled - idx;
-
-      const p1 = amb.geoPath[idx];
-      const p2 = amb.geoPath[idx + 1];
-
-      const curLat = p1[0] + (p2[0] - p1[0]) * segT;
-      const curLng = p1[1] + (p2[1] - p1[1]) * segT;
-
-      const markerKey = amb.id;
-      const isCritical = amb.status === 'CRITICAL';
-
-      const ambulanceIconHtml = `
-        <div class="relative flex items-center justify-center w-10 h-10 rounded-full bg-slate-950 border-2 ${
-          amb.id === 'AMB-104' ? 'border-red-500 shadow-red-500/80' : 'border-amber-500 shadow-amber-500/80'
-        } shadow-xl">
-          <span class="text-white text-xs font-bold font-mono">${amb.id === 'AMB-104' ? 'A' : 'B'}</span>
-          <span class="absolute -top-1 -right-1 w-3 h-3 rounded-full ${
-            amb.id === 'AMB-104' ? 'bg-red-500 animate-ping' : 'bg-amber-400 animate-pulse'
-          }"></span>
-        </div>
-      `;
-
-      const icon = L.divIcon({ html: ambulanceIconHtml, className: '', iconSize: [40, 40], iconAnchor: [20, 20] });
-
-      if (markersRef.current[markerKey]) {
-        markersRef.current[markerKey].setLatLng([curLat, curLng]);
-      } else {
-        const m = L.marker([curLat, curLng], { icon }).addTo(map);
-        m.bindPopup(`<strong>${amb.id} (${amb.name})</strong><br/>Destination: ${amb.destination}<br/>ETA: ${amb.eta}`);
-        markersRef.current[markerKey] = m;
-      }
-    });
-
-  }, [simState, mapMode]);
+  }, [simState]);
 
   return (
     <div className="relative w-full h-full bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 flex flex-col">
-      {/* Top Map HUD & Mode Switcher Bar */}
+      {/* Top Map HUD Bar */}
       <div className="absolute top-4 left-4 right-4 z-20 flex flex-wrap items-center justify-between pointer-events-none gap-2">
-        {/* Left Status & Real-World Toggle */}
+        {/* Mode Switcher */}
+        <div className="flex items-center space-x-2 pointer-events-auto bg-slate-950/90 backdrop-blur-md p-1 rounded-xl border border-slate-800 shadow-xl">
+          <button
+            onClick={() => setMapMode('TACTICAL')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center space-x-1.5 transition-all ${
+              mapMode === 'TACTICAL'
+                ? 'bg-emerald-500 text-slate-950 shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Icons.Layers className="w-3.5 h-3.5" />
+            <span>DIGITAL TWIN SIMULATION</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-950 ml-1"></span>
+          </button>
+
+          <button
+            onClick={() => setShowRealWorldLockedModal(true)}
+            className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center space-x-1.5 text-slate-400 hover:text-slate-200 transition-all"
+            title="Real-World Live Map Infrastructure Integration"
+          >
+            <Icons.Lock className="w-3.5 h-3.5 text-slate-500" />
+            <span>REAL-WORLD LIVE MAP</span>
+            <span className="px-1.5 py-0.2 rounded bg-slate-800 text-[9px] text-amber-400 font-mono">FUTURE</span>
+          </button>
+        </div>
+
+        {/* Legend Toggle & Live Status */}
         <div className="flex items-center space-x-2 pointer-events-auto">
-          {/* MAP MODE SWITCHER */}
-          <div className="glass-panel p-1 rounded-xl flex items-center space-x-1 border border-slate-700/80 shadow-xl bg-slate-950/90">
-            <button
-              onClick={() => setMapMode('TACTICAL')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all flex items-center space-x-1.5 ${
-                mapMode === 'TACTICAL'
-                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <Icons.Cpu className="w-3.5 h-3.5" />
-              <span>Digital Twin Simulation</span>
-            </button>
-            <button
-              onClick={() => setMapMode('REAL_WORLD')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all flex items-center space-x-1.5 ${
-                mapMode === 'REAL_WORLD'
-                  ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/30'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <Icons.Compass className="w-3.5 h-3.5" />
-              <span>Real-World Live Map</span>
-            </button>
-          </div>
+          <button
+            onClick={() => setShowLegend(!showLegend)}
+            className="px-3 py-1.5 rounded-xl bg-slate-950/90 border border-slate-800 text-slate-300 hover:text-white text-xs font-mono transition-all flex items-center space-x-1.5"
+          >
+            <Icons.Compass className="w-3.5 h-3.5 text-cyan-400" />
+            <span>{showLegend ? 'Hide Legend' : 'Show Legend'}</span>
+          </button>
 
-          <div className="hidden sm:flex glass-panel px-3 py-1.5 rounded-xl items-center space-x-2 text-xs font-mono border border-slate-700/80 text-slate-300">
-            <Icons.Navigation className="w-3.5 h-3.5 text-cyan-400" />
-            <span>CHENNAI METRO (13.0827° N, 80.2707° E)</span>
+          <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-950/90 border border-slate-800 text-xs font-mono text-slate-300">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>60 FPS ENGINE ACTIVE</span>
           </div>
-        </div>
-
-        {/* Camera View Selector */}
-        <div className="flex items-center space-x-1.5 glass-panel p-1 rounded-xl pointer-events-auto border border-slate-700/80">
-          <button
-            onClick={() => setActiveCam('ALL')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${activeCam === 'ALL' ? 'bg-emerald-500 text-slate-950 font-bold' : 'text-slate-300 hover:text-white'}`}
-          >
-            Overview
-          </button>
-          <button
-            onClick={() => setActiveCam('INT_4')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${activeCam === 'INT_4' ? 'bg-emerald-500 text-slate-950 font-bold' : 'text-slate-300 hover:text-white'}`}
-          >
-            Central Int. 4
-          </button>
-          <button
-            onClick={() => setActiveCam('AMB_A')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${activeCam === 'AMB_A' ? 'bg-red-500 text-white font-bold' : 'text-slate-300 hover:text-white'}`}
-          >
-            AMB-104 (A)
-          </button>
-          <button
-            onClick={() => setActiveCam('AMB_B')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${activeCam === 'AMB_B' ? 'bg-red-500 text-white font-bold' : 'text-slate-300 hover:text-white'}`}
-          >
-            AMB-208 (B)
-          </button>
         </div>
       </div>
 
-      {/* Main Map Container */}
-      <div className="relative flex-1 w-full h-full flex items-center justify-center overflow-hidden">
-        {mapMode === 'TACTICAL' ? (
-          <canvas
-            ref={canvasRef}
-            width={920}
-            height={680}
-            className="w-full h-full object-contain"
-          />
-        ) : (
-          <div
-            ref={leafletContainerRef}
-            className="w-full h-full z-10"
-            style={{ minHeight: '480px' }}
-          />
-        )}
-      </div>
+      {/* Main Tactical Canvas */}
+      <div className="relative w-full h-full flex-1">
+        <canvas
+          ref={canvasRef}
+          width={920}
+          height={680}
+          className="w-full h-full object-contain cursor-crosshair"
+        />
 
-      {/* DYNAMIC CONFLICT RESOLUTION BANNER OVERLAY */}
-      {conflictState.stage && conflictState.stage !== 'IDLE' && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 w-full max-w-2xl px-4 animate-in fade-in slide-in-from-top-4 duration-300 pointer-events-auto">
-          <div className={`rounded-2xl p-4 shadow-2xl backdrop-blur-xl border ${
-            conflictState.bannerType === 'alert' ? 'glass-alert border-red-500/80 bg-red-950/85' :
-            conflictState.bannerType === 'warning' ? 'glass-warning border-amber-500/80 bg-amber-950/85' :
-            'glass-success border-emerald-500/80 bg-emerald-950/85'
-          }`}>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-2">
-                <span className={`w-3 h-3 rounded-full animate-ping ${
-                  conflictState.bannerType === 'alert' ? 'bg-red-400' :
-                  conflictState.bannerType === 'warning' ? 'bg-amber-400' : 'bg-emerald-400'
-                }`}></span>
-                <span className="text-xs font-mono font-bold tracking-widest uppercase text-white">
-                  {conflictState.bannerText}
-                </span>
-              </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900/80 border border-slate-700 text-slate-300">
-                INT. 4 CONFLICT ARBITRATION
-              </span>
-            </div>
-
-            <p className="text-sm font-medium text-slate-100">
-              {conflictState.bannerSubtext}
-            </p>
-
-            {conflictState.stage !== 'BOTH_CLEARED' && (
-              <div className="mt-3 pt-3 border-t border-white/10 grid grid-cols-2 gap-4 text-xs font-mono">
-                <div className="flex items-center justify-between p-2 rounded bg-slate-950/60 border border-red-500/30">
-                  <span className="text-red-400 font-bold">🚑 AMB-104 (A)</span>
-                  <span className="text-slate-300">{ambA.currentIntersectionEta || 12}s to Int • 180m</span>
-                </div>
-                <div className="flex items-center justify-between p-2 rounded bg-slate-950/60 border border-amber-500/30">
-                  <span className="text-amber-400 font-bold">🚑 AMB-208 (B)</span>
-                  <span className="text-slate-300">{ambB.currentIntersectionEta || 19}s to Int • 290m</span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Picture-in-Picture CCTV Camera Feed (Bottom Left) */}
-      <div className={`absolute bottom-4 left-4 z-20 transition-all duration-300 ${cctvExpanded ? 'w-80 sm:w-96' : 'w-56 sm:w-64'}`}>
-        <div className="glass-panel rounded-xl overflow-hidden border border-slate-700/80 shadow-2xl">
-          <div className="bg-slate-950/90 px-3 py-1.5 flex items-center justify-between border-b border-slate-800 text-[11px] font-mono">
-            <div className="flex items-center space-x-1.5 text-red-400">
-              <Icons.Camera className="w-3.5 h-3.5" />
-              <span>CCTV CAM-04: CENTRAL JUNCTION</span>
+        {/* Simulated CCTV Stream Inset (CAM-04) */}
+        <div className={`absolute bottom-4 right-4 z-20 transition-all ${
+          cctvExpanded ? 'w-80 h-56 sm:w-96 sm:h-64' : 'w-48 h-32'
+        } bg-slate-950/95 rounded-xl border border-slate-700 shadow-2xl overflow-hidden pointer-events-auto flex flex-col`}>
+          <div className="h-6 bg-slate-900 border-b border-slate-800 px-2.5 flex items-center justify-between text-[10px] font-mono text-slate-300">
+            <div className="flex items-center space-x-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
+              <span className="font-bold text-white">CAM-04</span>
+              <span className="text-slate-400">• INT-04</span>
             </div>
             <button
               onClick={() => setCctvExpanded(!cctvExpanded)}
-              className="text-slate-400 hover:text-white"
+              className="text-slate-400 hover:text-white text-[9px]"
             >
               {cctvExpanded ? 'Minimize' : 'Expand'}
             </button>
           </div>
 
-          <div className="relative h-32 bg-slate-900 flex items-center justify-center overflow-hidden">
-            <div className="absolute top-2 left-2 flex items-center space-x-1 text-[10px] font-mono text-red-500 bg-black/60 px-1.5 py-0.5 rounded">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
-              <span>LIVE REC</span>
-            </div>
-            <div className="absolute top-2 right-2 text-[10px] font-mono text-slate-300 bg-black/60 px-1.5 py-0.5 rounded">
-              CAM-04 / 30FPS
-            </div>
-
-            <svg className="w-full h-full bg-slate-950" viewBox="0 0 200 100">
-              <rect x="0" y="0" width="200" height="100" fill="#090d16" />
-              <polygon points="70,100 130,100 110,40 90,40" fill="#1e293b" />
-              <polygon points="0,60 200,60 200,80 0,80" fill="#1e293b" />
-              <line x1="100" y1="40" x2="100" y2="100" stroke="#f8fafc" strokeDasharray="4,4" opacity="0.4" />
-
-              <rect x="135" y="25" width="4" height="40" fill="#475569" />
-              <rect x="131" y="20" width="12" height="24" rx="2" fill="#020617" />
-              <circle cx="137" cy="24" r="2.5" fill={int4.northSouth === 'GREEN' ? '#10b981' : int4.northSouth === 'YELLOW' ? '#f59e0b' : '#ef4444'} className="animate-pulse" />
-
-              {ambA.progress > 0.3 && ambA.progress < 0.65 && (
-                <g transform={`translate(95, ${35 + (ambA.progress - 0.3) * 180})`}>
-                  <rect x="-8" y="-12" width="16" height="24" rx="2" fill="#ef4444" stroke="#ffffff" strokeWidth="1" />
-                  <circle cx="0" cy="0" r="10" fill="#ef4444" opacity="0.3" className="animate-ping" />
-                </g>
-              )}
-            </svg>
-
-            <div className="absolute bottom-1 right-2 text-[9px] font-mono text-slate-400">
-              SIGNAL: <strong className={int4.northSouth === 'GREEN' ? 'text-emerald-400' : 'text-red-400'}>{int4.northSouth || 'RED'}</strong>
+          <div className="flex-1 relative bg-slate-900 overflow-hidden flex items-center justify-center p-2">
+            <div className="absolute inset-0 bg-scanlines opacity-20 pointer-events-none"></div>
+            <div className="text-center font-mono text-[10px] space-y-1">
+              <div className="text-emerald-400 font-bold">LIVE CCTV STREAM (SIMULATED)</div>
+              <div className="text-slate-400 text-[9px]">Intersection 4 • Central Corridor</div>
+              <div className="text-slate-500 text-[8px]">{int4.modeLabel || 'NORMAL CYCLE'}</div>
             </div>
           </div>
         </div>
+
+        {/* Clear Map Legend Overlay */}
+        {showLegend && (
+          <div className="absolute bottom-4 left-4 z-20 bg-slate-950/90 backdrop-blur-md p-3 rounded-xl border border-slate-800 text-xs font-mono space-y-1.5 shadow-xl pointer-events-auto max-w-xs">
+            <div className="text-[10px] text-slate-400 uppercase font-bold border-b border-slate-800 pb-1">
+              Map Legend
+            </div>
+            <div className="flex items-center space-x-2 text-slate-300">
+              <span className="w-3 h-1.5 rounded bg-emerald-400"></span>
+              <span>GREEN: Emergency Corridor</span>
+            </div>
+            <div className="flex items-center space-x-2 text-slate-300">
+              <span className="w-3 h-1.5 rounded bg-red-500"></span>
+              <span>RED: Critical Congestion</span>
+            </div>
+            <div className="flex items-center space-x-2 text-slate-300">
+              <span className="w-3 h-1.5 rounded bg-amber-500"></span>
+              <span>AMBER: Moderate Congestion</span>
+            </div>
+            <div className="flex items-center space-x-2 text-slate-300">
+              <span className="w-3 h-1.5 rounded bg-sky-400"></span>
+              <span>BLUE: Normal Route</span>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Bottom Map Legend */}
-      <div className="absolute bottom-4 right-4 z-20 flex items-center space-x-2">
-        <div className="glass-panel px-3 py-1.5 rounded-xl text-xs font-mono text-slate-300 flex items-center space-x-4 border border-slate-700/80">
-          <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-            <span>Emergency Corridor</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span>
-            <span>Critical ALS</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-            <span>Congestion</span>
+      {/* Requirement 17: Real-World Infrastructure Integration Modal */}
+      {showRealWorldLockedModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="max-w-lg w-full bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center space-x-2.5">
+                <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400">
+                  <Icons.Lock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-white">Real-World Infrastructure Integration</h3>
+                  <span className="text-[10px] font-mono text-amber-400 font-bold uppercase">LOCKED / FUTURE PHASE</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowRealWorldLockedModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white"
+              >
+                <Icons.X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs text-slate-300 leading-relaxed font-sans">
+              <p className="font-semibold text-amber-300">
+                Live infrastructure integration is not enabled in this prototype.
+              </p>
+              <p>
+                Future versions may integrate authorized traffic, ambulance, and hospital systems subject to technical and regulatory approval.
+              </p>
+              
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 font-mono text-[11px] space-y-1.5">
+                <div className="text-slate-400 uppercase font-bold">Planned Roadmap:</div>
+                <div className="text-emerald-400">✓ Phase 1: Digital Twin Simulation (Current)</div>
+                <div className="text-slate-300">○ Phase 2: Ambulance GPS MVP (Next)</div>
+                <div className="text-slate-400">○ Phase 3: Real-Time Traffic Sensor Ingestion</div>
+                <div className="text-slate-400">○ Phase 4: Authorized Municipal Pilot</div>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-800 flex justify-end">
+              <button
+                onClick={() => setShowRealWorldLockedModal(false)}
+                className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-bold text-xs transition-all"
+              >
+                Return to Digital Twin Simulation
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

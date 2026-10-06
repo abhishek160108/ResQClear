@@ -34,24 +34,32 @@ function RightStatusPanel({ simState, onApplyRoute }) {
   return (
     <div className="flex flex-col h-full space-y-4 overflow-y-auto pr-1">
       {/* AI Traffic Insight Card */}
-      <div className="glass-panel p-4 rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-slate-900 via-slate-950 to-cyan-950/20">
-        <div className="flex items-center justify-between mb-2">
+      <div className="glass-panel p-4 rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-slate-900 via-slate-950 to-cyan-950/20 space-y-3">
+        <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Icons.Zap className="w-4 h-4 text-cyan-400" />
-            <span className="text-xs font-mono font-bold text-white uppercase">{aiInsight.title || 'AI Traffic Insight'}</span>
+            <span className="text-xs font-mono font-bold text-white uppercase tracking-wide">AI TRAFFIC INSIGHT</span>
           </div>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
-            PREDICTIVE
+            SIMULATION ESTIMATE
           </span>
         </div>
 
-        <p className="text-xs text-slate-300 leading-relaxed">
-          {aiInsight.message || 'High congestion detected near the next intersection. Alternative route B could reduce estimated delay by 2 minutes 18 seconds.'}
-        </p>
+        <div className="text-xs text-slate-300 leading-relaxed space-y-1 font-sans">
+          <p className="font-semibold text-white">
+            High traffic density detected on Anna Salai North Link.
+          </p>
+          <p className="text-amber-400 font-mono text-[11px]">
+            Predicted delay: +2.4 min
+          </p>
+          <p className="text-slate-400 text-[11px]">
+            Alternative route may reduce simulated delay.
+          </p>
+        </div>
 
-        <div className="mt-3 flex items-center justify-between pt-2 border-t border-slate-800">
-          <span className="text-[11px] font-mono text-emerald-400">
-            EST. SAVINGS: {aiInsight.savings || '2m 18s'}
+        <div className="pt-2 border-t border-slate-800 flex items-center justify-between">
+          <span className="text-[11px] font-mono text-emerald-400 font-bold">
+            ESTIMATED SAVINGS: 2 min 18 sec
           </span>
           <button
             onClick={() => onApplyRoute()}
@@ -70,7 +78,7 @@ function RightStatusPanel({ simState, onApplyRoute }) {
             ) : (
               <>
                 <Icons.Navigation className="w-3.5 h-3.5" />
-                <span>Apply Route</span>
+                <span>SIMULATE ALTERNATE ROUTE</span>
               </>
             )}
           </button>
@@ -78,16 +86,16 @@ function RightStatusPanel({ simState, onApplyRoute }) {
       </div>
 
       {/* Live Emergency Events Stream */}
-      <div className="glass-panel p-4 rounded-2xl border border-slate-800 flex-1 flex flex-col min-h-[300px]">
+      <div className="glass-panel p-4 rounded-2xl border border-slate-800 flex-1 flex flex-col min-h-[320px]">
         <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
           <div className="flex items-center space-x-2">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
             <h3 className="font-bold text-sm text-white">Emergency Events</h3>
           </div>
-          <span className="text-[10px] font-mono text-slate-400">LIVE CHRONOLOGY</span>
+          <span className="text-[10px] font-mono text-slate-400">OPERATIONS LOG</span>
         </div>
 
-        <div className="space-y-2.5 overflow-y-auto flex-1 max-h-[360px] pr-1">
+        <div className="space-y-2.5 overflow-y-auto flex-1 max-h-[380px] pr-1">
           {events.map((evt) => (
             <div
               key={evt.id}
@@ -123,12 +131,12 @@ function RightStatusPanel({ simState, onApplyRoute }) {
 
         <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/80 text-[11px] font-mono">
           <div>
-            <span className="text-slate-400 block">TIME SAVED:</span>
-            <strong className="text-white text-xs">{(liveMetrics.timeSavedSec / 60).toFixed(1)} min</strong>
+            <span className="text-slate-400 block text-[10px]">EST. DELAY AVOIDED:</span>
+            <strong className="text-white text-xs">2m 18s (Simulated)</strong>
           </div>
           <div>
-            <span className="text-slate-400 block">SIGNALS SYNCED:</span>
-            <strong className="text-emerald-400 text-xs">{liveMetrics.intersectionsCoordinated || 14} Nodes</strong>
+            <span className="text-slate-400 block text-[10px]">SIGNALS SYNCED:</span>
+            <strong className="text-emerald-400 text-xs">4 Intersections</strong>
           </div>
         </div>
       </div>
