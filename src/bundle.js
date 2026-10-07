@@ -162,8 +162,29 @@ window.soundEngine = new SoundEngine();
 
 /* ===== START FILE: data.js ===== */
 // resQClear City Map, Fleet, Hospital, and Network Simulation Data
+// Enterprise Operations Center & Digital Twin Prototype
 
 const RESQCLEAR_DATA = {
+  system: {
+    name: 'resQClear',
+    subtitle: 'EMERGENCY TRAFFIC COORDINATION',
+    tagline: 'Clear the way. Save lives.',
+    corePositioning: 'AI-assisted emergency traffic coordination for safer and more efficient ambulance movement through congested urban intersections.',
+    mode: 'DIGITAL TWIN SIMULATION',
+    city: 'CHENNAI DIGITAL TWIN',
+    version: '2.0.0-PROTOTYPE',
+    disclaimer: 'resQClear is currently a digital twin simulation prototype. Signal actions and telemetry shown are simulated and not connected to real government traffic signals, live ambulances, or municipal infrastructure.'
+  },
+
+  networkSummary: {
+    intersectionsOnline: 6,
+    ambulancesTracked: 3,
+    hospitalsAvailable: 3,
+    congestionZonesDetected: 4,
+    activeConflicts: 1,
+    systemHealth: 'NORMAL'
+  },
+
   hospitals: [
     {
       id: 'hosp-1',
@@ -182,12 +203,14 @@ const RESQCLEAR_DATA = {
       icuFree: 4,
       specialty: 'Cardiac / Trauma Resuscitation',
       leadDoctor: 'Dr. K. Senthil Nathan',
-      integrationNote: 'Hospital notification simulated',
+      integrationNote: 'Simulated arrival notification generated (Not connected to hospital ER systems)',
+      notificationSent: true,
+      notificationText: 'Simulated Notification: AMB-104 ETA 06:42 min — Cardiac Bay Reserved',
       readiness: [
-        { item: 'Cath Lab 02 Pre-warmed', done: true },
+        { item: 'Cath Lab 02 Pre-warmed & Staffed', done: true },
         { item: 'Cardiology Triage Team Alerted', done: true },
         { item: 'Rapid ER Bay 1 Reserved', done: true },
-        { item: 'Direct Telemetry Connected (Simulated)', done: true }
+        { item: 'Direct Telemetry Feed Initialized (Simulated)', done: true }
       ]
     },
     {
@@ -207,10 +230,12 @@ const RESQCLEAR_DATA = {
       icuFree: 2,
       specialty: 'Polytrauma & Neurosurgery',
       leadDoctor: 'Dr. Priya Ramakrishnan',
-      integrationNote: 'Hospital notification simulated',
+      integrationNote: 'Simulated arrival notification generated (Not connected to hospital ER systems)',
+      notificationSent: true,
+      notificationText: 'Simulated Notification: AMB-208 ETA 08:15 min — Trauma Suite 04 Prepped',
       readiness: [
         { item: 'Surgical Suite 04 Prepped', done: true },
-        { item: 'Blood Bank Cross-match 4 Units O-', done: true },
+        { item: 'Blood Bank Cross-match 4 Units O- on Standby', done: true },
         { item: 'CT Neuro-Scan on Priority Standby', done: true },
         { item: 'Code Red Resuscitation Team Stationed', done: true }
       ]
@@ -232,7 +257,9 @@ const RESQCLEAR_DATA = {
       icuFree: 7,
       specialty: 'Acute Medical Care',
       leadDoctor: 'Dr. Anand Kumar',
-      integrationNote: 'Hospital notification simulated',
+      integrationNote: 'Simulated arrival notification generated (Not connected to hospital ER systems)',
+      notificationSent: false,
+      notificationText: 'Simulated Notification: AMB-312 ETA 12:40 min — Urgent Transit Protocol',
       readiness: [
         { item: 'ER Bay 03 Ready', done: true },
         { item: 'Triage Nurse Assigned', done: true }
@@ -245,19 +272,21 @@ const RESQCLEAR_DATA = {
       id: 'AMB-104',
       name: 'Ambulance A',
       status: 'CRITICAL',
-      origin: 'Anna Nagar',
+      subStatus: 'ACUTE CARDIAC',
+      origin: 'Anna Nagar West',
       destination: 'Government Hospital',
       destinationId: 'hosp-1',
-      speed: 46, // km/h
+      speed: 42,
       speedUnit: 'km/h',
       eta: '06:42',
       distance: '3.8 km',
       routeStatus: 'OPTIMIZED',
+      currentState: 'APPROACHING INTERSECTION',
       driver: 'S. Murugan (Paramedic Lead)',
       vehicleModel: 'Force Traveller Advance ALS',
       oxygenLevel: '98%',
       batteryCharge: '94%',
-      triageSource: 'Severity provided by authorized emergency personnel',
+      triageSource: 'Emergency severity provided by authorized emergency personnel',
       patient: {
         condition: 'Acute STEMI (Heart Attack)',
         age: '54 M',
@@ -267,34 +296,27 @@ const RESQCLEAR_DATA = {
       color: '#ef4444',
       trailColor: 'rgba(239, 68, 68, 0.4)',
       corridorColor: '#10b981',
-      // Simulation Path (Coordinates along the road grid)
       path: [
         { x: 120, y: 160, name: 'Anna Nagar West Terminal' },
-        { x: 280, y: 160, name: 'Roundabout Sector 3' },
-        { x: 450, y: 160, name: 'Kilpauk Medical Signal' },
-        { x: 450, y: 350, name: 'Central Conflict Junction (Int. 4)' },
-        { x: 620, y: 350, name: 'Poonamallee Arterial' },
-        { x: 780, y: 350, name: 'Hospital Access Boulevard' },
+        { x: 280, y: 160, name: 'INT-01: Anna Nagar Roundabout' },
+        { x: 450, y: 160, name: 'INT-02: Kilpauk Medical Signal' },
+        { x: 450, y: 350, name: 'INT-04: Central Conflict Junction' },
+        { x: 620, y: 350, name: 'INT-05: Poonamallee Arterial' },
+        { x: 780, y: 350, name: 'INT-06: Hospital Access Boulevard' },
         { x: 780, y: 160, name: 'Government Hospital ER Bay' }
       ],
-      geoPath: [
-        [13.0850, 80.2100],
-        [13.0820, 80.2250],
-        [13.0780, 80.2420],
-        [13.0750, 80.2580],
-        [13.0790, 80.2680],
-        [13.0827, 80.2785]
-      ],
-      progress: 0.05,
-      currentIntersectionEta: 43, // seconds (realistic demo value)
-      distanceToConflict: 180, // meters
-      priorityRank: 1
+      progress: 0.12,
+      currentIntersectionEta: 43,
+      distanceToConflict: 555,
+      priorityRank: 1,
+      approachDirection: 'North Approach (Sector 1)'
     },
     {
       id: 'AMB-208',
       name: 'Ambulance B',
       status: 'CRITICAL',
-      origin: 'T. Nagar',
+      subStatus: 'SEVERE POLYTRAUMA',
+      origin: 'T. Nagar Panagal Park',
       destination: 'Apollo Hospital',
       destinationId: 'hosp-2',
       speed: 40,
@@ -302,11 +324,12 @@ const RESQCLEAR_DATA = {
       eta: '08:15',
       distance: '4.2 km',
       routeStatus: 'OPTIMIZED',
+      currentState: 'APPROACHING INTERSECTION',
       driver: 'R. Vijay (Critical Care Paramedic)',
       vehicleModel: 'Tata Winger Type-D ICU',
       oxygenLevel: '95%',
       batteryCharge: '89%',
-      triageSource: 'Severity provided by authorized emergency personnel',
+      triageSource: 'Emergency severity provided by authorized emergency personnel',
       patient: {
         condition: 'Severe Polytrauma (MVA Collision)',
         age: '29 F',
@@ -318,30 +341,24 @@ const RESQCLEAR_DATA = {
       corridorColor: '#10b981',
       path: [
         { x: 120, y: 540, name: 'T. Nagar Panagal Park' },
-        { x: 280, y: 540, name: 'Usman Road Flyover Base' },
+        { x: 280, y: 540, name: 'INT-03: Usman Road Flyover Base' },
         { x: 450, y: 540, name: 'Anna Salai South Link' },
-        { x: 450, y: 350, name: 'Central Conflict Junction (Int. 4)' },
-        { x: 620, y: 350, name: 'Poonamallee Arterial' },
-        { x: 780, y: 350, name: 'Hospital Access Boulevard' },
+        { x: 450, y: 350, name: 'INT-04: Central Conflict Junction' },
+        { x: 620, y: 350, name: 'INT-05: Poonamallee Arterial' },
+        { x: 780, y: 350, name: 'INT-06: Hospital Access Boulevard' },
         { x: 780, y: 540, name: 'Apollo Emergency Bay' }
       ],
-      geoPath: [
-        [13.0418, 80.2341],
-        [13.0500, 80.2420],
-        [13.0620, 80.2500],
-        [13.0750, 80.2580],
-        [13.0680, 80.2550],
-        [13.0604, 80.2520]
-      ],
-      progress: 0.04,
-      currentIntersectionEta: 50, // seconds (realistic demo value)
-      distanceToConflict: 290, // meters
-      priorityRank: 2
+      progress: 0.10,
+      currentIntersectionEta: 50,
+      distanceToConflict: 555,
+      priorityRank: 2,
+      approachDirection: 'South Approach (Sector 2)'
     },
     {
       id: 'AMB-312',
       name: 'Ambulance C',
       status: 'URGENT',
+      subStatus: 'ACUTE RESPIRATORY',
       origin: 'Guindy Industrial',
       destination: 'Kauvery Hub',
       destinationId: 'hosp-3',
@@ -350,11 +367,12 @@ const RESQCLEAR_DATA = {
       eta: '12:40',
       distance: '5.1 km',
       routeStatus: 'CORRIDOR ACTIVE',
+      currentState: 'IN TRANSIT',
       driver: 'M. Anand (EMS Team)',
       vehicleModel: 'Mahindra Supro Ambulance',
       oxygenLevel: '99%',
       batteryCharge: '96%',
-      triageSource: 'Severity provided by authorized emergency personnel',
+      triageSource: 'Emergency severity provided by authorized emergency personnel',
       patient: {
         condition: 'Acute Respiratory Distress',
         age: '68 M',
@@ -367,18 +385,14 @@ const RESQCLEAR_DATA = {
       path: [
         { x: 120, y: 350, name: 'Guindy Base' },
         { x: 280, y: 350, name: 'Mount Road Sector' },
-        { x: 280, y: 540, name: 'Usman Road Flyover Base' },
+        { x: 280, y: 540, name: 'INT-03: Usman Road Flyover Base' },
         { x: 180, y: 560, name: 'Kauvery Hub ER Bay' }
-      ],
-      geoPath: [
-        [13.0067, 80.2025],
-        [13.0200, 80.2200],
-        [13.0338, 80.2505]
       ],
       progress: 0.35,
       currentIntersectionEta: 75,
       distanceToConflict: 720,
-      priorityRank: 3
+      priorityRank: 3,
+      approachDirection: 'Southwest Link'
     }
   ],
 
@@ -386,49 +400,52 @@ const RESQCLEAR_DATA = {
     {
       id: 'int-1',
       code: 'INT-01',
-      name: 'Anna Nagar Roundabout (INT-01)',
+      name: 'Anna Nagar Roundabout',
       x: 280,
       y: 160,
-      state: 'GREEN',
+      state: 'NORMAL_CYCLE',
       timer: 18,
       northSouth: 'GREEN',
       eastWest: 'RED',
       priorityVehicle: null,
       cooldown: 0,
-      modeLabel: 'NORMAL CYCLE'
+      modeLabel: 'NORMAL CYCLE',
+      simulatedPhase: 'NORMAL CYCLE'
     },
     {
       id: 'int-2',
       code: 'INT-02',
-      name: 'Kilpauk Medical Signal (INT-02)',
+      name: 'Kilpauk Medical Signal',
       x: 450,
       y: 160,
-      state: 'GREEN',
+      state: 'NORMAL_CYCLE',
       timer: 14,
       northSouth: 'GREEN',
       eastWest: 'RED',
       priorityVehicle: null,
       cooldown: 0,
-      modeLabel: 'NORMAL CYCLE'
+      modeLabel: 'NORMAL CYCLE',
+      simulatedPhase: 'NORMAL CYCLE'
     },
     {
       id: 'int-3',
       code: 'INT-03',
-      name: 'T. Nagar Usman Road Cross (INT-03)',
+      name: 'T. Nagar Usman Road Cross',
       x: 280,
       y: 540,
-      state: 'GREEN',
+      state: 'NORMAL_CYCLE',
       timer: 22,
       northSouth: 'RED',
       eastWest: 'GREEN',
       priorityVehicle: null,
       cooldown: 0,
-      modeLabel: 'NORMAL CYCLE'
+      modeLabel: 'NORMAL CYCLE',
+      simulatedPhase: 'NORMAL CYCLE'
     },
     {
       id: 'int-4',
       code: 'INT-04',
-      name: 'Central Conflict Junction (INT-04)',
+      name: 'Central Conflict Junction',
       x: 450,
       y: 350,
       state: 'NORMAL_CYCLE',
@@ -440,35 +457,38 @@ const RESQCLEAR_DATA = {
       hasConflict: false,
       conflictDetails: null,
       cooldown: 0,
-      modeLabel: 'NORMAL CYCLE'
+      modeLabel: 'NORMAL CYCLE',
+      simulatedPhase: 'NORMAL CYCLE'
     },
     {
       id: 'int-5',
       code: 'INT-05',
-      name: 'Poonamallee Arterial Crossing (INT-05)',
+      name: 'Poonamallee Arterial Crossing',
       x: 620,
       y: 350,
-      state: 'GREEN',
+      state: 'NORMAL_CYCLE',
       timer: 20,
       northSouth: 'RED',
       eastWest: 'GREEN',
       priorityVehicle: null,
       cooldown: 0,
-      modeLabel: 'NORMAL CYCLE'
+      modeLabel: 'NORMAL CYCLE',
+      simulatedPhase: 'NORMAL CYCLE'
     },
     {
       id: 'int-6',
       code: 'INT-06',
-      name: 'Govt Hospital North Gate (INT-06)',
+      name: 'Govt Hospital North Gate',
       x: 780,
       y: 350,
-      state: 'GREEN',
+      state: 'NORMAL_CYCLE',
       timer: 15,
       northSouth: 'GREEN',
       eastWest: 'RED',
       priorityVehicle: null,
       cooldown: 0,
-      modeLabel: 'NORMAL CYCLE'
+      modeLabel: 'NORMAL CYCLE',
+      simulatedPhase: 'NORMAL CYCLE'
     }
   ],
 
@@ -482,7 +502,8 @@ const RESQCLEAR_DATA = {
       severity: 'HIGH',
       delayImpact: '+2.4 min',
       color: 'rgba(239, 68, 68, 0.35)',
-      active: true
+      active: true,
+      label: 'CRITICAL CONGESTION'
     },
     {
       id: 'cong-2',
@@ -493,7 +514,183 @@ const RESQCLEAR_DATA = {
       severity: 'MODERATE',
       delayImpact: '+1.8 min',
       color: 'rgba(245, 158, 11, 0.3)',
-      active: true
+      active: true,
+      label: 'MODERATE CONGESTION'
+    },
+    {
+      id: 'cong-3',
+      name: 'Kilpauk North Arterial Dense Queue',
+      x: 350,
+      y: 160,
+      radius: 32,
+      severity: 'MODERATE',
+      delayImpact: '+1.2 min',
+      color: 'rgba(245, 158, 11, 0.25)',
+      active: true,
+      label: 'MODERATE CONGESTION'
+    },
+    {
+      id: 'cong-4',
+      name: 'Poonamallee East Approach',
+      x: 540,
+      y: 350,
+      radius: 30,
+      severity: 'HIGH',
+      delayImpact: '+1.9 min',
+      color: 'rgba(239, 68, 68, 0.3)',
+      active: true,
+      label: 'CRITICAL CONGESTION'
+    }
+  ],
+
+  beforeAfterComparison: {
+    withoutResQClear: {
+      title: 'WITHOUT resQClear',
+      trafficCondition: 'Traffic congestion',
+      intersectionStatus: 'Intersection waiting (Red light queues)',
+      coordination: 'Uncoordinated emergency movement',
+      baselineEta: '08:34',
+      avgDelay: '+2.4 min',
+      riskFactor: 'High probability of intersection deadlock'
+    },
+    withResQClear: {
+      title: 'WITH resQClear',
+      trafficCondition: 'Coordinated sequence',
+      intersectionStatus: 'Simulated emergency corridor',
+      coordination: 'Sequential priority clearance',
+      optimizedEta: '06:16',
+      estimatedDifference: '02:18',
+      riskFactor: 'Conflict resolved via AI-assisted sequence'
+    },
+    metricsSummary: {
+      baselineEta: '08:34',
+      optimizedEta: '06:16',
+      estimatedDifference: '02:18',
+      confidence: '96%',
+      badge: 'SIMULATION RESULT'
+    }
+  },
+
+  decisionFactors: {
+    junction: 'INT-04',
+    ambA: {
+      id: 'AMB-104',
+      eta: '43 sec',
+      distance: '555 m',
+      severity: 'CRITICAL',
+      direction: 'North Approach (Anna Nagar)'
+    },
+    ambB: {
+      id: 'AMB-208',
+      eta: '50 sec',
+      distance: '555 m',
+      severity: 'CRITICAL',
+      direction: 'South Approach (T. Nagar)'
+    },
+    conflictRisk: 'HIGH',
+    factorsList: [
+      { label: 'ETA to Junction', val: 'AMB-104: 43s | AMB-208: 50s (7s difference)' },
+      { label: 'Distance', val: '555m vs 555m (Equal convergence distance)' },
+      { label: 'Approach Direction', val: 'Opposing perpendicular vectors on INT-04' },
+      { label: 'Intersection Occupancy', val: 'Single vehicle capacity per clearance window' },
+      { label: 'Traffic Density', val: 'Anna Salai link: High (+2.4 min density)' },
+      { label: 'Route Conflict Probability', val: 'HIGH (Simultaneous intersection demand)' }
+    ],
+    recommendedSequence: [
+      { rank: '01', vehicle: 'AMB-104', action: 'Immediate Emergency Corridor', reason: 'Reaches junction 7s earlier' },
+      { rank: '02', vehicle: 'AMB-208', action: 'Hold/Controlled Deceleration', reason: 'Clear second sequentially' }
+    ],
+    reasoning: 'Sequential clearance minimizes simultaneous intersection occupancy and preserves momentum without stopping both emergency vehicles.',
+    confidence: '96%',
+    confidenceLabel: 'SIMULATION ESTIMATE'
+  },
+
+  whyExplanation: {
+    title: 'Why This Decision?',
+    summary: 'AMB-104 is predicted to reach the conflict zone 7 seconds earlier. Sequential clearance reduces the probability of simultaneous intersection occupancy.',
+    detailedPoints: [
+      'ETA Delta: AMB-104 arrives in 43 seconds compared to AMB-208 arriving in 50 seconds.',
+      'Momentum Preservation: Granting Priority 01 to AMB-104 allows it to pass through INT-04 without deceleration, clearing the intersection just before AMB-208 arrives.',
+      'Zero Deadlock Guarantee (Simulated): Eliminates the scenario where both ambulances attempt to cross simultaneously, requiring abrupt emergency braking in the intersection.',
+      'Secondary Green Wave: Once AMB-104 clears, INT-04 immediately switches green for AMB-208 (Priority 02).'
+    ],
+    disclaimer: 'This explanation is generated by the resQClear simulation decision model for transparent, explainable emergency coordination.'
+  },
+
+  productRoadmap: [
+    {
+      phase: 'PHASE 1',
+      title: 'Digital Twin Simulation',
+      status: 'CURRENT',
+      isCurrent: true,
+      desc: '60 FPS multi-ambulance conflict engine, corridor simulation, and operations center UI.'
+    },
+    {
+      phase: 'PHASE 2',
+      title: 'Ambulance GPS MVP',
+      status: 'NEXT',
+      isCurrent: false,
+      desc: 'Dedicated telemetry mobile/in-vehicle client with high-precision GPS tracking for paramedics.'
+    },
+    {
+      phase: 'PHASE 3',
+      title: 'Real-Time Traffic Data',
+      status: 'PLANNED',
+      isCurrent: false,
+      desc: 'City-wide traffic sensor mesh and mapping API ingestion for live congestion heatmaps.'
+    },
+    {
+      phase: 'PHASE 4',
+      title: 'Ambulance + Hospital Pilot',
+      status: 'PLANNED',
+      isCurrent: false,
+      desc: 'Controlled trial with participating ambulance fleet operators and receiving trauma centers.'
+    },
+    {
+      phase: 'PHASE 5',
+      title: 'Authorized Traffic Infrastructure Integration',
+      status: 'FUTURE',
+      isCurrent: false,
+      desc: 'Municipal traffic command center API integration subject to regulatory & civic authorization.'
+    }
+  ],
+
+  howItWorksSteps: [
+    {
+      step: '1',
+      name: 'DETECT',
+      desc: 'Detect emergency vehicles and traffic conditions via connected telemetry.',
+      icon: 'Ambulance'
+    },
+    {
+      step: '2',
+      name: 'PREDICT',
+      desc: 'Estimate congestion and arrival times across upcoming intersections.',
+      icon: 'Activity'
+    },
+    {
+      step: '3',
+      name: 'OPTIMIZE',
+      desc: 'Evaluate emergency routes and compare alternative arterial corridors.',
+      icon: 'Navigation'
+    },
+    {
+      step: '4',
+      name: 'RESOLVE',
+      desc: 'Coordinate multiple emergency vehicles approaching conflicting intersections.',
+      icon: 'Cpu'
+    },
+    {
+      step: '5',
+      name: 'COORDINATE',
+      desc: 'Generate an emergency corridor sequence with simulated traffic signal timing.',
+      icon: 'TrafficLight'
+    },
+    {
+      step: '6',
+      name: 'INFORM',
+      desc: 'Provide status and ETA information to authorized stakeholders and receiving ERs.',
+      icon: 'Hospital'
     }
   ],
 
@@ -506,25 +703,11 @@ const RESQCLEAR_DATA = {
     travelDelayReduction: '-32%',
     simulatedTimeSaved: '2.8 min',
     averageResponseTime: '06:14 min',
+    intersectionWaitTime: '4.2 sec',
     totalSimulatedTrips: 1248,
-    corridorStatus: 'SAFE CORRIDOR SEQUENCE COMPLETED'
+    corridorStatus: 'SAFE CORRIDOR SEQUENCE COMPLETED',
+    label: 'DEMO DATA'
   },
-
-  productRoadmap: [
-    { phase: 'PHASE 1', title: 'Digital Twin Simulation', status: 'Current', isCurrent: true, desc: '60 FPS collision conflict arbitration engine & traffic corridor visualization' },
-    { phase: 'PHASE 2', title: 'Ambulance GPS MVP', status: 'Next', isCurrent: false, desc: 'Paramedic vehicle telemetry client with live GPS precision tracking' },
-    { phase: 'PHASE 3', title: 'Real-Time Traffic Data', status: 'Planned', isCurrent: false, desc: 'City-wide traffic sensor and sensor-mesh ingestion feeds' },
-    { phase: 'PHASE 4', title: 'Hospital / Ambulance Pilot', status: 'Planned', isCurrent: false, desc: 'Controlled pilot with partner emergency departments and trauma centers' },
-    { phase: 'PHASE 5', title: 'Authorized Traffic Infrastructure Integration', status: 'Future', isCurrent: false, desc: 'Municipal traffic command center API integration subject to regulatory approval' }
-  ],
-
-  howItWorksSteps: [
-    { step: '1', name: 'DETECT', desc: 'Emergency vehicle detected via connected telemetry', icon: 'Ambulance' },
-    { step: '2', name: 'PREDICT', desc: 'Traffic congestion and ETA to intersection analyzed', icon: 'Activity' },
-    { step: '3', name: 'RESOLVE', desc: 'Conflicting emergency routes coordinated by AI decision model', icon: 'Cpu' },
-    { step: '4', name: 'COORDINATE', desc: 'Emergency corridor sequence simulated with dynamic green wave', icon: 'TrafficLight' },
-    { step: '5', name: 'INFORM', desc: 'Hospital and control-room status updated in real-time', icon: 'Hospital' }
-  ],
 
   analyticsData: {
     hourlyData: [
@@ -554,12 +737,13 @@ const RESQCLEAR_DATA = {
 };
 
 window.RESQCLEAR_DATA = RESQCLEAR_DATA;
-window.AMBUCLEAR_DATA = RESQCLEAR_DATA; // backward compatibility alias
+window.AMBUCLEAR_DATA = RESQCLEAR_DATA;
 
 /* ===== END FILE: data.js ===== */
 
 /* ===== START FILE: simulation.js ===== */
 // resQClear Real-Time Traffic & Emergency Simulation Engine
+// Enterprise Operations Center & Digital Twin Simulation Core
 
 class SimulationEngine {
   constructor() {
@@ -573,36 +757,65 @@ class SimulationEngine {
     // Civilian traffic
     this.civilianVehicles = this.initCivilianTraffic();
 
-    // Event Log (Realistic operations chronology)
+    // Event Log (Realistic operations chronology with exact clock timestamps)
     this.events = [
-      { id: 1, time: '18:42:00', type: 'system', message: 'resQClear Simulation Grid Engine Initialized • 6 Signal Nodes Online' },
-      { id: 2, time: '18:42:05', type: 'info', message: 'V2X Conflict Arbitration Engine Ready (Simulation Mode)' }
+      { id: 1, time: '13:50:18', type: 'system', message: 'resQClear Simulation Grid Engine Initialized • 6 Signal Nodes Online' },
+      { id: 2, time: '13:50:20', type: 'info', message: 'Emergency vehicle tracking initialized • Telemetry stream active' },
+      { id: 3, time: '13:50:25', type: 'info', message: 'V2X Conflict Arbitration Engine Ready (Digital Twin Simulation)' }
     ];
 
     // Conflict State
     this.conflictState = {
       detected: false,
-      stage: 'IDLE', // IDLE, DETECTED, RESOLVING, PRIORITY_A, A_CLEARED, PRIORITY_B, BOTH_CLEARED
+      stage: 'IDLE', // IDLE, DETECTING, PREDICTING, ANALYZING, GENERATING_SEQUENCE, PRIORITY_A, A_CLEARED, PRIORITY_B, B_CLEARED, BOTH_CLEARED
       ambA: null,
       ambB: null,
       decision: null,
       bannerText: '',
       bannerSubtext: '',
-      bannerType: 'info' // alert, success, warning, info
+      bannerType: 'info', // alert, warning, success, info
+      signalPhase: 'NORMAL CYCLE', // NORMAL CYCLE, EMERGENCY PRIORITY REQUESTED, SIGNAL PREPARING, GREEN CORRIDOR ACTIVE, AMBULANCE PASSING, CORRIDOR CLEARED, NORMAL CYCLE RESTORED
+      corridorStatusA: 'INACTIVE', // INACTIVE, ACTIVE, CLEARED
+      corridorStatusB: 'INACTIVE',
+      whyModalOpen: false
     };
 
-    // Automated Demo Scenario orchestrator
+    // System Intelligence Status
+    this.systemIntelligence = {
+      trafficAnalysis: { label: 'TRAFFIC ANALYSIS', status: 'Congestion detected', active: true, done: true },
+      routeAnalysis: { label: 'ROUTE ANALYSIS', status: 'Alternate route evaluated', active: false, done: false },
+      conflictAnalysis: { label: 'CONFLICT ANALYSIS', status: 'Multi-ambulance conflict detected', active: false, done: false },
+      sequence: { label: 'SEQUENCE', status: 'Priority order generated', active: false, done: false },
+      corridor: { label: 'CORRIDOR', status: 'Emergency corridor simulated', active: false, done: false },
+      hospitalEta: { label: 'HOSPITAL ETA', status: 'ETA synchronized with ER', active: true, done: true }
+    };
+
+    // Network Status Summary
+    this.networkStatus = {
+      intersectionsOnline: 6,
+      ambulancesTracked: 3,
+      hospitalsAvailable: 3,
+      congestionZonesDetected: 4,
+      activeConflicts: 1,
+      systemHealth: 'NORMAL'
+    };
+
+    // Automated Demo Scenario orchestrator (16 Sequential Steps)
     this.scenarioStep = 0;
     this.scenarioRunning = false;
     this.scenarioTimer = 0;
+    this.scenarioCompleteModal = false;
 
     // AI Insight state
     this.aiInsight = {
       visible: true,
-      title: 'AI Traffic Insight',
-      message: 'High traffic density detected on Anna Salai North Link. Predicted delay: +2.4 min. Alternative route may reduce simulated delay.',
+      title: 'AI TRAFFIC INSIGHT',
+      message: 'High traffic density detected on Anna Salai North Link.',
+      predictedDelay: '+2.4 min',
+      altRoute: 'Route B (EVR Periyar Express)',
+      savings: '2m 18s',
       applied: false,
-      savings: '2 min 18 sec'
+      badge: 'SIMULATION ESTIMATE'
     };
 
     // Metrics counter (Simulation Estimates)
@@ -612,8 +825,11 @@ class SimulationEngine {
       ambulancesCoordinated: 2,
       emergencyEventsSimulated: 12,
       decisionConfidence: '96%',
-      avgSpeed: 44.2,
-      activeCorridors: 2
+      avgSpeed: 42.4,
+      activeCorridors: 2,
+      delayAvoided: '2m 18s',
+      baselineEta: '08:34',
+      optimizedEta: '06:16'
     };
 
     this.listeners = [];
@@ -647,8 +863,11 @@ class SimulationEngine {
       civilianVehicles: this.civilianVehicles,
       events: this.events,
       conflictState: this.conflictState,
+      systemIntelligence: this.systemIntelligence,
+      networkStatus: this.networkStatus,
       scenarioRunning: this.scenarioRunning,
       scenarioStep: this.scenarioStep,
+      scenarioCompleteModal: this.scenarioCompleteModal,
       aiInsight: this.aiInsight,
       liveMetrics: this.liveMetrics
     };
@@ -699,7 +918,7 @@ class SimulationEngine {
       type,
       message
     };
-    this.events = [newEvent, ...this.events.slice(0, 40)];
+    this.events = [newEvent, ...this.events.slice(0, 35)];
   }
 
   start() {
@@ -734,20 +953,44 @@ class SimulationEngine {
       decision: null,
       bannerText: '',
       bannerSubtext: '',
-      bannerType: 'info'
+      bannerType: 'info',
+      signalPhase: 'NORMAL CYCLE',
+      corridorStatusA: 'INACTIVE',
+      corridorStatusB: 'INACTIVE',
+      whyModalOpen: false
     };
+    this.systemIntelligence = {
+      trafficAnalysis: { label: 'TRAFFIC ANALYSIS', status: 'Congestion detected', active: true, done: true },
+      routeAnalysis: { label: 'ROUTE ANALYSIS', status: 'Alternate route evaluated', active: false, done: false },
+      conflictAnalysis: { label: 'CONFLICT ANALYSIS', status: 'Multi-ambulance conflict detected', active: false, done: false },
+      sequence: { label: 'SEQUENCE', status: 'Priority order generated', active: false, done: false },
+      corridor: { label: 'CORRIDOR', status: 'Emergency corridor simulated', active: false, done: false },
+      hospitalEta: { label: 'HOSPITAL ETA', status: 'ETA synchronized with ER', active: true, done: true }
+    };
+    this.networkStatus.activeConflicts = 0;
     this.scenarioRunning = false;
     this.scenarioStep = 0;
     this.scenarioTimer = 0;
+    this.scenarioCompleteModal = false;
     this.aiInsight.applied = false;
-    this.logEvent('info', 'Simulation reset to default corridor parameters.');
+    this.logEvent('info', 'Simulation reset: Grid and telemetry restored to default parameters.');
+    this.notify();
+  }
+
+  toggleWhyModal(isOpen) {
+    this.conflictState.whyModalOpen = isOpen !== undefined ? isOpen : !this.conflictState.whyModalOpen;
+    this.notify();
+  }
+
+  closeScenarioCompleteModal() {
+    this.scenarioCompleteModal = false;
     this.notify();
   }
 
   getPointOnPath(path, progress) {
     if (!path || path.length < 2) return path[0] || { x: 0, y: 0 };
     const totalSegments = path.length - 1;
-    const scaled = progress * totalSegments;
+    const scaled = Math.max(0, Math.min(progress, 0.9999)) * totalSegments;
     const segIndex = Math.min(Math.floor(scaled), totalSegments - 1);
     const segProgress = scaled - segIndex;
 
@@ -766,34 +1009,44 @@ class SimulationEngine {
 
     const dt = (deltaTime / 1000) * this.speedMultiplier;
 
-    // Update normal traffic lights timers
+    // 1. Update normal traffic light cycles for standard intersections
     this.intersections.forEach(inter => {
       if (inter.id !== 'int-4' || this.conflictState.stage === 'IDLE' || this.conflictState.stage === 'BOTH_CLEARED') {
         inter.timer -= dt;
         if (inter.timer <= 0) {
-          inter.timer = 12 + Math.random() * 8;
+          inter.timer = 14 + Math.random() * 6;
           inter.northSouth = inter.northSouth === 'GREEN' ? 'RED' : 'GREEN';
           inter.eastWest = inter.northSouth === 'GREEN' ? 'RED' : 'GREEN';
           inter.modeLabel = 'NORMAL CYCLE';
+          inter.simulatedPhase = 'NORMAL CYCLE';
         }
       }
     });
 
-    // Update Ambulances
     const ambA = this.ambulances.find(a => a.id === 'AMB-104');
     const ambB = this.ambulances.find(a => a.id === 'AMB-208');
+    const ambC = this.ambulances.find(a => a.id === 'AMB-312');
 
-    // Move ambulances along paths
+    // 2. Animate Ambulances & Live Telemetry
     this.ambulances.forEach(amb => {
-      let speedFactor = 0.035;
+      let speedFactor = 0.034;
 
-      // In conflict resolution stage, AMB-B holds/decelerates while AMB-A clears
-      if (amb.id === 'AMB-208' && this.conflictState.stage === 'PRIORITY_A' && amb.progress > 0.45 && amb.progress < 0.52) {
-        speedFactor = 0.006;
+      // In conflict priority phase, adjust speeds realistically
+      if (amb.id === 'AMB-208' && this.conflictState.stage === 'PRIORITY_A' && amb.progress > 0.44 && amb.progress < 0.52) {
+        speedFactor = 0.008; // Holding / decelerating
+        amb.currentState = 'HOLDING FOR PRIORITY 01';
       } else if (amb.id === 'AMB-104' && this.conflictState.stage === 'PRIORITY_A') {
-        speedFactor = 0.048; // Accelerated priority clearance
+        speedFactor = 0.048; // Accelerating through green corridor
+        amb.currentState = 'CLEARING INTERSECTION (PRIORITY 01)';
       } else if (amb.id === 'AMB-208' && this.conflictState.stage === 'PRIORITY_B') {
-        speedFactor = 0.052; // Now B proceeds through
+        speedFactor = 0.052; // Secondary clearance proceeds
+        amb.currentState = 'CLEARING INTERSECTION (PRIORITY 02)';
+      } else if (amb.progress >= 0.54 && amb.progress < 0.85) {
+        amb.currentState = 'IN TRANSIT (CORRIDOR ACTIVE)';
+      } else if (amb.progress >= 0.85) {
+        amb.currentState = 'APPROACHING ER BAY';
+      } else {
+        amb.currentState = 'APPROACHING INTERSECTION';
       }
 
       amb.progress += speedFactor * dt;
@@ -801,42 +1054,61 @@ class SimulationEngine {
         amb.progress = 0.98;
       }
 
-      // Update current position
+      // Position along route
       const pos = this.getPointOnPath(amb.path, amb.progress);
       amb.currentX = pos.x;
       amb.currentY = pos.y;
       amb.heading = pos.angle;
 
-      // Distance and ETA to conflict junction (Intersection 4 is at x: 450, y: 350)
-      const targetDist = Math.hypot(450 - pos.x, 350 - pos.y);
-      amb.distanceToConflict = Math.round(targetDist * 1.5);
-      
-      // Calculate realistic ETA to intersection
+      // Dynamic Live Telemetry updates (Speed 41 -> 42 -> 43 km/h with subtle micro-fluctuation)
+      const baseSpeed = amb.id === 'AMB-104' ? 42 : amb.id === 'AMB-208' ? 40 : 48;
+      const speedJitter = Math.sin(performance.now() / 800 + (amb.id === 'AMB-104' ? 0 : 2)) * 1.8;
+      amb.speed = Math.round((baseSpeed + speedJitter) * 10) / 10;
+
+      // Distance to conflict junction INT-04 (x: 450, y: 350)
+      const distPx = Math.hypot(450 - pos.x, 350 - pos.y);
+      if (amb.progress < 0.50) {
+        // Counting down from 555m -> 510m -> 462m -> ...
+        const remainingFraction = Math.max(0, (0.50 - amb.progress) / 0.38);
+        amb.distanceToConflict = Math.max(0, Math.round(555 * remainingFraction));
+      } else {
+        amb.distanceToConflict = 0;
+      }
+
+      // Intersection ETA countdown (43s -> 39s -> 34s -> ...)
       if (amb.id === 'AMB-104') {
-        amb.currentIntersectionEta = Math.max(2, Math.round(43 * (1 - Math.min(1, amb.progress / 0.5))));
+        if (amb.progress < 0.50) {
+          const etaFrac = Math.max(0, (0.50 - amb.progress) / 0.38);
+          amb.currentIntersectionEta = Math.max(1, Math.round(43 * etaFrac));
+        } else {
+          amb.currentIntersectionEta = 0;
+        }
       } else if (amb.id === 'AMB-208') {
-        amb.currentIntersectionEta = Math.max(4, Math.round(50 * (1 - Math.min(1, amb.progress / 0.5))));
+        if (amb.progress < 0.50) {
+          const etaFrac = Math.max(0, (0.50 - amb.progress) / 0.40);
+          amb.currentIntersectionEta = Math.max(2, Math.round(50 * etaFrac));
+        } else {
+          amb.currentIntersectionEta = 0;
+        }
       } else {
         amb.currentIntersectionEta = Math.max(5, Math.round(amb.distanceToConflict / (amb.speed / 3.6)));
       }
     });
 
-    // Update Civilian Cars & Yielding Behavior
+    // 3. Civilian cars yielding behavior
     this.civilianVehicles.forEach(car => {
       let isYielding = false;
-
       this.ambulances.forEach(amb => {
         if (amb.currentX && amb.currentY) {
           const dist = Math.hypot(car.x - amb.currentX, car.y - amb.currentY);
-          if (dist < 60) {
+          if (dist < 65) {
             isYielding = true;
           }
         }
       });
 
       car.yielding = isYielding;
-      const currentSpeed = isYielding ? car.speed * 0.2 : car.speed;
-
+      const currentSpeed = isYielding ? car.speed * 0.15 : car.speed;
       car.t += currentSpeed * dt * 60;
       if (car.t > 1) car.t = 0;
 
@@ -844,10 +1116,10 @@ class SimulationEngine {
       car.y = car.road.start.y + (car.road.end.y - car.road.start.y) * car.t;
     });
 
-    // MAIN CONFLICT ENGINE CHECK
+    // 4. MAIN CONFLICT ENGINE EVALUATION
     this.evaluateIntersectionConflict(ambA, ambB, dt);
 
-    // Update Scenario Script if running
+    // 5. Automated Scenario Script if active
     if (this.scenarioRunning) {
       this.updateScenarioScript(dt);
     }
@@ -855,129 +1127,160 @@ class SimulationEngine {
 
   evaluateIntersectionConflict(ambA, ambB, dt) {
     if (!ambA || !ambB) return;
-
     const int4 = this.intersections.find(i => i.id === 'int-4');
 
-    const aApproaching = ambA.progress >= 0.30 && ambA.progress < 0.58;
-    const bApproaching = ambB.progress >= 0.28 && ambB.progress < 0.58;
+    const aApproaching = ambA.progress >= 0.28 && ambA.progress < 0.56;
+    const bApproaching = ambB.progress >= 0.25 && ambB.progress < 0.56;
 
+    // STEP 1: CONFLICT DETECTED
     if (aApproaching && bApproaching && this.conflictState.stage === 'IDLE') {
-      // 1. CONFLICT DETECTED
       this.conflictState.detected = true;
-      this.conflictState.stage = 'DETECTED';
+      this.conflictState.stage = 'DETECTING';
       this.conflictState.ambA = ambA;
       this.conflictState.ambB = ambB;
       this.conflictState.bannerText = 'MULTIPLE EMERGENCY CONFLICT DETECTED';
       this.conflictState.bannerSubtext = 'AMB-104 (North) & AMB-208 (South) converging on Intersection 4 simultaneously.';
       this.conflictState.bannerType = 'alert';
+      this.conflictState.signalPhase = 'EMERGENCY PRIORITY REQUESTED';
+
+      this.systemIntelligence.conflictAnalysis.active = true;
+      this.systemIntelligence.conflictAnalysis.done = true;
+      this.networkStatus.activeConflicts = 1;
 
       int4.hasConflict = true;
       int4.state = 'EMERGENCY_REQUEST';
-      int4.modeLabel = 'EMERGENCY PRIORITY REQUEST';
+      int4.modeLabel = 'EMERGENCY PRIORITY REQUESTED';
+      int4.simulatedPhase = 'EMERGENCY PRIORITY REQUESTED';
       int4.northSouth = 'YELLOW';
       int4.eastWest = 'RED';
 
-      this.logEvent('alert', 'MULTI-AMBULANCE CONFLICT DETECTED: AMB-104 & AMB-208 approaching Intersection 4');
+      this.logEvent('alert', '13:51:23 Intersection conflict detected: AMB-104 & AMB-208 converging on INT-04');
       if (window.soundEngine) window.soundEngine.playConflictAlert();
 
-      // 2. AI RESOLUTION & DECISION MATRIX
+      // STEP 2: PREDICTING & ANALYZING CONFLICT
       setTimeout(() => {
-        if (this.conflictState.stage === 'DETECTED') {
-          this.conflictState.stage = 'RESOLVING';
-          this.conflictState.bannerText = 'AI-ASSISTED CONFLICT RESOLUTION';
-          this.conflictState.bannerSubtext = 'Evaluating ETA, distance, and intersection occupancy. Resolving traffic coordination priority...';
+        if (this.conflictState.stage === 'DETECTING') {
+          this.conflictState.stage = 'ANALYZING';
+          this.conflictState.bannerText = 'ANALYZING CONFLICT & ETAS';
+          this.conflictState.bannerSubtext = 'Evaluating ETA (43s vs 50s), distance (555m), approach vectors, and intersection occupancy...';
           this.conflictState.bannerType = 'warning';
-          this.logEvent('info', 'AI-ASSISTED SEQUENCE GENERATED: Transparent scoring model evaluated.');
+          this.conflictState.signalPhase = 'SIGNAL PREPARING';
+          int4.modeLabel = 'SIGNAL PREPARING';
+          int4.simulatedPhase = 'SIGNAL PREPARING';
+
+          this.logEvent('info', '13:51:24 AI-assisted sequence generated: ETA differential 7 sec evaluated.');
           this.notify();
 
-          // 3. PRIORITY 01 TO AMBULANCE A
+          // STEP 3: GENERATING SAFE SEQUENCE & PRIORITY 01 TO AMB-104
           setTimeout(() => {
-            if (this.conflictState.stage === 'RESOLVING') {
+            if (this.conflictState.stage === 'ANALYZING') {
               this.conflictState.stage = 'PRIORITY_A';
-              this.conflictState.bannerText = 'AMB-104 — PRIORITY 01';
-              this.conflictState.bannerSubtext = 'Reason: AMB-104 reaches conflict zone earlier (43s vs 50s). Simulated emergency corridor active.';
+              this.conflictState.bannerText = 'PRIORITY 01: AMB-104';
+              this.conflictState.bannerSubtext = 'Reason: AMB-104 reaches conflict zone 7s earlier. Simulated emergency corridor active for North link.';
               this.conflictState.bannerType = 'success';
+              this.conflictState.signalPhase = 'GREEN CORRIDOR ACTIVE';
+              this.conflictState.corridorStatusA = 'ACTIVE';
+
+              this.systemIntelligence.sequence.active = true;
+              this.systemIntelligence.sequence.done = true;
+              this.systemIntelligence.corridor.active = true;
+              this.systemIntelligence.corridor.done = true;
+
               this.conflictState.decision = {
                 primary: 'AMB-104',
                 secondary: 'AMB-208',
-                order: 'AMB-104 → AMB-208',
+                order: '01 → AMB-104 | 02 → AMB-208',
                 confidence: '96%',
-                reason: 'AMB-104 reaches the conflict zone earlier. Sequential clearance minimizes intersection occupancy conflict.',
+                confidenceLabel: 'SIMULATION ESTIMATE',
+                reason: 'Sequential clearance minimizes simultaneous intersection occupancy and eliminates deadlock risk.',
                 factors: {
                   etaA: '43 sec',
                   etaB: '50 sec',
-                  severityA: 'Critical (Verified)',
-                  severityB: 'Critical (Verified)',
-                  conflictProb: 'HIGH',
-                  trafficDensity: 'High (North Sector)'
+                  severityA: 'Critical (Acute STEMI)',
+                  severityB: 'Critical (Polytrauma)',
+                  conflictRisk: 'HIGH',
+                  trafficDensity: 'High on Anna Salai link'
                 }
               };
 
               int4.state = 'PRIORITY_A';
-              int4.modeLabel = 'SIMULATED EMERGENCY CORRIDOR';
+              int4.modeLabel = 'GREEN CORRIDOR ACTIVE (AMB-104)';
+              int4.simulatedPhase = 'GREEN CORRIDOR ACTIVE';
               int4.northSouth = 'GREEN';
               int4.eastWest = 'RED';
               int4.priorityVehicle = 'AMB-104';
 
-              this.logEvent('priority', 'AMB-104 PRIORITY 01 ACTIVATED: Simulated green wave active for North corridor.');
+              this.logEvent('priority', '13:51:25 AMB-104 priority activated: Simulated green wave active for North corridor.');
+              this.logEvent('info', '13:51:29 Emergency corridor active: North-South green wave locked.');
               if (window.soundEngine) window.soundEngine.playPriorityChime();
               this.notify();
             }
-          }, 2000);
+          }, 1800);
         }
-      }, 1500);
+      }, 1400);
     }
 
-    // 4. AMBULANCE A CLEARED INTERSECTION
-    if (this.conflictState.stage === 'PRIORITY_A' && ambA.progress >= 0.54) {
+    // STEP 4: AMB-104 INTERSECTION CLEARED
+    if (this.conflictState.stage === 'PRIORITY_A' && ambA.progress >= 0.53) {
       this.conflictState.stage = 'A_CLEARED';
-      this.conflictState.bannerText = 'AMB-104 — INTERSECTION CLEARED';
-      this.conflictState.bannerSubtext = 'AMB-104 safely cleared conflict junction. Engaging Priority 02 for AMB-208...';
+      this.conflictState.bannerText = 'INTERSECTION CLEARED — AMB-104';
+      this.conflictState.bannerSubtext = 'AMB-104 safely passed conflict junction. Engaging Priority 02 for AMB-208...';
       this.conflictState.bannerType = 'info';
+      this.conflictState.signalPhase = 'CORRIDOR CLEARED (PHASE TRANSITION)';
+      this.conflictState.corridorStatusA = 'CLEARED';
 
       int4.modeLabel = 'CORRIDOR CLEARED';
+      int4.simulatedPhase = 'CORRIDOR CLEARED';
       int4.northSouth = 'YELLOW';
       int4.eastWest = 'RED';
 
-      this.logEvent('success', 'AMB-104 INTERSECTION CLEARED: Transitioning signal phase to secondary corridor.');
+      this.logEvent('success', '13:51:34 AMB-104 intersection cleared: Phase transition initiated.');
       if (window.soundEngine) window.soundEngine.playClearChime();
       this.notify();
 
-      // 5. SWITCH TO PRIORITY 02 (AMB-208)
+      // STEP 5: SWITCH TO PRIORITY 02 (AMB-208)
       setTimeout(() => {
         if (this.conflictState.stage === 'A_CLEARED') {
           this.conflictState.stage = 'PRIORITY_B';
-          this.conflictState.bannerText = 'AMB-208 — PRIORITY 02';
-          this.conflictState.bannerSubtext = 'South corridor green wave active. AMB-208 clearing intersection...';
+          this.conflictState.bannerText = 'PRIORITY 02: AMB-208';
+          this.conflictState.bannerSubtext = 'South corridor emergency green wave active. AMB-208 clearing intersection...';
           this.conflictState.bannerType = 'success';
+          this.conflictState.signalPhase = 'GREEN CORRIDOR ACTIVE';
+          this.conflictState.corridorStatusB = 'ACTIVE';
 
           int4.state = 'PRIORITY_B';
-          int4.modeLabel = 'SIMULATED EMERGENCY CORRIDOR';
+          int4.modeLabel = 'GREEN CORRIDOR ACTIVE (AMB-208)';
+          int4.simulatedPhase = 'GREEN CORRIDOR ACTIVE';
           int4.northSouth = 'GREEN';
           int4.eastWest = 'RED';
           int4.priorityVehicle = 'AMB-208';
 
-          this.logEvent('priority', 'AMB-208 PRIORITY 02 ACTIVATED: South corridor clearance engaged.');
+          this.logEvent('priority', '13:51:35 AMB-208 priority activated: South corridor clearance engaged.');
           if (window.soundEngine) window.soundEngine.playPriorityChime();
           this.notify();
         }
-      }, 1500);
+      }, 1400);
     }
 
-    // 6. AMBULANCE B CLEARED INTERSECTION
-    if (this.conflictState.stage === 'PRIORITY_B' && ambB.progress >= 0.54) {
+    // STEP 6: AMB-208 INTERSECTION CLEARED & CONFLICT RESOLVED
+    if (this.conflictState.stage === 'PRIORITY_B' && ambB.progress >= 0.53) {
       this.conflictState.stage = 'BOTH_CLEARED';
       this.conflictState.bannerText = 'CONFLICT RESOLVED';
-      this.conflictState.bannerSubtext = 'Both emergency routes coordinated successfully. Returning to normal traffic cycle.';
+      this.conflictState.bannerSubtext = 'Both emergency vehicles coordinated sequentially without deadlock. Returning to normal municipal cycle.';
       this.conflictState.bannerType = 'success';
+      this.conflictState.signalPhase = 'NORMAL CYCLE RESTORED';
+      this.conflictState.corridorStatusB = 'CLEARED';
+
+      this.networkStatus.activeConflicts = 0;
 
       int4.state = 'ALL_CLEAR';
-      int4.modeLabel = 'RETURNING TO NORMAL CYCLE';
+      int4.modeLabel = 'NORMAL CYCLE RESTORED';
+      int4.simulatedPhase = 'NORMAL CYCLE RESTORED';
       int4.hasConflict = false;
       int4.priorityVehicle = null;
 
-      this.logEvent('success', 'AMB-208 INTERSECTION CLEARED: Secondary emergency vehicle cleared without complete stop.');
-      this.logEvent('success', 'CONFLICT RESOLVED: Both emergency routes coordinated successfully.');
+      this.logEvent('success', '13:51:41 AMB-208 intersection cleared: Secondary emergency vehicle cleared without complete stop.');
+      this.logEvent('success', '13:51:43 Conflict resolved: Sequential clearance completed (Simulated delay avoided: 2m 18s).');
       if (window.soundEngine) window.soundEngine.playClearChime();
 
       // Return traffic signal to normal cycle
@@ -985,8 +1288,10 @@ class SimulationEngine {
         if (this.conflictState.stage === 'BOTH_CLEARED') {
           int4.state = 'NORMAL_CYCLE';
           int4.modeLabel = 'NORMAL CYCLE';
+          int4.simulatedPhase = 'NORMAL CYCLE';
           int4.northSouth = 'GREEN';
           int4.eastWest = 'RED';
+          this.conflictState.signalPhase = 'NORMAL CYCLE';
           this.notify();
         }
       }, 2500);
@@ -995,15 +1300,21 @@ class SimulationEngine {
     }
   }
 
-  // AI Route Application
+  // AI Alternate Route Application
   applyAiRoute() {
     this.aiInsight.applied = true;
+    this.systemIntelligence.routeAnalysis.active = true;
+    this.systemIntelligence.routeAnalysis.done = true;
+
     const ambA = this.ambulances.find(a => a.id === 'AMB-104');
     if (ambA) {
-      ambA.routeStatus = 'ALTERNATE ROUTE APPLIED';
-      ambA.eta = '05:24'; // -1m 18s
-      this.liveMetrics.timeSavedSec = 178; // Increased simulated savings
-      this.logEvent('info', 'SIMULATION ESTIMATE: Alternate corridor applied for AMB-104. Estimated delay avoided: 2m 18s.');
+      ambA.routeStatus = 'ALTERNATE ROUTE B APPLIED';
+      ambA.eta = '05:24';
+      ambA.distance = '3.5 km';
+      this.liveMetrics.timeSavedSec = 178;
+      this.liveMetrics.delayAvoided = '2m 18s';
+      this.liveMetrics.optimizedEta = '05:24';
+      this.logEvent('info', '13:52:05 SIMULATION ESTIMATE: Alternate Route B applied for AMB-104. Estimated delay avoided: 2m 18s.');
       this.notify();
     }
   }
@@ -1012,8 +1323,8 @@ class SimulationEngine {
   triggerAmbulanceA() {
     const ambA = this.ambulances.find(a => a.id === 'AMB-104');
     if (ambA) {
-      ambA.progress = 0.1;
-      this.logEvent('info', 'AMB-104 dispatched from Anna Nagar West (Simulated).');
+      ambA.progress = 0.12;
+      this.logEvent('info', '13:50:40 AMB-104 dispatched from Anna Nagar West (Simulated Emergency).');
       this.notify();
     }
   }
@@ -1021,8 +1332,8 @@ class SimulationEngine {
   triggerAmbulanceB() {
     const ambB = this.ambulances.find(a => a.id === 'AMB-208');
     if (ambB) {
-      ambB.progress = 0.1;
-      this.logEvent('info', 'AMB-208 dispatched from T. Nagar Panagal Park (Simulated).');
+      ambB.progress = 0.10;
+      this.logEvent('info', '13:50:42 AMB-208 dispatched from T. Nagar Panagal Park (Simulated Emergency).');
       this.notify();
     }
   }
@@ -1032,107 +1343,140 @@ class SimulationEngine {
     const ambA = this.ambulances.find(a => a.id === 'AMB-104');
     const ambB = this.ambulances.find(a => a.id === 'AMB-208');
     if (ambA && ambB) {
-      ambA.progress = 0.25;
-      ambB.progress = 0.22;
-      this.logEvent('alert', 'CRITICAL MULTI-AMBULANCE EVENT: Simultaneous dispatch simulated.');
+      ambA.progress = 0.22;
+      ambB.progress = 0.19;
+      this.logEvent('alert', '13:51:10 CRITICAL MULTI-AMBULANCE EVENT: Simultaneous dispatches active.');
       this.notify();
     }
   }
 
   createTrafficJam() {
     this.congestionZones.forEach(z => z.active = true);
-    this.logEvent('warning', 'SIMULATION: Peak congestion surge injected along Anna Salai link (+2.4 min delay).');
+    this.logEvent('warning', '13:50:50 SIMULATION: Peak congestion surge injected along Anna Salai link (+2.4 min delay).');
     this.notify();
   }
 
   clearTraffic() {
     this.congestionZones.forEach(z => z.active = false);
-    this.logEvent('info', 'SIMULATION: Traffic congestion cleared. Free flow transit restored.');
+    this.logEvent('info', '13:50:55 SIMULATION: Traffic congestion cleared. Free-flow transit active.');
     this.notify();
   }
 
-  // AUTOMATED HERO SCENARIO (12 Sequential Steps)
+  // AUTOMATED HERO SCENARIO DEMO (16 Sequential Steps)
   runEmergencyScenario() {
     this.reset();
     this.scenarioRunning = true;
     this.scenarioStep = 1;
     this.scenarioTimer = 0;
-    this.speedMultiplier = 1.2;
+    this.scenarioCompleteModal = false;
+    this.speedMultiplier = 1.25;
 
     const ambA = this.ambulances.find(a => a.id === 'AMB-104');
     const ambB = this.ambulances.find(a => a.id === 'AMB-208');
 
     if (ambA && ambB) {
-      ambA.progress = 0.15;
-      ambB.progress = 0.12;
+      ambA.progress = 0.14;
+      ambB.progress = 0.11;
     }
 
-    this.logEvent('alert', 'CRITICAL MULTI-AMBULANCE EVENT INITIALIZED: Scenario demo executing.');
+    this.logEvent('system', '13:51:18 Step 1: Start normal traffic grid simulation.');
     this.notify();
   }
 
   updateScenarioScript(dt) {
     this.scenarioTimer += dt;
 
-    // Step 1: Initial Movement
-    if (this.scenarioStep === 1 && this.scenarioTimer > 2.0) {
+    // Step 1 -> 2: Ambulance A Emergency Appears
+    if (this.scenarioStep === 1 && this.scenarioTimer > 1.8) {
       this.scenarioStep = 2;
-      this.logEvent('info', 'STEP 2: Traffic congestion predicted along primary arterial route.');
+      this.logEvent('alert', '13:51:20 Step 2: Ambulance A (AMB-104) emergency appears — Cardiac Critical.');
       this.notify();
     }
-    // Step 3: Conflict Convergence Detected
-    else if (this.scenarioStep === 2 && this.scenarioTimer > 4.5) {
+    // Step 2 -> 3: Ambulance B Emergency Appears
+    else if (this.scenarioStep === 2 && this.scenarioTimer > 3.6) {
       this.scenarioStep = 3;
-      this.logEvent('alert', 'STEP 3: Multiple emergency vehicles converging on Intersection 4.');
+      this.logEvent('alert', '13:51:21 Step 3: Ambulance B (AMB-208) emergency appears — Severe Polytrauma.');
       this.notify();
     }
-    // Step 4: AI Decision Arbitration
-    else if (this.scenarioStep === 3 && this.scenarioTimer > 7.0) {
+    // Step 3 -> 4: Congestion Appears
+    else if (this.scenarioStep === 3 && this.scenarioTimer > 5.4) {
       this.scenarioStep = 4;
-      this.logEvent('info', 'STEP 4: AI-assisted conflict resolution matrix computed (AMB-104 → Priority 01).');
+      this.congestionZones.forEach(z => z.active = true);
+      this.logEvent('warning', '13:51:22 Step 4: Congestion appears along primary arterial links (+2.4 min).');
       this.notify();
     }
-    // Step 5: Green Corridor Locked
-    else if (this.scenarioStep === 4 && this.scenarioTimer > 9.5) {
+    // Step 4 -> 5: Both Ambulances Approach Same Intersection
+    else if (this.scenarioStep === 4 && this.scenarioTimer > 7.2) {
       this.scenarioStep = 5;
-      this.logEvent('priority', 'STEP 5: Simulated emergency corridor locked for AMB-104.');
+      this.logEvent('alert', '13:51:23 Step 5: Both ambulances approach Intersection 4 simultaneously.');
       this.notify();
     }
-    // Step 6: AMB-A Crossing
-    else if (this.scenarioStep === 5 && this.scenarioTimer > 12.0) {
+    // Step 5 -> 6: Conflict Warning Appears
+    else if (this.scenarioStep === 5 && this.scenarioTimer > 9.0) {
       this.scenarioStep = 6;
+      this.logEvent('alert', '13:51:23 Step 6: ⚠ MULTIPLE EMERGENCY CONFLICT DETECTED at INT-04.');
       this.notify();
     }
-    // Step 7: AMB-A Cleared
-    else if (this.scenarioStep === 6 && this.scenarioTimer > 14.5) {
+    // Step 6 -> 7: Conflict Engine Analyzes Both
+    else if (this.scenarioStep === 6 && this.scenarioTimer > 10.8) {
       this.scenarioStep = 7;
+      this.logEvent('info', '13:51:24 Step 7: Conflict Engine analyzes ETA, approach vectors, and occupancy.');
       this.notify();
     }
-    // Step 8: Priority Transfer to AMB-B
-    else if (this.scenarioStep === 7 && this.scenarioTimer > 17.0) {
+    // Step 7 -> 8: Priority Sequence is Generated
+    else if (this.scenarioStep === 7 && this.scenarioTimer > 12.6) {
       this.scenarioStep = 8;
+      this.logEvent('info', '13:51:24 Step 8: Priority sequence generated: 01 → AMB-104 | 02 → AMB-208.');
       this.notify();
     }
-    // Step 9: AMB-B Crossing
-    else if (this.scenarioStep === 8 && this.scenarioTimer > 19.5) {
+    // Step 8 -> 9: Signal Simulation Changes
+    else if (this.scenarioStep === 8 && this.scenarioTimer > 14.4) {
       this.scenarioStep = 9;
+      this.logEvent('priority', '13:51:25 Step 9: Signal simulation changes — Simulated emergency corridor active.');
       this.notify();
     }
-    // Step 10: Both Cleared
-    else if (this.scenarioStep === 9 && this.scenarioTimer > 22.0) {
+    // Step 9 -> 10: Ambulance A Passes
+    else if (this.scenarioStep === 9 && this.scenarioTimer > 16.5) {
       this.scenarioStep = 10;
+      this.logEvent('success', '13:51:34 Step 10: Ambulance A (AMB-104) passes INT-04 without stopping.');
       this.notify();
     }
-    // Step 11: Normal Signal Resumed
-    else if (this.scenarioStep === 10 && this.scenarioTimer > 24.5) {
+    // Step 10 -> 11: Ambulance B Receives Priority
+    else if (this.scenarioStep === 10 && this.scenarioTimer > 18.5) {
       this.scenarioStep = 11;
+      this.logEvent('priority', '13:51:35 Step 11: Ambulance B (AMB-208) receives secondary green wave priority.');
       this.notify();
     }
-    // Step 12: Scenario Complete
-    else if (this.scenarioStep === 11 && this.scenarioTimer > 27.0) {
+    // Step 11 -> 12: Ambulance B Passes
+    else if (this.scenarioStep === 11 && this.scenarioTimer > 20.8) {
       this.scenarioStep = 12;
+      this.logEvent('success', '13:51:41 Step 12: Ambulance B (AMB-208) passes INT-04 safely.');
+      this.notify();
+    }
+    // Step 12 -> 13: Both Routes Clear
+    else if (this.scenarioStep === 12 && this.scenarioTimer > 22.8) {
+      this.scenarioStep = 13;
+      this.logEvent('success', '13:51:43 Step 13: Both emergency routes clear conflict junction.');
+      this.notify();
+    }
+    // Step 13 -> 14: Hospital ETAs Update
+    else if (this.scenarioStep === 13 && this.scenarioTimer > 24.6) {
+      this.scenarioStep = 14;
+      this.logEvent('info', '13:51:45 Step 14: Hospital ETAs updated — Trauma bays prepped.');
+      this.notify();
+    }
+    // Step 14 -> 15: Analytics Update
+    else if (this.scenarioStep === 14 && this.scenarioTimer > 26.2) {
+      this.scenarioStep = 15;
+      this.logEvent('info', '13:51:48 Step 15: Analytics and corridor performance metrics updated.');
+      this.notify();
+    }
+    // Step 15 -> 16: Final Result Modal Appears
+    else if (this.scenarioStep === 15 && this.scenarioTimer > 28.0) {
+      this.scenarioStep = 16;
       this.scenarioRunning = false;
-      this.logEvent('success', 'STEP 12: Scenario demonstration completed successfully (Simulation Estimate: 2m 18s avoided).');
+      this.scenarioCompleteModal = true;
+      this.logEvent('success', '13:51:50 Step 16: SIMULATION COMPLETE — Multi-ambulance conflict resolved successfully.');
       this.notify();
     }
   }
@@ -1154,10 +1498,10 @@ window.simulationEngine = new SimulationEngine();
 /* ===== END FILE: simulation.js ===== */
 
 /* ===== START FILE: components.js ===== */
-// AmbuClear UI Components (React 18)
+// resQClear UI Components & Enterprise SVG Icon Library (React 18)
 // [React hooks initialized at top level]
 
-// --- ICONS (Clean, scalable SVG Lucide-style icons) ---
+// --- ICONS (Scalable SVG Icons) ---
 const Icons = {
   Ambulance: ({ className = "w-5 h-5", ...props }) => (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -1179,6 +1523,17 @@ const Icons = {
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
       <line x1="12" y1="8" x2="12" y2="12" />
       <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+  ),
+  ShieldCheck: ({ className = "w-5 h-5", ...props }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <polyline points="9 12 11 14 15 10" />
+    </svg>
+  ),
+  Shield: ({ className = "w-5 h-5", ...props }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
     </svg>
   ),
   Zap: ({ className = "w-5 h-5", ...props }) => (
@@ -1322,15 +1677,56 @@ const Icons = {
       <polyline points="2 17 12 22 22 17" />
       <polyline points="2 12 12 17 22 12" />
     </svg>
+  ),
+  Lock: ({ className = "w-5 h-5", ...props }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  ),
+  X: ({ className = "w-5 h-5", ...props }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  ),
+  Info: ({ className = "w-5 h-5", ...props }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12.01" y2="8" />
+    </svg>
+  ),
+  HelpCircle: ({ className = "w-5 h-5", ...props }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  ),
+  Crosshair: ({ className = "w-5 h-5", ...props }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="22" y1="12" x2="18" y2="12" />
+      <line x1="6" y1="12" x2="2" y2="12" />
+      <line x1="12" y1="6" x2="12" y2="2" />
+      <line x1="12" y1="22" x2="12" y2="18" />
+    </svg>
+  ),
+  TrendingUp: ({ className = "w-5 h-5", ...props }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+      <polyline points="17 6 23 6 23 12" />
+    </svg>
   )
 };
 
 // --- LOGO COMPONENT ---
 function ResQClearLogo({ size = "default" }) {
-  const isSmall = size === "sm";
+  const isSmall = size === "sm" || size === "small";
   return (
-    <div className="flex items-center space-x-2.5 group cursor-pointer">
-      <div className={`relative flex items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 p-0.5 shadow-lg shadow-emerald-500/20`}>
+    <div className="flex items-center space-x-2.5 select-none">
+      <div className="relative flex items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 p-0.5 shadow-md shadow-emerald-500/20">
         <div className={`bg-slate-950 rounded-[10px] ${isSmall ? 'p-1.5' : 'p-2'} flex items-center justify-center`}>
           <div className="relative">
             <Icons.Ambulance className={`${isSmall ? 'w-4 h-4' : 'w-5 h-5'} text-emerald-400`} />
@@ -1344,13 +1740,13 @@ function ResQClearLogo({ size = "default" }) {
           <span className={`font-extrabold tracking-tight text-white ${isSmall ? 'text-base' : 'text-xl'}`}>
             resQ<span className="text-emerald-400">Clear</span>
           </span>
-          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-            AI-V2X
+          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold uppercase">
+            PROTOTYPE
           </span>
         </div>
         {!isSmall && (
-          <p className="text-[10px] text-slate-400 tracking-wider uppercase font-mono">
-            Emergency Traffic Coordination
+          <p className="text-[9px] text-slate-400 tracking-wider uppercase font-mono font-medium">
+            EMERGENCY TRAFFIC COORDINATION
           </p>
         )}
       </div>
@@ -1358,20 +1754,21 @@ function ResQClearLogo({ size = "default" }) {
   );
 }
 
-// Export for app.js
+// Export for app bundle
 window.Icons = Icons;
 window.ResQClearLogo = ResQClearLogo;
-window.AmbuClearLogo = ResQClearLogo; // alias for backwards compatibility
+window.AmbuClearLogo = ResQClearLogo;
 
 /* ===== END FILE: components.js ===== */
 
 /* ===== START FILE: LiveMap.js ===== */
-// resQClear Interactive City Digital Twin Simulation & Future Infrastructure Modal
+// resQClear Interactive City Digital Twin Simulation Map (Hero Canvas Engine)
+// 60 FPS Tactical Grid, Emergency Corridors, Intersections & Live Telemetry Overlay
 // [React hooks initialized at top level]
 
 function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
   const canvasRef = useRef(null);
-  const [mapMode, setMapMode] = useState('TACTICAL'); // 'TACTICAL' (Digital Twin Simulation - Active)
+  const [mapMode, setMapMode] = useState('TACTICAL');
   const [showRealWorldLockedModal, setShowRealWorldLockedModal] = useState(false);
   const [cctvExpanded, setCctvExpanded] = useState(false);
   const [showLegend, setShowLegend] = useState(true);
@@ -1390,7 +1787,7 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
   const ambB = ambulances.find(a => a.id === 'AMB-208') || {};
   const int4 = intersections.find(i => i.id === 'int-4') || {};
 
-  // --- 1. TACTICAL CANVAS DIGITAL TWIN RENDERER (60 FPS) ---
+  // --- 60 FPS TACTICAL DIGITAL TWIN RENDERER ---
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -1400,54 +1797,69 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
 
     ctx.clearRect(0, 0, width, height);
 
-    // Dark Urban Base Map Grid
-    ctx.fillStyle = '#090d16';
+    // Dark Operations Center Base Map Grid
+    ctx.fillStyle = '#060a12';
     ctx.fillRect(0, 0, width, height);
 
-    // Grid lines
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+    // Subtle Grid lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.025)';
     ctx.lineWidth = 1;
-    for (let x = 0; x < width; x += 40) {
+    for (let x = 0; x < width; x += 36) {
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, height);
       ctx.stroke();
     }
-    for (let y = 0; y < height; y += 40) {
+    for (let y = 0; y < height; y += 36) {
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(width, y);
       ctx.stroke();
     }
 
-    // Sector Outlines
-    ctx.strokeStyle = 'rgba(148, 163, 184, 0.07)';
-    ctx.strokeRect(40, 40, 360, 240); // Sector A - Anna Nagar
-    ctx.strokeRect(40, 420, 360, 220); // Sector B - T. Nagar
-    ctx.strokeRect(520, 40, 380, 240); // Sector C - Central Medical District
-    ctx.strokeRect(520, 420, 380, 220); // Sector D - Apollo Emergency Zone
+    // Urban City Blocks / Zones
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.4)';
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.06)';
+    ctx.lineWidth = 1;
+    
+    // Sector A - Anna Nagar North
+    ctx.fillRect(40, 40, 360, 240);
+    ctx.strokeRect(40, 40, 360, 240);
 
-    // Sector Labels
-    ctx.font = '10px "JetBrains Mono", monospace';
-    ctx.fillStyle = 'rgba(148, 163, 184, 0.35)';
+    // Sector B - T. Nagar South
+    ctx.fillRect(40, 420, 360, 220);
+    ctx.strokeRect(40, 420, 360, 220);
+
+    // Sector C - Central Medical District
+    ctx.fillRect(520, 40, 370, 240);
+    ctx.strokeRect(520, 40, 370, 240);
+
+    // Sector D - Apollo / Greams Zone
+    ctx.fillRect(520, 420, 370, 220);
+    ctx.strokeRect(520, 420, 370, 220);
+
+    // Sector Identifier Labels
+    ctx.font = '9px "JetBrains Mono", monospace';
+    ctx.fillStyle = 'rgba(148, 163, 184, 0.3)';
     ctx.fillText('SECTOR 01: ANNA NAGAR NORTH', 50, 60);
     ctx.fillText('SECTOR 02: T. NAGAR SOUTH', 50, 440);
-    ctx.fillText('SECTOR 03: GOVT MEDICAL DISTRICT', 530, 60);
+    ctx.fillText('SECTOR 03: GOVT MEDICAL ZONE', 530, 60);
     ctx.fillText('SECTOR 04: GREAMS ROAD / APOLLO ZONE', 530, 440);
 
-    // Road Network
+    // Major Arterial Roads
     const roads = [
-      { x1: 40, y1: 160, x2: 880, y2: 160, name: 'Poonamallee High Road', width: 36 },
+      { x1: 40, y1: 160, x2: 880, y2: 160, name: 'Poonamallee High Road', width: 34 },
       { x1: 40, y1: 350, x2: 880, y2: 350, name: 'Anna Salai Express Arterial', width: 44, primary: true },
-      { x1: 40, y1: 540, x2: 880, y2: 540, name: 'Grand Southern Trunk (GST)', width: 36 },
-      { x1: 280, y1: 40, x2: 280, y2: 660, name: '1st Avenue Cross Corridor', width: 34 },
-      { x1: 450, y1: 40, x2: 450, y2: 660, name: 'EVR Periyar Central Spine', width: 42, primary: true },
-      { x1: 620, y1: 40, x2: 620, y2: 660, name: 'Hospital Access Highway', width: 34 },
-      { x1: 780, y1: 120, x2: 780, y2: 580, name: 'Medical Center Access Link', width: 30 }
+      { x1: 40, y1: 540, x2: 880, y2: 540, name: 'Grand Southern Trunk (GST)', width: 34 },
+      { x1: 280, y1: 40, x2: 280, y2: 650, name: '1st Avenue Cross Corridor', width: 32 },
+      { x1: 450, y1: 40, x2: 450, y2: 650, name: 'EVR Periyar Central Spine', width: 42, primary: true },
+      { x1: 620, y1: 40, x2: 620, y2: 650, name: 'Hospital Access Highway', width: 32 },
+      { x1: 780, y1: 120, x2: 780, y2: 580, name: 'Medical Center Access Link', width: 28 }
     ];
 
     roads.forEach(r => {
-      ctx.strokeStyle = '#1e293b';
+      // Asphalt Base
+      ctx.strokeStyle = '#0f172a';
       ctx.lineWidth = r.width;
       ctx.lineCap = 'round';
       ctx.beginPath();
@@ -1455,7 +1867,8 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
       ctx.lineTo(r.x2, r.y2);
       ctx.stroke();
 
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+      // Road Borders
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(r.x1, r.y1 - r.width/2);
@@ -1464,9 +1877,10 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
       ctx.lineTo(r.x2, r.y2 + r.width/2);
       ctx.stroke();
 
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([8, 8]);
+      // Center Dotted Lane Markings
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([7, 7]);
       ctx.beginPath();
       ctx.moveTo(r.x1, r.y1);
       ctx.lineTo(r.x2, r.y2);
@@ -1474,12 +1888,13 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
       ctx.setLineDash([]);
     });
 
-    // Congestion Zones (RED: Critical, AMBER: Moderate)
+    // 4 Congestion Zones (RED: Critical, AMBER: Moderate)
     congestionZones.forEach(zone => {
       if (!zone.active) return;
-      const grad = ctx.createRadialGradient(zone.x, zone.y, 5, zone.x, zone.y, zone.radius);
-      grad.addColorStop(0, zone.severity === 'HIGH' ? 'rgba(239, 68, 68, 0.45)' : 'rgba(245, 158, 11, 0.35)');
-      grad.addColorStop(0.7, zone.severity === 'HIGH' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.1)');
+      const isHigh = zone.severity === 'HIGH';
+      const grad = ctx.createRadialGradient(zone.x, zone.y, 4, zone.x, zone.y, zone.radius);
+      grad.addColorStop(0, isHigh ? 'rgba(239, 68, 68, 0.45)' : 'rgba(245, 158, 11, 0.35)');
+      grad.addColorStop(0.7, isHigh ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.1)');
       grad.addColorStop(1, 'rgba(0,0,0,0)');
       
       ctx.fillStyle = grad;
@@ -1487,17 +1902,25 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
       ctx.arc(zone.x, zone.y, zone.radius, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.fillStyle = zone.severity === 'HIGH' ? '#ef4444' : '#f59e0b';
-      ctx.font = 'bold 9px "JetBrains Mono", monospace';
-      ctx.fillText(`CONGESTION ${zone.delayImpact}`, zone.x - 30, zone.y - zone.radius - 4);
+      // Pulsing Ring for Critical Congestion
+      ctx.strokeStyle = isHigh ? 'rgba(239, 68, 68, 0.6)' : 'rgba(245, 158, 11, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(zone.x, zone.y, zone.radius * 0.85, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Label
+      ctx.fillStyle = isHigh ? '#ef4444' : '#f59e0b';
+      ctx.font = 'bold 8.5px "JetBrains Mono", monospace';
+      ctx.fillText(`CONGESTION ${zone.delayImpact}`, zone.x - 32, zone.y - zone.radius - 3);
     });
 
-    // Green Wave Emergency Corridors & Normal Routes
+    // Emergency Corridors & Normal Routes
     ambulances.forEach(amb => {
       if (!amb.path || amb.path.length < 2) return;
       
-      // Normal Route Path (Blue tint baseline)
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+      // BLUE: Baseline / Normal Route
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
       ctx.lineWidth = 5;
       ctx.beginPath();
       amb.path.forEach((pt, i) => {
@@ -1506,18 +1929,19 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
       });
       ctx.stroke();
 
-      // Active Green Wave Simulated Emergency Corridor
+      // GREEN: Active Emergency Corridor (Forward Wave Animation)
       if (amb.currentX && amb.currentY) {
-        const isPriorityA = amb.id === 'AMB-104' && conflictState.stage === 'PRIORITY_A';
-        const isPriorityB = amb.id === 'AMB-208' && conflictState.stage === 'PRIORITY_B';
-        const isGreenWave = isPriorityA || isPriorityB;
+        const isPriorityA = amb.id === 'AMB-104' && (conflictState.stage === 'PRIORITY_A' || conflictState.stage === 'A_CLEARED');
+        const isPriorityB = amb.id === 'AMB-208' && (conflictState.stage === 'PRIORITY_B' || conflictState.stage === 'BOTH_CLEARED');
+        const isCorridorActive = isPriorityA || isPriorityB || amb.id === 'AMB-312';
 
-        ctx.strokeStyle = isGreenWave ? '#10b981' : 'rgba(16, 185, 129, 0.65)';
-        ctx.lineWidth = isGreenWave ? 8 : 6;
+        ctx.strokeStyle = isCorridorActive ? '#10b981' : 'rgba(16, 185, 129, 0.5)';
+        ctx.lineWidth = isCorridorActive ? 8 : 5;
         ctx.shadowColor = '#10b981';
-        ctx.shadowBlur = isGreenWave ? 14 : 6;
+        ctx.shadowBlur = isCorridorActive ? 12 : 4;
         ctx.beginPath();
         ctx.moveTo(amb.currentX, amb.currentY);
+        
         const nextIdx = Math.min(amb.path.length - 1, (amb.progress > 0.5 ? 4 : 3));
         for (let i = nextIdx; i < Math.min(amb.path.length, nextIdx + 2); i++) {
           ctx.lineTo(amb.path[i].x, amb.path[i].y);
@@ -1527,8 +1951,8 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
 
         // Route Direction Arrows
         if (amb.heading !== undefined) {
-          const arrowX = amb.currentX + Math.cos(amb.heading) * 20;
-          const arrowY = amb.currentY + Math.sin(amb.heading) * 20;
+          const arrowX = amb.currentX + Math.cos(amb.heading) * 22;
+          const arrowY = amb.currentY + Math.sin(amb.heading) * 22;
           ctx.fillStyle = '#10b981';
           ctx.beginPath();
           ctx.arc(arrowX, arrowY, 3, 0, Math.PI * 2);
@@ -1552,20 +1976,20 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
       ctx.restore();
     });
 
-    // Intersections with Clear IDs and Simulated Signals
+    // 6 Intersections (INT-01 to INT-06) with Signals
     intersections.forEach(inter => {
       ctx.save();
       ctx.translate(inter.x, inter.y);
 
-      // Junction ID Label
+      // Intersection Code Label (e.g., INT-04)
       ctx.font = 'bold 9px "JetBrains Mono", monospace';
-      ctx.fillStyle = '#94a3b8';
-      ctx.fillText(inter.code || inter.id.toUpperCase(), -18, -28);
+      ctx.fillStyle = inter.id === 'int-4' ? '#38bdf8' : '#94a3b8';
+      ctx.fillText(inter.code || inter.id.toUpperCase(), -18, -26);
 
-      // Conflict Junction Special Highlight
+      // Central Conflict Junction INT-04 Special Box & Rings
       if (inter.id === 'int-4') {
         const isConflict = conflictState.stage && conflictState.stage !== 'IDLE' && conflictState.stage !== 'BOTH_CLEARED';
-        ctx.strokeStyle = isConflict ? 'rgba(239, 68, 68, 0.7)' : 'rgba(16, 185, 129, 0.4)';
+        ctx.strokeStyle = isConflict ? 'rgba(239, 68, 68, 0.8)' : 'rgba(16, 185, 129, 0.4)';
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(0, 0, 32, 0, Math.PI * 2);
@@ -1575,67 +1999,67 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
           ctx.strokeStyle = '#ef4444';
           ctx.setLineDash([4, 4]);
           ctx.beginPath();
-          ctx.arc(0, 0, 42, 0, Math.PI * 2);
+          ctx.arc(0, 0, 44, 0, Math.PI * 2);
           ctx.stroke();
           ctx.setLineDash([]);
         }
 
-        // Mode Status Box
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
-        ctx.fillRect(-65, 26, 130, 18);
+        // Simulated Signal Control Mode Banner
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+        ctx.fillRect(-70, 24, 140, 20);
         ctx.strokeStyle = isConflict ? '#ef4444' : '#10b981';
         ctx.lineWidth = 1;
-        ctx.strokeRect(-65, 26, 130, 18);
+        ctx.strokeRect(-70, 24, 140, 20);
         ctx.fillStyle = isConflict ? '#ef4444' : '#10b981';
         ctx.font = 'bold 8px "JetBrains Mono", monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(inter.modeLabel || 'NORMAL CYCLE', 0, 38);
+        ctx.fillText(inter.modeLabel || 'NORMAL CYCLE', 0, 37);
         ctx.textAlign = 'left';
       }
 
-      // Signal Lamps Box
+      // Signal Lamps Housing Box
       ctx.fillStyle = '#020617';
-      ctx.fillRect(-8, -20, 16, 40);
+      ctx.fillRect(-8, -18, 16, 36);
       ctx.strokeStyle = '#334155';
       ctx.lineWidth = 1;
-      ctx.strokeRect(-8, -20, 16, 40);
+      ctx.strokeRect(-8, -18, 16, 36);
 
       // Red Lamp
       const isRed = inter.northSouth === 'RED';
       ctx.fillStyle = isRed ? '#ef4444' : '#450a0a';
       ctx.beginPath();
-      ctx.arc(0, -12, 4, 0, Math.PI * 2);
+      ctx.arc(0, -11, 3.5, 0, Math.PI * 2);
       ctx.fill();
 
       // Yellow Lamp
       const isYellow = inter.northSouth === 'YELLOW';
       ctx.fillStyle = isYellow ? '#f59e0b' : '#451a03';
       ctx.beginPath();
-      ctx.arc(0, 0, 4, 0, Math.PI * 2);
+      ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
       ctx.fill();
 
       // Green Lamp
       const isGreen = inter.northSouth === 'GREEN';
       ctx.fillStyle = isGreen ? '#10b981' : '#022c22';
       ctx.beginPath();
-      ctx.arc(0, 12, 4, 0, Math.PI * 2);
+      ctx.arc(0, 11, 3.5, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.restore();
     });
 
-    // Destination Hospitals
+    // 3 Destination Hospitals
     hospitals.forEach(hosp => {
       ctx.save();
       ctx.translate(hosp.x, hosp.y);
 
-      // Outer glow
-      ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+      // Outer Radar Glow
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.12)';
       ctx.beginPath();
       ctx.arc(0, 0, 24, 0, Math.PI * 2);
       ctx.fill();
 
-      // Hospital base
+      // Base Circle
       ctx.fillStyle = '#064e3b';
       ctx.beginPath();
       ctx.arc(0, 0, 16, 0, Math.PI * 2);
@@ -1644,20 +2068,20 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // Hospital Cross Icon
+      // Hospital White Cross
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(-2, -8, 4, 16);
       ctx.fillRect(-8, -2, 16, 4);
 
-      // Hospital Label
+      // Label
       ctx.font = 'bold 9px "JetBrains Mono", monospace';
       ctx.fillStyle = '#10b981';
-      ctx.fillText(hosp.shortName, -20, -22);
+      ctx.fillText(hosp.shortName, -24, -22);
 
       ctx.restore();
     });
 
-    // Ambulances (ALS Vehicles)
+    // Ambulances (AMB-104, AMB-208, AMB-312)
     ambulances.forEach(amb => {
       if (!amb.currentX || !amb.currentY) return;
 
@@ -1665,52 +2089,49 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
       ctx.translate(amb.currentX, amb.currentY);
       ctx.rotate(amb.heading || 0);
 
-      // Beacon Pulse
-      ctx.fillStyle = amb.id === 'AMB-104' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(245, 158, 11, 0.3)';
+      // Siren Pulse
+      const isCritical = amb.status === 'CRITICAL';
+      ctx.fillStyle = isCritical ? 'rgba(239, 68, 68, 0.35)' : 'rgba(245, 158, 11, 0.3)';
       ctx.beginPath();
       ctx.arc(0, 0, 18, 0, Math.PI * 2);
       ctx.fill();
 
       // Ambulance Body
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(-10, -6, 20, 12);
-      ctx.strokeStyle = '#0f172a';
+      ctx.fillRect(-11, -7, 22, 14);
+      ctx.strokeStyle = '#020617';
       ctx.lineWidth = 1;
-      ctx.strokeRect(-10, -6, 20, 12);
+      ctx.strokeRect(-11, -7, 22, 14);
 
-      // Red Stripe
-      ctx.fillStyle = amb.id === 'AMB-104' ? '#ef4444' : '#f59e0b';
-      ctx.fillRect(-10, -2, 20, 4);
+      // Emergency Stripe
+      ctx.fillStyle = isCritical ? '#ef4444' : '#f59e0b';
+      ctx.fillRect(-11, -2.5, 22, 5);
 
-      // Flashing Siren
+      // Flashing Siren Beacon
       ctx.fillStyle = '#ef4444';
       ctx.beginPath();
-      ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
+      ctx.arc(0, 0, 3, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.restore();
 
-      // Label above ambulance
-      ctx.font = 'bold 10px "JetBrains Mono", monospace';
+      // ID and Speed Tag
+      ctx.font = 'bold 9.5px "JetBrains Mono", monospace';
       ctx.fillStyle = '#ffffff';
-      ctx.fillText(`${amb.id} (${amb.name})`, amb.currentX - 28, amb.currentY - 18);
+      ctx.fillText(`${amb.id} (${amb.speed} ${amb.speedUnit})`, amb.currentX - 32, amb.currentY - 18);
     });
 
   }, [simState]);
 
   return (
-    <div className="relative w-full h-full bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 flex flex-col">
+    <div className="relative w-full h-full bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 flex flex-col shadow-2xl">
       {/* Top Map HUD Bar */}
-      <div className="absolute top-4 left-4 right-4 z-20 flex flex-wrap items-center justify-between pointer-events-none gap-2">
-        {/* Mode Switcher */}
+      <div className="absolute top-3.5 left-3.5 right-3.5 z-20 flex flex-wrap items-center justify-between pointer-events-none gap-2">
+        {/* Digital Twin Mode Badge */}
         <div className="flex items-center space-x-2 pointer-events-auto bg-slate-950/90 backdrop-blur-md p-1 rounded-xl border border-slate-800 shadow-xl">
           <button
             onClick={() => setMapMode('TACTICAL')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center space-x-1.5 transition-all ${
-              mapMode === 'TACTICAL'
-                ? 'bg-emerald-500 text-slate-950 shadow-md'
-                : 'text-slate-400 hover:text-white'
-            }`}
+            className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center space-x-1.5 bg-emerald-500 text-slate-950 shadow-md transition-all"
           >
             <Icons.Layers className="w-3.5 h-3.5" />
             <span>DIGITAL TWIN SIMULATION</span>
@@ -1728,7 +2149,7 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
           </button>
         </div>
 
-        {/* Legend Toggle & Live Status */}
+        {/* Legend Toggle & 60 FPS Badge */}
         <div className="flex items-center space-x-2 pointer-events-auto">
           <button
             onClick={() => setShowLegend(!showLegend)}
@@ -1740,7 +2161,7 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
 
           <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-950/90 border border-slate-800 text-xs font-mono text-slate-300">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>60 FPS ENGINE ACTIVE</span>
+            <span>SIMULATED SIGNAL CONTROL ACTIVE</span>
           </div>
         </div>
       </div>
@@ -1755,7 +2176,7 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
         />
 
         {/* Simulated CCTV Stream Inset (CAM-04) */}
-        <div className={`absolute bottom-4 right-4 z-20 transition-all ${
+        <div className={`absolute bottom-3.5 right-3.5 z-20 transition-all ${
           cctvExpanded ? 'w-80 h-56 sm:w-96 sm:h-64' : 'w-48 h-32'
         } bg-slate-950/95 rounded-xl border border-slate-700 shadow-2xl overflow-hidden pointer-events-auto flex flex-col`}>
           <div className="h-6 bg-slate-900 border-b border-slate-800 px-2.5 flex items-center justify-between text-[10px] font-mono text-slate-300">
@@ -1772,43 +2193,45 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
             </button>
           </div>
 
-          <div className="flex-1 relative bg-slate-900 overflow-hidden flex items-center justify-center p-2">
-            <div className="absolute inset-0 bg-scanlines opacity-20 pointer-events-none"></div>
+          <div className="flex-1 relative bg-slate-900/90 overflow-hidden flex items-center justify-center p-2">
             <div className="text-center font-mono text-[10px] space-y-1">
               <div className="text-emerald-400 font-bold">LIVE CCTV STREAM (SIMULATED)</div>
-              <div className="text-slate-400 text-[9px]">Intersection 4 • Central Corridor</div>
-              <div className="text-slate-500 text-[8px]">{int4.modeLabel || 'NORMAL CYCLE'}</div>
+              <div className="text-slate-300 text-[9px]">Intersection 4 • Central Corridor</div>
+              <div className="text-slate-400 text-[8px]">{int4.modeLabel || 'NORMAL CYCLE'}</div>
             </div>
           </div>
         </div>
 
         {/* Clear Map Legend Overlay */}
         {showLegend && (
-          <div className="absolute bottom-4 left-4 z-20 bg-slate-950/90 backdrop-blur-md p-3 rounded-xl border border-slate-800 text-xs font-mono space-y-1.5 shadow-xl pointer-events-auto max-w-xs">
+          <div className="absolute bottom-3.5 left-3.5 z-20 bg-slate-950/90 backdrop-blur-md p-3 rounded-xl border border-slate-800 text-xs font-mono space-y-1.5 shadow-xl pointer-events-auto max-w-xs">
             <div className="text-[10px] text-slate-400 uppercase font-bold border-b border-slate-800 pb-1">
               Map Legend
             </div>
             <div className="flex items-center space-x-2 text-slate-300">
-              <span className="w-3 h-1.5 rounded bg-emerald-400"></span>
+              <span className="w-3.5 h-1.5 rounded bg-emerald-400"></span>
               <span>GREEN: Emergency Corridor</span>
             </div>
             <div className="flex items-center space-x-2 text-slate-300">
-              <span className="w-3 h-1.5 rounded bg-red-500"></span>
+              <span className="w-3.5 h-1.5 rounded bg-red-500"></span>
               <span>RED: Critical Congestion</span>
             </div>
             <div className="flex items-center space-x-2 text-slate-300">
-              <span className="w-3 h-1.5 rounded bg-amber-500"></span>
-              <span>AMBER: Moderate Congestion</span>
+              <span className="w-3.5 h-1.5 rounded bg-amber-500"></span>
+              <span>AMBER: Congestion</span>
             </div>
             <div className="flex items-center space-x-2 text-slate-300">
-              <span className="w-3 h-1.5 rounded bg-sky-400"></span>
+              <span className="w-3.5 h-1.5 rounded bg-sky-400"></span>
               <span>BLUE: Normal Route</span>
+            </div>
+            <div className="pt-1 text-[9px] text-slate-500 border-t border-slate-900">
+              INT-01 to INT-06: Simulated Signals
             </div>
           </div>
         )}
       </div>
 
-      {/* Requirement 17: Real-World Infrastructure Integration Modal */}
+      {/* Real-World Infrastructure Integration Modal */}
       {showRealWorldLockedModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="max-w-lg w-full bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-2xl space-y-4">
@@ -1843,7 +2266,8 @@ function LiveMap({ simState, onSelectAmbulance, onApplyRoute }) {
                 <div className="text-emerald-400">✓ Phase 1: Digital Twin Simulation (Current)</div>
                 <div className="text-slate-300">○ Phase 2: Ambulance GPS MVP (Next)</div>
                 <div className="text-slate-400">○ Phase 3: Real-Time Traffic Sensor Ingestion</div>
-                <div className="text-slate-400">○ Phase 4: Authorized Municipal Pilot</div>
+                <div className="text-slate-400">○ Phase 4: Ambulance + Hospital Pilot</div>
+                <div className="text-slate-400">○ Phase 5: Authorized Traffic Infrastructure Integration</div>
               </div>
             </div>
 
@@ -1867,24 +2291,57 @@ window.LiveMap = LiveMap;
 /* ===== END FILE: LiveMap.js ===== */
 
 /* ===== START FILE: ConflictEngineModal.js ===== */
-// resQClear Multi-Ambulance Conflict Engine & Decision Factors Panel
+// resQClear Conflict Resolution Engine & Decision Factors Intelligence Panel
+// Core Startup Intelligence: Decision Panel, Telemetry, Sequence, & Explainability
 // [React hooks initialized at top level]
 
 function ConflictEnginePanel({ simState, onClose }) {
   const { conflictState = {}, ambulances = [], intersections = [] } = simState || {};
+  const [showWhyModal, setShowWhyModal] = useState(false);
+
   const ambA = ambulances.find(a => a.id === 'AMB-104') || {};
   const ambB = ambulances.find(a => a.id === 'AMB-208') || {};
   const int4 = intersections.find(i => i.id === 'int-4') || {};
 
-  const isDetected = conflictState.stage === 'DETECTED';
-  const isResolving = conflictState.stage === 'RESOLVING';
-  const isAActive = conflictState.stage === 'PRIORITY_A' || conflictState.stage === 'A_CLEARED';
-  const isBActive = conflictState.stage === 'PRIORITY_B';
-  const isBothCleared = conflictState.stage === 'BOTH_CLEARED';
+  const stage = conflictState.stage || 'IDLE';
+  const isDetected = stage === 'DETECTING' || stage === 'PREDICTING';
+  const isAnalyzing = stage === 'ANALYZING' || stage === 'GENERATING_SEQUENCE';
+  const isAActive = stage === 'PRIORITY_A' || stage === 'A_CLEARED';
+  const isBActive = stage === 'PRIORITY_B';
+  const isBothCleared = stage === 'BOTH_CLEARED';
+
+  // Sequence Flow Stages for Visual Progress Tracker
+  const sequenceStages = [
+    { key: 'DETECTING', label: 'DETECTING' },
+    { key: 'PREDICTING', label: 'PREDICTING' },
+    { key: 'ANALYZING', label: 'ANALYZING CONFLICT' },
+    { key: 'GENERATING', label: 'GENERATING SAFE SEQUENCE' },
+    { key: 'PRIORITY_A', label: 'PRIORITY 01: AMB-104' },
+    { key: 'A_CLEARED', label: 'INTERSECTION CLEARED' },
+    { key: 'PRIORITY_B', label: 'PRIORITY 02: AMB-208' },
+    { key: 'B_CLEARED', label: 'INTERSECTION CLEARED' },
+    { key: 'BOTH_CLEARED', label: 'CONFLICT RESOLVED' }
+  ];
+
+  const getCurrentStepIndex = () => {
+    switch (stage) {
+      case 'DETECTING': return 0;
+      case 'PREDICTING': return 1;
+      case 'ANALYZING': return 2;
+      case 'GENERATING_SEQUENCE': return 3;
+      case 'PRIORITY_A': return 4;
+      case 'A_CLEARED': return 5;
+      case 'PRIORITY_B': return 6;
+      case 'BOTH_CLEARED': return 8;
+      default: return isBothCleared ? 8 : 4;
+    }
+  };
+
+  const currentIdx = getCurrentStepIndex();
 
   return (
     <div className="glass-panel rounded-2xl border border-slate-700/80 p-5 sm:p-6 shadow-2xl bg-slate-950/95 space-y-5">
-      {/* Header */}
+      {/* 1. Header & Junction Identifier */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
@@ -1892,46 +2349,39 @@ function ConflictEnginePanel({ simState, onClose }) {
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h3 className="font-extrabold text-base sm:text-lg text-white">CRITICAL MULTI-AMBULANCE EVENT</h3>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-red-500/20 text-red-400 border border-red-500/30 font-bold">
-                SIMULATION
+              <h3 className="font-extrabold text-base sm:text-lg text-white">CONFLICT RESOLUTION ENGINE</h3>
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 font-bold uppercase">
+                CORE AI MODEL
               </span>
             </div>
             <p className="text-xs text-slate-400 font-mono">
-              Convergence Node: Central Conflict Junction (INT-04) • AMB-104 & AMB-208
+              CONFLICT JUNCTION: <strong className="text-white">INT-04 (Central Conflict Junction)</strong> • Vector Collision Arbitration
             </p>
           </div>
         </div>
 
         <div className="flex items-center space-x-2 font-mono text-xs">
-          <span className="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300">
-            ENGINE: <strong className="text-emerald-400">AI-V2X ARBITRATION</strong>
+          <span className="px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">
+            CONFLICT RISK: <strong className="text-red-400">HIGH</strong>
           </span>
-          {isBothCleared ? (
-            <span className="px-3 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold flex items-center space-x-1.5">
-              <Icons.CheckCircle2 className="w-3.5 h-3.5" />
-              <span>CONFLICT RESOLVED</span>
-            </span>
-          ) : (
-            <span className="px-3 py-1 rounded bg-red-500/20 text-red-300 border border-red-500/30 font-bold animate-pulse">
-              AI-ASSISTED DECISION IN PROGRESS
-            </span>
-          )}
+          <span className="px-3 py-1 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold">
+            CONFIDENCE: 96% (SIMULATION ESTIMATE)
+          </span>
         </div>
       </div>
 
-      {/* Main Status Alert Banner */}
-      <div className={`p-4 rounded-xl border flex items-center justify-between transition-all ${
+      {/* 2. Main High-Impact Dynamic Status Banner */}
+      <div className={`p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all ${
         isBothCleared
-          ? 'bg-emerald-950/30 border-emerald-500/40 text-emerald-300'
+          ? 'bg-emerald-950/30 border-emerald-500/50 text-emerald-300'
           : isAActive || isBActive
-          ? 'bg-cyan-950/30 border-cyan-500/40 text-cyan-300'
-          : isResolving
-          ? 'bg-amber-950/30 border-amber-500/40 text-amber-300'
+          ? 'bg-cyan-950/30 border-cyan-500/50 text-cyan-300'
+          : isAnalyzing
+          ? 'bg-amber-950/30 border-amber-500/50 text-amber-300'
           : 'bg-red-950/40 border-red-500/50 text-red-300'
       }`}>
         <div className="flex items-center space-x-3">
-          <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
+          <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex-shrink-0">
             {isBothCleared ? (
               <Icons.CheckCircle2 className="w-5 h-5 text-emerald-400" />
             ) : (
@@ -1939,129 +2389,143 @@ function ConflictEnginePanel({ simState, onClose }) {
             )}
           </div>
           <div>
-            <div className="font-extrabold text-sm font-mono uppercase tracking-wide">
-              {conflictState.bannerText || 'MULTIPLE EMERGENCY CONFLICT DETECTED'}
+            <div className="font-extrabold text-sm font-mono uppercase tracking-wide flex items-center space-x-2">
+              <span>{conflictState.bannerText || '⚠ MULTIPLE EMERGENCY CONFLICT DETECTED'}</span>
             </div>
             <div className="text-xs opacity-90 mt-0.5">
-              {conflictState.bannerSubtext || 'Two critical ALS units approaching the same intersection from opposing vectors.'}
+              {conflictState.bannerSubtext || 'AMB-104 (North) & AMB-208 (South) converging on INT-04. AI-assisted sequence formulating.'}
             </div>
           </div>
         </div>
 
-        <div className="hidden sm:block text-right font-mono text-xs">
-          <div className="text-slate-400 text-[10px]">SEQUENCE STATUS</div>
-          <div className="font-bold text-white">
-            {isBothCleared ? 'SAFE CORRIDOR COMPLETED' : isBActive ? 'STAGE 02 / 02' : isAActive ? 'STAGE 01 / 02' : 'ARBITRATING'}
-          </div>
+        {/* Explainability Button: WHY THIS DECISION? */}
+        <button
+          onClick={() => setShowWhyModal(true)}
+          className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-500/40 hover:border-cyan-400 font-mono text-xs font-bold transition-all flex items-center space-x-1.5 flex-shrink-0"
+        >
+          <Icons.HelpCircle className="w-3.5 h-3.5 text-cyan-400" />
+          <span>WHY THIS DECISION?</span>
+        </button>
+      </div>
+
+      {/* 3. Sequential Progress Timeline Bar */}
+      <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+        <div className="text-[10px] font-mono text-slate-400 uppercase font-bold mb-2 flex justify-between">
+          <span>AI ARBITRATION SEQUENCE PROGRESS</span>
+          <span className="text-emerald-400">STAGE {currentIdx + 1} OF {sequenceStages.length}</span>
+        </div>
+        <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-9 gap-1 font-mono text-[9px] text-center">
+          {sequenceStages.map((stg, i) => {
+            const isPast = i < currentIdx;
+            const isCurrent = i === currentIdx;
+            return (
+              <div
+                key={stg.key}
+                className={`p-1.5 rounded-lg border leading-tight transition-all ${
+                  isCurrent
+                    ? 'bg-emerald-500 text-slate-950 font-bold border-emerald-400 shadow-md ring-1 ring-emerald-400'
+                    : isPast
+                    ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/30'
+                    : 'bg-slate-950 text-slate-400 border-slate-800'
+                }`}
+              >
+                {stg.label}
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Side-by-Side Telemetry & Approach Direction Cards */}
+      {/* 4. Side-by-Side Dual Ambulance Telemetry Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Ambulance A Card */}
+        {/* Ambulance A Telemetry Card */}
         <div className={`p-4 rounded-xl border transition-all ${
-          isAActive ? 'bg-emerald-950/30 border-emerald-500/60 shadow-lg shadow-emerald-950/40' : 'bg-slate-900/60 border-slate-800'
+          isAActive ? 'bg-emerald-950/30 border-emerald-500/70 shadow-lg shadow-emerald-950/50' : 'bg-slate-900/70 border-slate-800'
         }`}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
-              <span className="font-bold text-sm text-white">AMB-104 (Ambulance A)</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping flex-shrink-0"></span>
+              <span className="font-bold text-sm text-white whitespace-nowrap">{ambA.id || 'AMB-104'}</span>
+              <span className="text-xs text-slate-400 font-mono whitespace-nowrap">({ambA.name})</span>
             </div>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-red-500/20 text-red-400 border border-red-500/30 font-bold">
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-red-500/20 text-red-400 border border-red-500/40 font-bold whitespace-nowrap">
               CRITICAL
             </span>
           </div>
 
-          <div className="space-y-2 text-xs font-mono">
-            <div className="flex justify-between text-slate-300">
-              <span className="text-slate-400">Target Node:</span>
-              <span className="font-bold text-white">INT-04 (Central Conflict)</span>
+          <div className="grid grid-cols-2 gap-2 text-xs font-mono mb-3">
+            <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
+              <div className="text-[10px] text-slate-400">ETA TO INT-04:</div>
+              <div className="font-bold text-emerald-400 text-sm">{ambA.currentIntersectionEta || 43} sec</div>
             </div>
-            <div className="flex justify-between text-slate-300">
-              <span className="text-slate-400">Approach Vector:</span>
-              <span className="font-medium text-slate-200">North Corridors (Anna Nagar)</span>
+            <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
+              <div className="text-[10px] text-slate-400">DISTANCE TO INT-04:</div>
+              <div className="font-bold text-white text-sm">{ambA.distanceToConflict || 555} m</div>
             </div>
-            <div className="flex justify-between text-slate-300">
-              <span className="text-slate-400">Destination:</span>
-              <span className="font-medium text-emerald-400">Government Hospital</span>
+            <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
+              <div className="text-[10px] text-slate-400">APPROACH VECTOR:</div>
+              <div className="font-medium text-slate-200">North Link (Sector 1)</div>
             </div>
-            <div className="flex justify-between text-slate-300">
-              <span className="text-slate-400">Distance to INT-04:</span>
-              <span className="font-bold text-white">{ambA.distanceToConflict || 180} m</span>
-            </div>
-            <div className="flex justify-between text-slate-300">
-              <span className="text-slate-400">Intersection ETA:</span>
-              <span className="font-bold text-emerald-400">{ambA.currentIntersectionEta || 43} sec</span>
-            </div>
-            <div className="flex justify-between text-slate-300">
-              <span className="text-slate-400">Current Velocity:</span>
-              <span>{ambA.speed || 46} km/h</span>
+            <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
+              <div className="text-[10px] text-slate-400">CURRENT SPEED:</div>
+              <div className="font-bold text-slate-200">{ambA.speed || 42} km/h</div>
             </div>
           </div>
 
-          <div className="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
-            <span className="text-slate-400 font-mono">COORDINATION PRIORITY:</span>
-            <span className={`font-mono font-bold px-2.5 py-0.5 rounded ${
-              isAActive ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-300'
-            }`}>
-              PRIORITY 01
+          <div className="flex items-center justify-between pt-2.5 border-t border-slate-800 text-xs font-mono">
+            <span className="text-slate-400">RECOMMENDED SEQUENCE:</span>
+            <span className="px-3 py-1 rounded bg-emerald-500 text-slate-950 font-bold">
+              01 → PRIORITY 01
             </span>
           </div>
         </div>
 
-        {/* Ambulance B Card */}
+        {/* Ambulance B Telemetry Card */}
         <div className={`p-4 rounded-xl border transition-all ${
-          isBActive ? 'bg-emerald-950/30 border-emerald-500/60 shadow-lg shadow-emerald-950/40' : 'bg-slate-900/60 border-slate-800'
+          isBActive ? 'bg-emerald-950/30 border-emerald-500/70 shadow-lg shadow-emerald-950/50' : 'bg-slate-900/70 border-slate-800'
         }`}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-              <span className="font-bold text-sm text-white">AMB-208 (Ambulance B)</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>
+              <span className="font-bold text-sm text-white whitespace-nowrap">{ambB.id || 'AMB-208'}</span>
+              <span className="text-xs text-slate-400 font-mono whitespace-nowrap">({ambB.name})</span>
             </div>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-red-500/20 text-red-400 border border-red-500/30 font-bold">
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-red-500/20 text-red-400 border border-red-500/40 font-bold whitespace-nowrap">
               CRITICAL
             </span>
           </div>
 
-          <div className="space-y-2 text-xs font-mono">
-            <div className="flex justify-between text-slate-300">
-              <span className="text-slate-400">Target Node:</span>
-              <span className="font-bold text-white">INT-04 (Central Conflict)</span>
+          <div className="grid grid-cols-2 gap-2 text-xs font-mono mb-3">
+            <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
+              <div className="text-[10px] text-slate-400">ETA TO INT-04:</div>
+              <div className="font-bold text-amber-400 text-sm">{ambB.currentIntersectionEta || 50} sec</div>
             </div>
-            <div className="flex justify-between text-slate-300">
-              <span className="text-slate-400">Approach Vector:</span>
-              <span className="font-medium text-slate-200">South Link (T. Nagar)</span>
+            <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
+              <div className="text-[10px] text-slate-400">DISTANCE TO INT-04:</div>
+              <div className="font-bold text-white text-sm">{ambB.distanceToConflict || 555} m</div>
             </div>
-            <div className="flex justify-between text-slate-300">
-              <span className="text-slate-400">Destination:</span>
-              <span className="font-medium text-emerald-400">Apollo Hospital</span>
+            <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
+              <div className="text-[10px] text-slate-400">APPROACH VECTOR:</div>
+              <div className="font-medium text-slate-200">South Link (Sector 2)</div>
             </div>
-            <div className="flex justify-between text-slate-300">
-              <span className="text-slate-400">Distance to INT-04:</span>
-              <span className="font-bold text-white">{ambB.distanceToConflict || 290} m</span>
-            </div>
-            <div className="flex justify-between text-slate-300">
-              <span className="text-slate-400">Intersection ETA:</span>
-              <span className="font-bold text-amber-400">{ambB.currentIntersectionEta || 50} sec</span>
-            </div>
-            <div className="flex justify-between text-slate-300">
-              <span className="text-slate-400">Current Velocity:</span>
-              <span>{ambB.speed || 40} km/h</span>
+            <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
+              <div className="text-[10px] text-slate-400">CURRENT SPEED:</div>
+              <div className="font-bold text-slate-200">{ambB.speed || 40} km/h</div>
             </div>
           </div>
 
-          <div className="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
-            <span className="text-slate-400 font-mono">COORDINATION PRIORITY:</span>
-            <span className={`font-mono font-bold px-2.5 py-0.5 rounded ${
+          <div className="flex items-center justify-between pt-2.5 border-t border-slate-800 text-xs font-mono">
+            <span className="text-slate-400">RECOMMENDED SEQUENCE:</span>
+            <span className={`px-3 py-1 rounded font-bold ${
               isBActive ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-300'
             }`}>
-              PRIORITY 02 (Secondary)
+              02 → PRIORITY 02
             </span>
           </div>
         </div>
       </div>
 
-      {/* Transparent Decision Factors Scoring Model */}
+      {/* 5. DECISION FACTORS & ARBITRATION MATRIX */}
       <div className="p-4 rounded-xl bg-slate-900 border border-emerald-500/30 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
           <div className="flex items-center space-x-2">
@@ -2069,84 +2533,175 @@ function ConflictEnginePanel({ simState, onClose }) {
             <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">DECISION FACTORS & ARBITRATION MATRIX</span>
           </div>
           <div className="flex items-center space-x-2 text-xs font-mono">
-            <span className="text-slate-400">Confidence:</span>
-            <span className="font-bold text-emerald-400 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30">
+            <span className="text-slate-400">DECISION CONFIDENCE:</span>
+            <span className="font-bold text-emerald-400 px-2.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30">
               96% (SIMULATION ESTIMATE)
             </span>
           </div>
         </div>
 
-        {/* Factors Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
-          <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
-            <div className="text-[10px] text-slate-400 uppercase">ETA to Intersection</div>
-            <div className="font-bold text-white mt-0.5">AMB-104: 43s</div>
-            <div className="text-slate-400">AMB-208: 50s</div>
+        {/* 6 Core Decision Factors */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 text-xs font-mono">
+          <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <div className="text-[9px] text-slate-400 uppercase">• ETA</div>
+            <div className="font-bold text-emerald-400 mt-0.5">43s vs 50s</div>
+            <div className="text-[9px] text-slate-500">7s Delta</div>
           </div>
 
-          <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
-            <div className="text-[10px] text-slate-400 uppercase">Emergency Severity</div>
-            <div className="font-bold text-red-400 mt-0.5">AMB-104: Critical</div>
-            <div className="text-red-400">AMB-208: Critical</div>
+          <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <div className="text-[9px] text-slate-400 uppercase">• Distance</div>
+            <div className="font-bold text-white mt-0.5">555m vs 555m</div>
+            <div className="text-[9px] text-slate-500">Equal Radius</div>
           </div>
 
-          <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
-            <div className="text-[10px] text-slate-400 uppercase">Conflict Probability</div>
-            <div className="font-bold text-red-400 mt-0.5">HIGH (Cross-Axis)</div>
-            <div className="text-slate-400">Overlap: 6.2s window</div>
+          <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <div className="text-[9px] text-slate-400 uppercase">• Approach Vector</div>
+            <div className="font-bold text-white mt-0.5">North vs South</div>
+            <div className="text-[9px] text-slate-500">Cross-axis</div>
           </div>
 
-          <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
-            <div className="text-[10px] text-slate-400 uppercase">Recommended Sequence</div>
-            <div className="font-extrabold text-emerald-400 mt-0.5">AMB-104 → AMB-208</div>
-            <div className="text-slate-400">Sequential Clearance</div>
+          <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <div className="text-[9px] text-slate-400 uppercase">• Occupancy</div>
+            <div className="font-bold text-amber-400 mt-0.5">1 Vehicle/Slot</div>
+            <div className="text-[9px] text-slate-500">Non-simultaneous</div>
+          </div>
+
+          <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <div className="text-[9px] text-slate-400 uppercase">• Traffic Density</div>
+            <div className="font-bold text-red-400 mt-0.5">High (+2.4m)</div>
+            <div className="text-[9px] text-slate-500">Anna Salai Link</div>
+          </div>
+
+          <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+            <div className="text-[9px] text-slate-400 uppercase">• Conflict Risk</div>
+            <div className="font-bold text-red-400 mt-0.5">HIGH</div>
+            <div className="text-[9px] text-slate-500">Simultaneous Demand</div>
           </div>
         </div>
 
-        {/* Reason Explanation */}
-        <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-300 leading-relaxed">
-          <strong className="text-emerald-400 font-mono">Arbitration Reason:</strong> AMB-104 reaches the conflict zone earlier. Sequential clearance minimizes intersection occupancy conflict and maintains continuous vehicle momentum.
-        </div>
-
-        {/* Sequence Progress Tracker */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 text-xs font-mono">
-          <div className={`p-2.5 rounded-lg border flex items-center space-x-2 ${
-            isAActive || isBActive || isBothCleared ? 'bg-emerald-950/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-400'
-          }`}>
-            <span className="font-bold">1.</span>
-            <span>AMB-104 PRIORITY 01</span>
-            {isAActive && <Icons.CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 ml-auto" />}
+        {/* Recommended Sequence & Reason */}
+        <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+          <div>
+            <div className="font-mono text-[10px] text-slate-400 uppercase">RECOMMENDED SEQUENCE</div>
+            <div className="font-mono font-extrabold text-emerald-400 text-sm mt-0.5">
+              01 → AMB-104 &nbsp;|&nbsp; 02 → AMB-208
+            </div>
+            <div className="text-slate-300 mt-1">
+              <strong>Reason:</strong> "Sequential clearance minimizes simultaneous intersection occupancy."
+            </div>
           </div>
 
-          <div className={`p-2.5 rounded-lg border flex items-center space-x-2 ${
-            isBActive || isBothCleared ? 'bg-emerald-950/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-400'
-          }`}>
-            <span className="font-bold">2.</span>
-            <span>AMB-208 PRIORITY 02</span>
-            {isBActive && <Icons.CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 ml-auto" />}
-          </div>
-
-          <div className={`p-2.5 rounded-lg border flex items-center space-x-2 ${
-            isBothCleared ? 'bg-emerald-950/30 border-emerald-500/50 text-emerald-300 font-bold' : 'bg-slate-950 border-slate-800 text-slate-400'
-          }`}>
-            <span className="font-bold">3.</span>
-            <span>CONFLICT RESOLVED</span>
-            {isBothCleared && <Icons.CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 ml-auto" />}
+          <div className="text-right font-mono text-[11px] text-slate-400 flex-shrink-0">
+            <div>SIMULATED SIGNAL CONTROL:</div>
+            <strong className="text-emerald-400">{conflictState.signalPhase || 'NORMAL CYCLE'}</strong>
           </div>
         </div>
       </div>
 
-      {/* Disclaimers & Regulatory Positioning */}
-      <div className="pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-400 gap-2">
-        <div className="flex items-center space-x-1.5">
-          <Icons.Shield className="w-3.5 h-3.5 text-cyan-400" />
-          <span>Traffic coordination priority • Emergency severity provided by authorized emergency personnel.</span>
+      {/* 6. Emergency Corridor Visualization */}
+      <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
+        <div className="flex items-center justify-between text-xs font-mono">
+          <span className="text-slate-300 font-bold uppercase">EMERGENCY CORRIDOR VISUALIZATION</span>
+          <span className="text-slate-400">
+            CORRIDOR STATUS: <strong className={isBothCleared ? 'text-teal-300' : isAActive || isBActive ? 'text-emerald-400 animate-pulse' : 'text-slate-400'}>
+              {isBothCleared ? 'CLEARED' : isAActive || isBActive ? 'ACTIVE' : 'INACTIVE'}
+            </strong>
+          </span>
         </div>
-        <div className="flex items-center space-x-1.5 text-slate-400">
-          <Icons.AlertTriangle className="w-3.5 h-3.5 text-amber-500/80" />
-          <span>Simulation decision — not connected to real traffic infrastructure.</span>
+
+        <div className="flex items-center justify-between overflow-x-auto py-2 px-1 text-xs font-mono text-center gap-2">
+          <div className="p-2 rounded-lg bg-slate-950 border border-red-500/40 text-red-400 min-w-[100px]">
+            <Icons.Ambulance className="w-4 h-4 mx-auto mb-1 text-red-400" />
+            <span className="font-bold">AMBULANCE</span>
+          </div>
+          <span className="text-slate-600 font-bold">↓</span>
+          <div className="p-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 min-w-[110px]">
+            <span className="text-[10px] text-slate-500 block">NODE 1</span>
+            <span className="font-bold text-white">INT-01</span>
+          </div>
+          <span className="text-slate-600 font-bold">↓</span>
+          <div className="p-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 min-w-[110px]">
+            <span className="text-[10px] text-slate-500 block">NODE 2</span>
+            <span className="font-bold text-white">INT-02</span>
+          </div>
+          <span className="text-slate-600 font-bold">↓</span>
+          <div className="p-2 rounded-lg bg-slate-950 border border-emerald-500/50 text-emerald-400 min-w-[120px] ring-1 ring-emerald-500/30">
+            <span className="text-[10px] text-emerald-500 block">CONFLICT JUNCTION</span>
+            <span className="font-bold text-emerald-300">INT-04</span>
+          </div>
+          <span className="text-slate-600 font-bold">↓</span>
+          <div className="p-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 min-w-[110px]">
+            <span className="text-[10px] text-slate-500 block">NODE 3</span>
+            <span className="font-bold text-white">INT-06</span>
+          </div>
+          <span className="text-slate-600 font-bold">↓</span>
+          <div className="p-2 rounded-lg bg-slate-950 border border-emerald-500/40 text-emerald-400 min-w-[110px]">
+            <Icons.Hospital className="w-4 h-4 mx-auto mb-1 text-emerald-400" />
+            <span className="font-bold">HOSPITAL</span>
+          </div>
         </div>
       </div>
+
+      {/* 7. "WHY THIS DECISION?" Explainability Modal */}
+      {showWhyModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="max-w-xl w-full bg-slate-900 border border-cyan-500/40 rounded-2xl p-6 shadow-2xl space-y-4 font-sans">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center space-x-2.5">
+                <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+                  <Icons.HelpCircle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base text-white">Why This Decision?</h3>
+                  <span className="text-[10px] font-mono text-cyan-400 uppercase font-bold">TRANSPARENT AI EXPLAINABILITY</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowWhyModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white"
+              >
+                <Icons.X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 rounded-xl bg-cyan-950/30 border border-cyan-500/30 text-xs text-cyan-200 leading-relaxed">
+              <strong className="text-white">Core Arbitration Summary:</strong><br />
+              "AMB-104 is predicted to reach the conflict zone 7 seconds earlier. Sequential clearance reduces the probability of simultaneous intersection occupancy."
+            </div>
+
+            <div className="space-y-2.5 text-xs text-slate-300">
+              <div className="font-mono text-slate-400 font-bold uppercase text-[10px]">Key Factors Evaluated:</div>
+              <ul className="space-y-2 pl-2">
+                <li className="flex items-start space-x-2">
+                  <span className="text-emerald-400 font-bold">•</span>
+                  <span><strong>ETA Delta:</strong> AMB-104 predicted ETA is 43s vs AMB-208 ETA of 50s.</span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <span className="text-emerald-400 font-bold">•</span>
+                  <span><strong>Momentum Preservation:</strong> Sequential green wave allows AMB-104 to clear INT-04 without deceleration, leaving the intersection open for AMB-208.</span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <span className="text-emerald-400 font-bold">•</span>
+                  <span><strong>Deadlock Prevention:</strong> Eliminates cross-axis convergence where both vehicles arrive concurrently.</span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <span className="text-emerald-400 font-bold">•</span>
+                  <span><strong>Simulated Signal Control:</strong> Phase transfer occurs automatically the moment AMB-104 passes the intersection boundary.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="pt-3 border-t border-slate-800 flex justify-end">
+              <button
+                onClick={() => setShowWhyModal(false)}
+                className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-mono font-bold text-xs transition-all"
+              >
+                Close Explanation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -2156,11 +2711,19 @@ window.ConflictEnginePanel = ConflictEnginePanel;
 /* ===== END FILE: ConflictEngineModal.js ===== */
 
 /* ===== START FILE: RightStatusPanel.js ===== */
-// resQClear Right-Side Live Status & Emergency Event Stream Panel
+// resQClear Right-Side Operations & Intelligence Panel
+// System Intelligence, AI Traffic Insight, Before vs After & Live Chronology
 // [React hooks initialized at top level]
 
 function RightStatusPanel({ simState, onApplyRoute }) {
-  const { events = [], liveMetrics = {}, ambulances = [], aiInsight = {} } = simState || {};
+  const {
+    events = [],
+    liveMetrics = {},
+    ambulances = [],
+    aiInsight = {},
+    systemIntelligence = {},
+    conflictState = {}
+  } = simState || {};
 
   const getEventBadge = (type) => {
     switch (type) {
@@ -2191,33 +2754,102 @@ function RightStatusPanel({ simState, onApplyRoute }) {
 
   return (
     <div className="flex flex-col h-full space-y-4 overflow-y-auto pr-1">
-      {/* AI Traffic Insight Card */}
+      {/* 1. DEDICATED "SYSTEM INTELLIGENCE" PANEL */}
+      <div className="glass-panel p-4 rounded-2xl border border-slate-800 bg-slate-950/90 space-y-3">
+        <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+          <div className="flex items-center space-x-2">
+            <Icons.Cpu className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">SYSTEM INTELLIGENCE</span>
+          </div>
+          <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold">
+            LIVE ENGINE
+          </span>
+        </div>
+
+        <div className="space-y-2 text-xs font-mono">
+          <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 border border-slate-800">
+            <span className="text-slate-400">TRAFFIC ANALYSIS</span>
+            <span className="text-emerald-400 font-bold flex items-center space-x-1">
+              <Icons.CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span>Congestion detected</span>
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 border border-slate-800">
+            <span className="text-slate-400">ROUTE ANALYSIS</span>
+            <span className={`font-bold flex items-center space-x-1 ${aiInsight.applied ? 'text-emerald-400' : 'text-slate-300'}`}>
+              <Icons.CheckCircle2 className={`w-3 h-3 ${aiInsight.applied ? 'text-emerald-400' : 'text-slate-500'}`} />
+              <span>{aiInsight.applied ? 'Alternate Route Applied' : 'Alternate route evaluated'}</span>
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 border border-slate-800">
+            <span className="text-slate-400">CONFLICT ANALYSIS</span>
+            <span className="text-emerald-400 font-bold flex items-center space-x-1">
+              <Icons.CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span>Multi-ambulance conflict detected</span>
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 border border-slate-800">
+            <span className="text-slate-400">SEQUENCE</span>
+            <span className="text-emerald-400 font-bold flex items-center space-x-1">
+              <Icons.CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span>Priority order generated</span>
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 border border-slate-800">
+            <span className="text-slate-400">CORRIDOR</span>
+            <span className="text-emerald-400 font-bold flex items-center space-x-1">
+              <Icons.CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span>Emergency corridor simulated</span>
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 border border-slate-800">
+            <span className="text-slate-400">HOSPITAL ETA</span>
+            <span className="text-emerald-400 font-bold flex items-center space-x-1">
+              <Icons.CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span>ETA updated</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. AI TRAFFIC INSIGHT CARD */}
       <div className="glass-panel p-4 rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-slate-900 via-slate-950 to-cyan-950/20 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Icons.Zap className="w-4 h-4 text-cyan-400" />
             <span className="text-xs font-mono font-bold text-white uppercase tracking-wide">AI TRAFFIC INSIGHT</span>
           </div>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
+          <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 font-bold">
             SIMULATION ESTIMATE
           </span>
         </div>
 
         <div className="text-xs text-slate-300 leading-relaxed space-y-1 font-sans">
           <p className="font-semibold text-white">
-            High traffic density detected on Anna Salai North Link.
+            "High traffic density detected on Anna Salai North Link."
           </p>
-          <p className="text-amber-400 font-mono text-[11px]">
-            Predicted delay: +2.4 min
-          </p>
-          <p className="text-slate-400 text-[11px]">
-            Alternative route may reduce simulated delay.
-          </p>
+          <div className="flex justify-between text-xs font-mono pt-1">
+            <span className="text-slate-400">Predicted delay:</span>
+            <span className="text-red-400 font-bold">+2.4 min</span>
+          </div>
+          <div className="flex justify-between text-xs font-mono">
+            <span className="text-slate-400">Alternative route:</span>
+            <span className="text-cyan-300 font-bold">Route B</span>
+          </div>
+          <div className="flex justify-between text-xs font-mono">
+            <span className="text-slate-400">Estimated improvement:</span>
+            <span className="text-emerald-400 font-bold">2m 18s</span>
+          </div>
         </div>
 
         <div className="pt-2 border-t border-slate-800 flex items-center justify-between">
-          <span className="text-[11px] font-mono text-emerald-400 font-bold">
-            ESTIMATED SAVINGS: 2 min 18 sec
+          <span className="text-[10px] font-mono text-slate-400">
+            SIMULATION ESTIMATE
           </span>
           <button
             onClick={() => onApplyRoute()}
@@ -2231,7 +2863,7 @@ function RightStatusPanel({ simState, onApplyRoute }) {
             {aiInsight.applied ? (
               <>
                 <Icons.CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Route Applied</span>
+                <span>Alternate Applied</span>
               </>
             ) : (
               <>
@@ -2243,17 +2875,58 @@ function RightStatusPanel({ simState, onApplyRoute }) {
         </div>
       </div>
 
-      {/* Live Emergency Events Stream */}
-      <div className="glass-panel p-4 rounded-2xl border border-slate-800 flex-1 flex flex-col min-h-[320px]">
+      {/* 3. "BEFORE vs AFTER" COMPARISON PANEL */}
+      <div className="glass-panel p-4 rounded-2xl border border-slate-800 bg-slate-950/90 space-y-3">
+        <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+          <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">BEFORE vs AFTER COMPARISON</span>
+          <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-slate-900 text-amber-400 border border-slate-800">
+            SIMULATION RESULT
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 text-xs font-mono">
+          {/* WITHOUT resQClear */}
+          <div className="p-2.5 rounded-xl bg-slate-900/80 border border-red-500/20 space-y-1.5">
+            <div className="text-[10px] font-bold text-red-400 uppercase">WITHOUT resQClear</div>
+            <div className="text-slate-400 text-[11px] font-sans">• Traffic congestion</div>
+            <div className="text-slate-400 text-[11px] font-sans">• Intersection waiting</div>
+            <div className="text-slate-400 text-[11px] font-sans">• Uncoordinated emergency movement</div>
+            <div className="pt-1 border-t border-slate-800/80 flex justify-between text-[11px]">
+              <span className="text-slate-500">Baseline ETA:</span>
+              <strong className="text-red-400">08:34</strong>
+            </div>
+          </div>
+
+          {/* WITH resQClear */}
+          <div className="p-2.5 rounded-xl bg-slate-900/80 border border-emerald-500/30 space-y-1.5">
+            <div className="text-[10px] font-bold text-emerald-400 uppercase">WITH resQClear</div>
+            <div className="text-slate-200 text-[11px] font-sans">• Coordinated sequence</div>
+            <div className="text-slate-200 text-[11px] font-sans">• Emergency corridor</div>
+            <div className="text-slate-200 text-[11px] font-sans">• Reduced simulated delay</div>
+            <div className="pt-1 border-t border-slate-800/80 flex justify-between text-[11px]">
+              <span className="text-slate-500">Optimized ETA:</span>
+              <strong className="text-emerald-400">06:16</strong>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-xs font-mono">
+          <span className="text-slate-300">ESTIMATED DIFFERENCE:</span>
+          <strong className="text-emerald-400 text-sm">02:18 min saved</strong>
+        </div>
+      </div>
+
+      {/* 4. LIVE EVENT TIMELINE */}
+      <div className="glass-panel p-4 rounded-2xl border border-slate-800 flex-1 flex flex-col min-h-[300px]">
         <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
           <div className="flex items-center space-x-2">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-            <h3 className="font-bold text-sm text-white">Emergency Events</h3>
+            <h3 className="font-bold text-sm text-white">Event Timeline</h3>
           </div>
-          <span className="text-[10px] font-mono text-slate-400">OPERATIONS LOG</span>
+          <span className="text-[10px] font-mono text-slate-400">LIVE CHRONOLOGY</span>
         </div>
 
-        <div className="space-y-2.5 overflow-y-auto flex-1 max-h-[380px] pr-1">
+        <div className="space-y-2.5 overflow-y-auto flex-1 max-h-[360px] pr-1 font-mono">
           {events.map((evt) => (
             <div
               key={evt.id}
@@ -2262,40 +2935,15 @@ function RightStatusPanel({ simState, onApplyRoute }) {
               <div className="mt-0.5">{getEventIcon(evt.type)}</div>
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-0.5">
-                  <span className="font-mono text-[10px] text-slate-400">{evt.time}</span>
-                  <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono border ${getEventBadge(evt.type)}`}>
+                  <span className="text-[10px] text-slate-400 font-bold">{evt.time}</span>
+                  <span className={`px-1.5 py-0.2 rounded text-[9px] border ${getEventBadge(evt.type)}`}>
                     {evt.type.toUpperCase()}
                   </span>
                 </div>
-                <p className="text-slate-200 text-xs leading-snug">{evt.message}</p>
+                <p className="text-slate-200 text-xs leading-snug font-sans">{evt.message}</p>
               </div>
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* Corridor Telemetry Snapshot */}
-      <div className="glass-panel p-4 rounded-2xl border border-slate-800 space-y-3">
-        <div className="flex items-center justify-between text-xs font-mono">
-          <span className="text-slate-400">CORRIDOR CLEARANCE SPEED</span>
-          <span className="text-emerald-400 font-bold">{liveMetrics.avgSpeed || 44.2} km/h</span>
-        </div>
-        <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
-          <div
-            className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
-            style={{ width: `${Math.min(100, (liveMetrics.avgSpeed / 60) * 100)}%` }}
-          ></div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/80 text-[11px] font-mono">
-          <div>
-            <span className="text-slate-400 block text-[10px]">EST. DELAY AVOIDED:</span>
-            <strong className="text-white text-xs">2m 18s (Simulated)</strong>
-          </div>
-          <div>
-            <span className="text-slate-400 block text-[10px]">SIGNALS SYNCED:</span>
-            <strong className="text-emerald-400 text-xs">4 Intersections</strong>
-          </div>
         </div>
       </div>
     </div>
@@ -2308,6 +2956,7 @@ window.RightStatusPanel = RightStatusPanel;
 
 /* ===== START FILE: AmbulanceFleetView.js ===== */
 // resQClear Ambulance Fleet Management Cards View
+// Enterprise Telemetry Cards with Dynamic Live Telemetry & Patient Triage
 // [React hooks initialized at top level]
 
 function AmbulanceFleetView({ simState, onTriggerAmbulance }) {
@@ -2321,8 +2970,8 @@ function AmbulanceFleetView({ simState, onTriggerAmbulance }) {
         <div>
           <div className="flex items-center space-x-3">
             <h2 className="text-2xl font-extrabold text-white">Active Emergency Fleet Telemetry</h2>
-            <span className="px-2.5 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-mono font-bold">
-              SIMULATION DATA
+            <span className="px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-mono font-bold">
+              SIMULATION TELEMETRY
             </span>
           </div>
           <p className="text-xs text-slate-400 font-mono mt-1">
@@ -2349,94 +2998,107 @@ function AmbulanceFleetView({ simState, onTriggerAmbulance }) {
             <div
               key={amb.id}
               onClick={() => setSelectedAmb(amb.id)}
-              className={`glass-panel rounded-2xl p-5 border transition-all cursor-pointer relative overflow-hidden ${
+              className={`glass-panel rounded-2xl p-5 border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${
                 isSelected
-                  ? 'border-emerald-500 shadow-xl shadow-emerald-950/40 bg-slate-900/90'
+                  ? 'border-emerald-500 shadow-xl shadow-emerald-950/40 bg-slate-900/95'
                   : 'border-slate-800 hover:border-slate-700 bg-slate-950/80'
               }`}
             >
-              {/* Top Row */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                    isCritical ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
-                  }`}>
-                    <Icons.Ambulance className="w-5 h-5" />
+              <div>
+                {/* Top Row: ID, SubStatus, Emergency Level Badge */}
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${
+                      isCritical ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
+                    }`}>
+                      <Icons.Ambulance className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-extrabold text-lg text-white font-mono">{amb.id}</h3>
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">
+                          {amb.name}
+                        </span>
+                      </div>
+                      <p className="text-xs text-red-400 font-mono font-bold mt-0.5">{amb.subStatus || amb.status}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-extrabold text-base text-white">{amb.id}</h3>
-                    <p className="text-xs text-slate-400 font-mono">{amb.name} • {amb.vehicleModel}</p>
+
+                  <div className="text-right">
+                    <span className={`px-2.5 py-1 rounded text-xs font-mono font-bold border ${
+                      isCritical ? 'bg-red-500/20 text-red-400 border-red-500/40' : 'bg-amber-500/20 text-amber-400 border-amber-500/40'
+                    }`}>
+                      {amb.status}
+                    </span>
+                    <div className="text-[10px] font-mono text-emerald-400 font-bold mt-1">PRIORITY 0{amb.priorityRank}</div>
                   </div>
                 </div>
 
-                <div className="text-right">
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
-                    isCritical ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
-                  }`}>
-                    {amb.status}
-                  </span>
-                  <div className="text-[10px] font-mono text-slate-400 mt-1">PRIORITY 0{amb.priorityRank}</div>
+                {/* State Badge */}
+                <div className="p-2 rounded-lg bg-slate-950 border border-slate-800 mb-3 text-xs font-mono flex items-center justify-between">
+                  <span className="text-slate-400 text-[10px]">CURRENT STATE:</span>
+                  <span className="text-emerald-400 font-bold text-[11px]">{amb.currentState || 'IN TRANSIT'}</span>
                 </div>
+
+                {/* Live Telemetry Grid (Speed, Distance, ETA, Intersection ETA) */}
+                <div className="grid grid-cols-2 gap-2.5 p-3 rounded-xl bg-slate-900/90 border border-slate-800 mb-4 text-xs font-mono">
+                  <div className="p-2 rounded-lg bg-slate-950 border border-slate-800/80">
+                    <span className="text-slate-400 block text-[10px]">SPEED:</span>
+                    <span className="text-emerald-400 font-bold text-sm">{amb.speed} {amb.speedUnit}</span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-950 border border-slate-800/80">
+                    <span className="text-slate-400 block text-[10px]">TOTAL DISTANCE:</span>
+                    <span className="text-white font-bold text-sm">{amb.distance}</span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-950 border border-slate-800/80">
+                    <span className="text-slate-400 block text-[10px]">HOSPITAL ETA:</span>
+                    <span className="text-white font-bold text-sm">{amb.eta} min</span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-950 border border-slate-800/80">
+                    <span className="text-slate-400 block text-[10px]">INTERSECTION ETA:</span>
+                    <span className="text-cyan-400 font-bold text-sm">{amb.currentIntersectionEta || 43} sec</span>
+                  </div>
+                </div>
+
+                {/* Location, Destination & Route Details */}
+                <div className="space-y-2 text-xs font-mono mb-4 text-slate-300">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-400">Current Location:</span>
+                    <span className="text-white font-medium">{amb.origin}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-400">Destination:</span>
+                    <span className="text-emerald-400 font-bold">{amb.destination}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-400">Route Status:</span>
+                    <span className="text-teal-300 font-bold">{amb.routeStatus}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-400">Paramedic Lead:</span>
+                    <span className="text-slate-200">{amb.driver}</span>
+                  </div>
+                </div>
+
+                {/* Patient Condition & Triage */}
+                {amb.patient && (
+                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-slate-400 font-mono text-[10px]">TRIAGE CONDITION:</span>
+                      <span className="text-red-400 font-mono font-bold text-[10px]">{amb.patient.age}</span>
+                    </div>
+                    <div className="font-semibold text-white mb-2 font-sans">{amb.patient.condition}</div>
+                    
+                    <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 border-t border-slate-900 pt-1.5">
+                      <span>HR: <strong className="text-white">{amb.patient.vitals.hr}</strong> bpm</span>
+                      <span>BP: <strong className="text-white">{amb.patient.vitals.bp}</strong></span>
+                      <span>SpO2: <strong className="text-emerald-400">{amb.patient.vitals.spo2}%</strong></span>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Vital Telemetry Stats */}
-              <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-slate-900/90 border border-slate-800 mb-4 text-xs font-mono">
-                <div>
-                  <span className="text-slate-400 block text-[10px]">CURRENT SPEED:</span>
-                  <span className="text-emerald-400 font-bold text-sm">{amb.speed} {amb.speedUnit}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[10px]">HOSPITAL ETA:</span>
-                  <span className="text-white font-bold text-sm">{amb.eta} min</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[10px]">DISTANCE REMAINING:</span>
-                  <span className="text-slate-200 font-medium">{amb.distance}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[10px]">INTERSECTION ETA:</span>
-                  <span className="text-cyan-400 font-bold">{amb.currentIntersectionEta || 43} sec</span>
-                </div>
-              </div>
-
-              {/* Transit Details */}
-              <div className="space-y-2 text-xs font-mono mb-4 text-slate-300">
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-400">Current Location:</span>
-                  <span className="text-white font-medium">{amb.origin}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-400">Destination:</span>
-                  <span className="text-emerald-400 font-bold">{amb.destination}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-400">Route Status:</span>
-                  <span className="text-teal-300 font-medium">{amb.routeStatus}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-400">Driver / Paramedic:</span>
-                  <span className="text-slate-200">{amb.driver}</span>
-                </div>
-              </div>
-
-              {/* Patient Condition Details */}
-              {amb.patient && (
-                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-slate-400 font-mono text-[10px]">AUTHORIZED TRIAGE:</span>
-                    <span className="text-red-400 font-mono font-bold text-[10px]">{amb.patient.age}</span>
-                  </div>
-                  <div className="font-semibold text-white mb-2">{amb.patient.condition}</div>
-                  
-                  <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 border-t border-slate-900 pt-1.5">
-                    <span>HR: <strong className="text-white">{amb.patient.vitals.hr}</strong> bpm</span>
-                    <span>BP: <strong className="text-white">{amb.patient.vitals.bp}</strong></span>
-                    <span>SpO2: <strong className="text-emerald-400">{amb.patient.vitals.spo2}%</strong></span>
-                  </div>
-                </div>
-              )}
-
-              {/* Action Button */}
+              {/* Card Footer */}
               <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between">
                 <span className="text-[10px] font-mono text-slate-400">
                   BATTERY: {amb.batteryCharge} • O2: {amb.oxygenLevel}
@@ -2464,7 +3126,8 @@ window.AmbulanceFleetView = AmbulanceFleetView;
 /* ===== END FILE: AmbulanceFleetView.js ===== */
 
 /* ===== START FILE: HospitalView.js ===== */
-// resQClear Hospital Receiving & Trauma Readiness Dashboard
+// resQClear Hospital Emergency Receiving & Trauma Readiness Dashboard
+// Synchronized ER Bay Notifications & Bed Capacity Telemetry
 // [React hooks initialized at top level]
 
 function HospitalView({ simState }) {
@@ -2477,12 +3140,12 @@ function HospitalView({ simState }) {
         <div>
           <div className="flex items-center space-x-3">
             <h2 className="text-2xl font-extrabold text-white">Hospital Emergency Receiving Hubs</h2>
-            <span className="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold">
-              SIMULATION
+            <span className="px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold">
+              SIMULATION HUBS
             </span>
           </div>
           <p className="text-xs text-slate-400 font-mono mt-1">
-            Hospital notification simulated • Telemetry synchronized for ER bay preparation
+            Simulated ambulance arrival preparation • Telemetry synchronized for ER trauma bay readiness
           </p>
         </div>
         <div className="flex items-center space-x-3 text-xs font-mono">
@@ -2520,46 +3183,58 @@ function HospitalView({ simState }) {
                   </div>
                 </div>
 
-                {/* Status Badge */}
+                {/* ER Status Badge */}
                 <div className="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 border border-slate-800 mb-5 text-xs font-mono">
-                  <span className="text-slate-400">TRAUMA BAY STATUS:</span>
+                  <span className="text-slate-400">ER STATUS:</span>
                   <span className={`px-2.5 py-1 rounded font-bold border ${
                     isReady ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
                   }`}>
-                    {hosp.erStatus === 'READY' ? 'READY (TEAM NOTIFIED)' : 'STANDBY'}
+                    {isReady ? 'READY' : 'STANDBY'}
                   </span>
                 </div>
 
-                {/* Incoming Ambulance Card */}
-                <div className="p-4 rounded-xl bg-gradient-to-br from-slate-900 to-slate-950 border border-emerald-500/25 mb-5 space-y-3">
+                {/* Incoming Transport Card */}
+                <div className="p-4 rounded-xl bg-gradient-to-br from-slate-900 to-slate-950 border border-emerald-500/25 mb-4 space-y-3">
                   <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-slate-400">INCOMING TRANSPORT:</span>
-                    <span className="text-emerald-400 font-bold">{hosp.assignedAmbulance}</span>
+                    <span className="text-slate-400 uppercase">INCOMING TRANSPORT:</span>
+                    <span className="text-emerald-400 font-extrabold text-sm">{hosp.assignedAmbulance}</span>
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="grid grid-cols-2 gap-3 pt-1">
                     <div>
-                      <div className="text-[10px] font-mono text-slate-400 uppercase">ESTIMATED ARRIVAL (ETA)</div>
+                      <div className="text-[10px] font-mono text-slate-400 uppercase">ETA:</div>
                       <div className="text-2xl font-extrabold text-white font-mono">{incomingAmb.eta || hosp.eta} <span className="text-xs font-normal text-slate-400">min</span></div>
                     </div>
                     <div className="text-right">
-                      <div className="text-[10px] font-mono text-slate-400 uppercase">EMERGENCY STATUS</div>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-red-500/20 text-red-400 border border-red-500/30 font-bold">
+                      <div className="text-[10px] font-mono text-slate-400 uppercase">EMERGENCY:</div>
+                      <span className="inline-block mt-1 px-2.5 py-1 rounded text-[11px] font-mono bg-red-500/20 text-red-400 border border-red-500/30 font-bold">
                         {incomingAmb.status || 'CRITICAL'}
                       </span>
                     </div>
                   </div>
 
                   {incomingAmb.patient && (
-                    <div className="text-xs text-slate-300 pt-2 border-t border-slate-800/80">
+                    <div className="text-xs text-slate-300 pt-2 border-t border-slate-800/80 font-sans">
                       <strong>Triage:</strong> {incomingAmb.patient.condition} ({incomingAmb.patient.age})
                     </div>
                   )}
                 </div>
 
+                {/* AMBULANCE ARRIVAL PREPARATION */}
+                <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 mb-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono font-bold text-white uppercase">AMBULANCE ARRIVAL PREPARATION</span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-slate-950 border border-emerald-500/30 text-xs font-mono text-emerald-300 flex items-center space-x-2">
+                    <Icons.Bell className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                    <span>"Emergency arrival notification generated."</span>
+                  </div>
+                </div>
+
                 {/* Preparation Checklist */}
                 <div className="space-y-2 mb-4">
-                  <div className="text-xs font-mono font-bold text-slate-300 uppercase">Hospital Preparation Protocol:</div>
+                  <div className="text-xs font-mono font-bold text-slate-300 uppercase">Hospital Readiness Checklist:</div>
                   {hosp.readiness.map((item, idx) => (
                     <div key={idx} className="flex items-center space-x-2 text-xs text-slate-300">
                       <Icons.CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
@@ -2569,7 +3244,7 @@ function HospitalView({ simState }) {
                 </div>
               </div>
 
-              {/* Lead Doctor & Bed Capacity & Note */}
+              {/* Lead Doctor & Bed Capacity & Credibility Note */}
               <div className="pt-4 border-t border-slate-800/80 text-xs font-mono text-slate-400 flex flex-col space-y-2">
                 <div className="flex items-center justify-between">
                   <div>
@@ -2581,8 +3256,8 @@ function HospitalView({ simState }) {
                     <strong className="text-emerald-400">{hosp.icuFree} Available</strong>
                   </div>
                 </div>
-                <div className="text-[10px] text-slate-400 text-center pt-1 border-t border-slate-900">
-                  {hosp.integrationNote || 'Hospital notification simulated'}
+                <div className="text-[10px] text-slate-500 text-center pt-1 border-t border-slate-900">
+                  Simulated hospital readiness • Not connected to real hospital ER infrastructure
                 </div>
               </div>
             </div>
@@ -2599,6 +3274,7 @@ window.HospitalView = HospitalView;
 
 /* ===== START FILE: AnalyticsView.js ===== */
 // resQClear Traffic Analytics & Performance Metrics Component
+// Enterprise Visualization with Response Times, Wait Times, Delay Reductions & Corridor Stats
 // [React hooks initialized at top level]
 
 function AnalyticsView({ simState }) {
@@ -2612,11 +3288,11 @@ function AnalyticsView({ simState }) {
           <div className="flex items-center space-x-3">
             <h2 className="text-2xl font-extrabold text-white">Emergency Traffic Analytics & Corridors</h2>
             <span className="px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-mono font-bold">
-              SIMULATION DATA
+              DEMO DATA
             </span>
           </div>
           <p className="text-xs text-slate-400 font-mono mt-1">
-            All analytics shown are simulated demonstration data.
+            Simulated demonstration analytics • Empirical corridor performance modeling
           </p>
         </div>
 
@@ -2630,42 +3306,42 @@ function AnalyticsView({ simState }) {
         </div>
       </div>
 
-      {/* 6 Key Simulated Metrics Grid */}
+      {/* 6 Core Analytical Performance Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 font-mono">
         <div className="glass-panel p-4 rounded-xl border border-slate-800">
-          <div className="text-[10px] text-slate-400 uppercase">Simulated Travel Time</div>
+          <div className="text-[10px] text-slate-400 uppercase">Emergency Response Time</div>
           <div className="text-xl font-extrabold text-emerald-400 mt-1">06:14 min</div>
-          <div className="text-[9px] text-slate-400 mt-0.5">Avg per critical route</div>
+          <div className="text-[9px] text-slate-500 mt-0.5">Avg per critical route</div>
         </div>
 
         <div className="glass-panel p-4 rounded-xl border border-slate-800">
-          <div className="text-[10px] text-slate-400 uppercase">Estimated Delay Avoided</div>
-          <div className="text-xl font-extrabold text-teal-300 mt-1">2m 18s</div>
-          <div className="text-[9px] text-slate-400 mt-0.5">Peak bottleneck savings</div>
-        </div>
-
-        <div className="glass-panel p-4 rounded-xl border border-slate-800">
-          <div className="text-[10px] text-slate-400 uppercase">Intersection Wait Time</div>
+          <div className="text-[10px] text-slate-400 uppercase">Intersection Waiting Time</div>
           <div className="text-xl font-extrabold text-cyan-400 mt-1">4.2 sec</div>
-          <div className="text-[9px] text-slate-400 mt-0.5">Reduced from 48s base</div>
+          <div className="text-[9px] text-slate-500 mt-0.5">Reduced from 48s baseline</div>
+        </div>
+
+        <div className="glass-panel p-4 rounded-xl border border-slate-800">
+          <div className="text-[10px] text-slate-400 uppercase">Traffic Congestion Delay</div>
+          <div className="text-xl font-extrabold text-teal-300 mt-1">-32.4%</div>
+          <div className="text-[9px] text-slate-500 mt-0.5">2m 18s avoided</div>
         </div>
 
         <div className="glass-panel p-4 rounded-xl border border-slate-800">
           <div className="text-[10px] text-slate-400 uppercase">Route Efficiency</div>
           <div className="text-xl font-extrabold text-purple-400 mt-1">+33.8%</div>
-          <div className="text-[9px] text-slate-400 mt-0.5">Corridor flow boost</div>
+          <div className="text-[9px] text-slate-500 mt-0.5">Corridor flow boost</div>
         </div>
 
         <div className="glass-panel p-4 rounded-xl border border-slate-800">
           <div className="text-[10px] text-slate-400 uppercase">Corridor Activations</div>
           <div className="text-xl font-extrabold text-emerald-400 mt-1">14 Nodes</div>
-          <div className="text-[9px] text-slate-400 mt-0.5">Dynamic phase overrides</div>
+          <div className="text-[9px] text-slate-500 mt-0.5">Dynamic phase overrides</div>
         </div>
 
         <div className="glass-panel p-4 rounded-xl border border-slate-800">
-          <div className="text-[10px] text-slate-400 uppercase">Conflict Events</div>
+          <div className="text-[10px] text-slate-400 uppercase">Multi-Ambulance Conflicts</div>
           <div className="text-xl font-extrabold text-amber-400 mt-1">12 Events</div>
-          <div className="text-[9px] text-slate-400 mt-0.5">Zero cross-axis deadlock</div>
+          <div className="text-[9px] text-slate-500 mt-0.5">Zero cross-axis deadlock</div>
         </div>
       </div>
 
@@ -2675,13 +3351,13 @@ function AnalyticsView({ simState }) {
         <div className="lg:col-span-8 glass-panel p-6 rounded-2xl border border-slate-800 flex flex-col justify-between">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
             <div>
-              <h3 className="text-base font-bold text-white">Simulated Ambulance Transit Time (Minutes)</h3>
-              <p className="text-xs text-slate-400 font-mono">Hourly response comparison: Traditional siren vs resQClear AI corridor</p>
+              <h3 className="text-base font-bold text-white">Emergency Response Time Comparison (Minutes)</h3>
+              <p className="text-xs text-slate-400 font-mono">Hourly transit duration: Traditional siren baseline vs resQClear AI corridor</p>
             </div>
             <div className="flex items-center space-x-4 text-xs font-mono">
               <div className="flex items-center space-x-1.5">
                 <span className="w-3 h-3 rounded-full bg-red-400/80"></span>
-                <span className="text-slate-300">Traditional Siren Base</span>
+                <span className="text-slate-300">Traditional Siren Baseline</span>
               </div>
               <div className="flex items-center space-x-1.5">
                 <span className="w-3 h-3 rounded-full bg-emerald-400"></span>
@@ -2690,7 +3366,7 @@ function AnalyticsView({ simState }) {
             </div>
           </div>
 
-          {/* SVG Bar / Area Chart */}
+          {/* SVG Bar Chart */}
           <div className="h-64 w-full relative">
             <svg className="w-full h-full" viewBox="0 0 700 220" preserveAspectRatio="none">
               {/* Horizontal Grid lines */}
@@ -2726,8 +3402,8 @@ function AnalyticsView({ simState }) {
           </div>
 
           <div className="mt-4 pt-3 border-t border-slate-800/80 text-xs font-mono text-slate-400 flex items-center justify-between">
-            <span>Rush Hour Savings: <strong>11.3 min avoided during 18:00 peak</strong></span>
-            <span className="text-emerald-400 font-bold">Average Corridor Improvement: +33.8%</span>
+            <span>Peak Hour Avoidance: <strong>11.3 min delay avoided during 18:00 rush hour</strong></span>
+            <span className="text-emerald-400 font-bold">Corridor Efficiency Boost: +33.8%</span>
           </div>
         </div>
 
@@ -2753,7 +3429,7 @@ function AnalyticsView({ simState }) {
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-slate-800/80 text-[11px] font-mono text-slate-400 text-center">
+          <div className="mt-6 pt-4 border-t border-slate-800/80 text-[11px] font-mono text-slate-500 text-center">
             All analytics shown are simulated demonstration data.
           </div>
         </div>
@@ -2768,10 +3444,11 @@ window.AnalyticsView = AnalyticsView;
 
 /* ===== START FILE: TrafficNetworkView.js ===== */
 // resQClear Traffic Network & Intersections Control View
+// Network Status, 6 Intersections, Simulated Signals, and Congestion Overview
 // [React hooks initialized at top level]
 
 function TrafficNetworkView({ simState }) {
-  const { intersections = [], conflictState = {} } = simState || {};
+  const { intersections = [], conflictState = {}, networkStatus = {}, congestionZones = [], ambulances = [] } = simState || {};
 
   return (
     <div className="space-y-6">
@@ -2781,7 +3458,7 @@ function TrafficNetworkView({ simState }) {
           <div className="flex items-center space-x-3">
             <h2 className="text-2xl font-extrabold text-white">Smart Traffic Signal Network (Simulated)</h2>
             <span className="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold">
-              SIMULATION
+              SIMULATED SIGNAL CONTROL
             </span>
           </div>
           <p className="text-xs text-slate-400 font-mono mt-1">
@@ -2793,12 +3470,47 @@ function TrafficNetworkView({ simState }) {
             TOTAL NODES: <strong className="text-white">{intersections.length}</strong>
           </span>
           <span className="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
-            V2X SIMULATION SYNC
+            60 FPS DIGITAL TWIN
           </span>
         </div>
       </div>
 
-      {/* Intersections Grid */}
+      {/* 17. NETWORK STATUS OVERVIEW VIEW */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 font-mono">
+        <div className="glass-panel p-4 rounded-xl border border-slate-800 text-center">
+          <div className="text-2xl font-extrabold text-white">{networkStatus.intersectionsOnline || 6}</div>
+          <div className="text-[11px] text-emerald-400 font-bold mt-0.5">INTERSECTIONS ONLINE</div>
+          <div className="text-[9px] text-slate-500 mt-1">V2X Grid Connected</div>
+        </div>
+
+        <div className="glass-panel p-4 rounded-xl border border-slate-800 text-center">
+          <div className="text-2xl font-extrabold text-white">{networkStatus.ambulancesTracked || 3}</div>
+          <div className="text-[11px] text-cyan-400 font-bold mt-0.5">AMBULANCES TRACKED</div>
+          <div className="text-[9px] text-slate-500 mt-1">2 Critical ALS + 1 Urgent</div>
+        </div>
+
+        <div className="glass-panel p-4 rounded-xl border border-slate-800 text-center">
+          <div className="text-2xl font-extrabold text-white">{networkStatus.hospitalsAvailable || 3}</div>
+          <div className="text-[11px] text-teal-300 font-bold mt-0.5">HOSPITALS AVAILABLE</div>
+          <div className="text-[9px] text-slate-500 mt-1">Trauma Bays Prepared</div>
+        </div>
+
+        <div className="glass-panel p-4 rounded-xl border border-slate-800 text-center">
+          <div className="text-2xl font-extrabold text-amber-400">{congestionZones.filter(z => z.active).length}</div>
+          <div className="text-[11px] text-amber-400 font-bold mt-0.5">CONGESTION ZONES DETECTED</div>
+          <div className="text-[9px] text-slate-500 mt-1">Anna Salai & Usman Bottlenecks</div>
+        </div>
+
+        <div className="glass-panel p-4 rounded-xl border border-slate-800 text-center">
+          <div className={`text-2xl font-extrabold ${networkStatus.activeConflicts > 0 ? 'text-red-400 animate-pulse' : 'text-emerald-400'}`}>
+            {networkStatus.activeConflicts || 0}
+          </div>
+          <div className="text-[11px] text-red-400 font-bold mt-0.5">ACTIVE CONFLICT</div>
+          <div className="text-[9px] text-slate-500 mt-1">{networkStatus.activeConflicts > 0 ? 'INT-04 Arbitration Active' : 'All Clear'}</div>
+        </div>
+      </div>
+
+      {/* 6 Intersections Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {intersections.map((inter) => {
           const isConflictNode = inter.id === 'int-4';
@@ -2823,7 +3535,7 @@ function TrafficNetworkView({ simState }) {
                   </div>
                   <div>
                     <h3 className="font-extrabold text-base text-white">{inter.name}</h3>
-                    <p className="text-xs text-slate-400 font-mono">{inter.code || inter.id.toUpperCase()} • Simulation Coordinates: ({inter.x}, {inter.y})</p>
+                    <p className="text-xs text-slate-400 font-mono">{inter.code || inter.id.toUpperCase()} • Simulated Coordinates: ({inter.x}, {inter.y})</p>
                   </div>
                 </div>
               </div>
@@ -2866,14 +3578,14 @@ function TrafficNetworkView({ simState }) {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Cycle Mode:</span>
+                  <span className="text-slate-400">Simulated Signal Mode:</span>
                   <span className="text-teal-300 font-medium">{inter.modeLabel || 'NORMAL CYCLE'}</span>
                 </div>
               </div>
 
               {/* Footer */}
               <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
-                <span>SIMULATION INTEGRATION: <strong className="text-emerald-400">OK</strong></span>
+                <span>SIMULATED SIGNAL CONTROL: <strong className="text-emerald-400">OK</strong></span>
                 <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300">
                   LATENCY: 18ms
                 </span>
@@ -3039,6 +3751,7 @@ window.SettingsView = SettingsView;
 
 /* ===== START FILE: DemoControls.js ===== */
 // resQClear Dedicated Simulation Demo Controls Bar
+// Enterprise Control Room Actions: Playback, Hero Scenario, Speed, and Event Injections
 // [React hooks initialized at top level]
 
 function DemoControls({ simState, onRunScenario, onStart, onPause, onReset, onTriggerA, onTriggerB, onTriggerBoth, onCreateJam, onClearJam, onSetSpeed, onToggleSound, soundEnabled }) {
@@ -3046,7 +3759,7 @@ function DemoControls({ simState, onRunScenario, onStart, onPause, onReset, onTr
 
   return (
     <div className="glass-panel p-3.5 sm:p-4 rounded-2xl border border-slate-700/80 bg-slate-950/95 shadow-2xl flex flex-wrap items-center justify-between gap-3">
-      {/* Left Group: HERO BUTTON (Run Emergency Scenario) */}
+      {/* Left Group: HERO BUTTON (RUN EMERGENCY SCENARIO) */}
       <div className="flex items-center space-x-3">
         <button
           onClick={onRunScenario}
@@ -3065,7 +3778,7 @@ function DemoControls({ simState, onRunScenario, onStart, onPause, onReset, onTr
           <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-mono">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
             <span className="text-slate-400">STEP:</span>
-            <span className="text-emerald-400 font-bold">{scenarioStep || 1} / 12</span>
+            <span className="text-emerald-400 font-bold">{scenarioStep || 1} / 16</span>
           </div>
         )}
       </div>
@@ -3176,55 +3889,60 @@ window.DemoControls = DemoControls;
 /* ===== END FILE: DemoControls.js ===== */
 
 /* ===== START FILE: PresentationMode.js ===== */
-// resQClear Startup Pitch Presentation Mode Component
+// resQClear Startup Presentation & Pitch Mode Component
+// Cinematic, High-Density Operations Deck for Investors & Municipal Stakeholders
 // [React hooks initialized at top level]
 
 function PresentationMode({ simState, onExit, onRunScenario }) {
-  const { conflictState = {}, liveMetrics = {} } = simState || {};
+  const { conflictState = {}, liveMetrics = {}, ambulances = [], events = [], intersections = [] } = simState || {};
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  const ambA = ambulances.find(a => a.id === 'AMB-104') || {};
+  const ambB = ambulances.find(a => a.id === 'AMB-208') || {};
+  const int4 = intersections.find(i => i.id === 'int-4') || {};
 
   const narrativeSteps = [
     {
       id: 1,
       tag: 'STEP 01',
-      title: 'EMERGENCY DETECTED',
-      desc: 'High-priority cardiac alert dispatched from Anna Nagar. resQClear vehicle telemetry immediately acquires emergency unit location.',
+      title: 'NORMAL TRAFFIC ACTIVE',
+      desc: 'Urban grid operates under standard cyclic signal phasing across all 6 intersections.',
+      icon: Icons.TrafficLight,
+      color: 'text-emerald-400',
+      border: 'border-emerald-500/40'
+    },
+    {
+      id: 2,
+      tag: 'STEP 02',
+      title: 'AMBULANCE A DISPATCHED (CARDIAC)',
+      desc: 'AMB-104 dispatched from Anna Nagar heading toward Government Hospital under Critical STEMI triage.',
       icon: Icons.Ambulance,
       color: 'text-red-400',
       border: 'border-red-500/40'
     },
     {
-      id: 2,
-      tag: 'STEP 02',
-      title: 'TRAFFIC CONGESTION PREDICTED',
-      desc: 'Predictive neural model detects severe bottleneck (+2.4 min delay) along primary arterial corridor.',
-      icon: Icons.Activity,
+      id: 3,
+      tag: 'STEP 03',
+      title: 'AMBULANCE B DISPATCHED (POLYTRAUMA)',
+      desc: 'AMB-208 dispatched simultaneously from T. Nagar heading toward Apollo Hospital.',
+      icon: Icons.Ambulance,
       color: 'text-amber-400',
       border: 'border-amber-500/40'
     },
     {
-      id: 3,
-      tag: 'STEP 03',
-      title: 'MULTIPLE EMERGENCY VEHICLES DETECTED',
-      desc: 'Secondary critical ALS unit dispatched simultaneously from T. Nagar heading toward Apollo Hospital.',
+      id: 4,
+      tag: 'STEP 04',
+      title: 'CROSS-AXIS CONFLICT DETECTED',
+      desc: 'resQClear detects both critical ALS units converging on INT-04 simultaneously (43s vs 50s ETA).',
       icon: Icons.AlertTriangle,
       color: 'text-red-400',
       border: 'border-red-500/40'
     },
     {
-      id: 4,
-      tag: 'STEP 04',
-      title: 'CONFLICT INTERSECTION IDENTIFIED',
-      desc: 'Convergence analysis identifies impending simultaneous arrival at Intersection 4 (Central Conflict Junction).',
-      icon: Icons.Crosshair,
-      color: 'text-amber-400',
-      border: 'border-amber-500/40'
-    },
-    {
       id: 5,
       tag: 'STEP 05',
-      title: 'AI-ASSISTED CONFLICT RESOLUTION',
-      desc: 'Transparent scoring model evaluates ETA (43s vs 50s), distance, and turning movements to formulate sequential priority.',
+      title: 'AI-ASSISTED SEQUENCE GENERATED',
+      desc: 'Scoring model evaluates ETA, approach vectors, and occupancy: Priority 01 granted to AMB-104 (7s earlier).',
       icon: Icons.Cpu,
       color: 'text-cyan-400',
       border: 'border-cyan-500/40'
@@ -3232,8 +3950,8 @@ function PresentationMode({ simState, onExit, onRunScenario }) {
     {
       id: 6,
       tag: 'STEP 06',
-      title: 'AMB-104 — PRIORITY 01',
-      desc: 'Simulated emergency corridor locked on North-South axis. Traffic signal turns green for AMB-104.',
+      title: 'SIMULATED GREEN CORRIDOR: AMB-104',
+      desc: 'Emergency green wave locked for North link. AMB-104 proceeds through INT-04 with zero deceleration.',
       icon: Icons.TrafficLight,
       color: 'text-emerald-400',
       border: 'border-emerald-500/40'
@@ -3241,26 +3959,26 @@ function PresentationMode({ simState, onExit, onRunScenario }) {
     {
       id: 7,
       tag: 'STEP 07',
-      title: 'INTERSECTION CLEARED',
-      desc: 'AMB-104 safely clears intersection without deceleration. System immediately initiates phase transfer.',
+      title: 'AMB-104 INTERSECTION CLEARED',
+      desc: 'AMB-104 clears conflict zone. System immediately transitions signal phase to secondary corridor.',
       icon: Icons.CheckCircle2,
-      color: 'text-emerald-400',
-      border: 'border-emerald-500/40'
-    },
-    {
-      id: 8,
-      tag: 'STEP 08',
-      title: 'AMB-208 — PRIORITY 02',
-      desc: 'South corridor emergency green wave activated for AMB-208. Secondary clearance proceeds smoothly.',
-      icon: Icons.TrafficLight,
       color: 'text-teal-300',
       border: 'border-teal-500/40'
     },
     {
+      id: 8,
+      tag: 'STEP 08',
+      title: 'SIMULATED GREEN CORRIDOR: AMB-208',
+      desc: 'South corridor green wave active. AMB-208 proceeds through INT-04 smoothly without complete stop.',
+      icon: Icons.TrafficLight,
+      color: 'text-emerald-400',
+      border: 'border-emerald-500/40'
+    },
+    {
       id: 9,
       tag: 'STEP 09',
-      title: 'INTERSECTION CLEARED',
-      desc: 'AMB-208 clears intersection safely without coming to a complete stop.',
+      title: 'AMB-208 INTERSECTION CLEARED',
+      desc: 'Secondary critical vehicle safely cleared without cross-axis deadlock or emergency braking.',
       icon: Icons.CheckCircle2,
       color: 'text-emerald-400',
       border: 'border-emerald-500/40'
@@ -3268,8 +3986,8 @@ function PresentationMode({ simState, onExit, onRunScenario }) {
     {
       id: 10,
       tag: 'STEP 10',
-      title: 'EMERGENCY ROUTES COORDINATED',
-      desc: 'Both emergency routes coordinated successfully. Traffic signal returns to normal municipal cycle.',
+      title: 'CONFLICT RESOLVED & CYCLES RESTORED',
+      desc: 'Both emergency routes coordinated successfully. Simulated delay avoided: 2m 18s.',
       icon: Icons.ShieldCheck,
       color: 'text-emerald-400',
       border: 'border-emerald-500/40'
@@ -3278,8 +3996,8 @@ function PresentationMode({ simState, onExit, onRunScenario }) {
 
   // Map simulation state to active narrative slide
   useEffect(() => {
-    if (conflictState.stage === 'DETECTED') setCurrentSlide(2);
-    else if (conflictState.stage === 'RESOLVING') setCurrentSlide(4);
+    if (conflictState.stage === 'DETECTING') setCurrentSlide(3);
+    else if (conflictState.stage === 'ANALYZING') setCurrentSlide(4);
     else if (conflictState.stage === 'PRIORITY_A') setCurrentSlide(5);
     else if (conflictState.stage === 'A_CLEARED') setCurrentSlide(6);
     else if (conflictState.stage === 'PRIORITY_B') setCurrentSlide(7);
@@ -3287,16 +4005,15 @@ function PresentationMode({ simState, onExit, onRunScenario }) {
   }, [conflictState.stage]);
 
   const activeStep = narrativeSteps[currentSlide] || narrativeSteps[0];
-  const isFinalSlide = currentSlide === narrativeSteps.length - 1;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-2xl flex flex-col justify-between p-4 sm:p-8 animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-50 bg-slate-950/98 backdrop-blur-2xl flex flex-col justify-between p-4 sm:p-6 animate-in fade-in duration-300 overflow-y-auto">
       {/* Top Bar */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-800">
         <div className="flex items-center space-x-3">
           <ResQClearLogo />
-          <span className="hidden sm:inline-block px-2.5 py-1 rounded bg-purple-500/10 text-purple-400 border border-purple-500/30 text-xs font-mono font-bold">
-            PRESENTATION MODE • INVESTOR / HACKATHON DEMO
+          <span className="hidden sm:inline-block px-2.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/30 text-xs font-mono font-bold">
+            PRESENTATION MODE • PITCH DECK
           </span>
         </div>
 
@@ -3309,58 +4026,58 @@ function PresentationMode({ simState, onExit, onRunScenario }) {
             className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-mono font-bold flex items-center space-x-2 transition-all shadow-lg shadow-emerald-500/20"
           >
             <Icons.Zap className="w-4 h-4" />
-            <span>Re-Run Live Scenario</span>
+            <span>Launch Automated Scenario</span>
           </button>
 
           <button
             onClick={onExit}
             className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 text-xs font-mono font-bold transition-all"
           >
-            Exit Presentation Mode
+            Exit Presentation
           </button>
         </div>
       </div>
 
-      {/* Main Presentation Stage */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center my-auto py-6">
-        {/* Left Side: Live Simulation Map View */}
-        <div className="lg:col-span-7 h-[420px] sm:h-[480px] rounded-2xl overflow-hidden border border-slate-800 shadow-2xl relative">
+      {/* Main Presentation Grid: MAP, AMBULANCES, CONFLICT ENGINE, SIGNAL, TIMELINE, METRICS */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 my-auto py-4">
+        {/* Left Side (7 Cols): MAP HERO */}
+        <div className="lg:col-span-7 h-[460px] sm:h-[520px] rounded-2xl overflow-hidden border border-slate-800 shadow-2xl relative">
           <LiveMap simState={simState} />
         </div>
 
-        {/* Right Side: High-Impact Narrative Card */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl relative overflow-hidden">
-            {/* Top Indicator */}
-            <div className="flex items-center justify-between mb-4">
+        {/* Right Side (5 Cols): CONFLICT ENGINE + TELEMETRY + TIMELINE + NARRATIVE */}
+        <div className="lg:col-span-5 space-y-4">
+          {/* Active Narrative Slide */}
+          <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-2xl relative overflow-hidden">
+            <div className="flex items-center justify-between mb-3">
               <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold border ${activeStep.border} ${activeStep.color} bg-slate-950`}>
                 {activeStep.tag} • STEP {currentSlide + 1} OF 10
               </span>
-              <span className="text-xs font-mono text-slate-400">SIMULATION DEMO</span>
+              <span className="text-xs font-mono text-slate-400">PITCH STORY</span>
             </div>
 
-            <div className="flex items-start space-x-4 my-4">
-              <div className={`p-3.5 rounded-2xl bg-slate-950 border ${activeStep.border} ${activeStep.color}`}>
-                <activeStep.icon className="w-7 h-7" />
+            <div className="flex items-start space-x-3.5 my-2">
+              <div className={`p-3 rounded-2xl bg-slate-950 border ${activeStep.border} ${activeStep.color} flex-shrink-0`}>
+                <activeStep.icon className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight leading-snug">
+                <h2 className="text-lg sm:text-xl font-extrabold text-white tracking-tight leading-snug">
                   {activeStep.title}
                 </h2>
-                <p className="mt-2 text-sm text-slate-300 leading-relaxed">
+                <p className="mt-1 text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
                   {activeStep.desc}
                 </p>
               </div>
             </div>
 
-            {/* Step Navigation Dots */}
-            <div className="flex items-center space-x-1.5 pt-6 border-t border-slate-800/80 overflow-x-auto pb-1">
+            {/* Slide Dots */}
+            <div className="flex items-center space-x-1.5 pt-4 border-t border-slate-800/80 overflow-x-auto">
               {narrativeSteps.map((s, idx) => (
                 <button
                   key={s.id}
                   onClick={() => setCurrentSlide(idx)}
-                  className={`h-2.5 rounded-full transition-all ${
-                    currentSlide === idx ? 'w-8 bg-emerald-400' : 'w-2 bg-slate-700 hover:bg-slate-600'
+                  className={`h-2 rounded-full transition-all ${
+                    currentSlide === idx ? 'w-7 bg-emerald-400' : 'w-2 bg-slate-700 hover:bg-slate-600'
                   }`}
                   title={s.title}
                 />
@@ -3368,54 +4085,74 @@ function PresentationMode({ simState, onExit, onRunScenario }) {
             </div>
           </div>
 
-          {/* Impact Summary Metrics / Final Slide Summary */}
-          <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
-            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider font-bold">
-              SIMULATED DEMO IMPACT
+          {/* Key Ambulances & Conflict State Snapshot */}
+          <div className="grid grid-cols-2 gap-3 font-mono text-xs">
+            <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-bold text-white">AMB-104</span>
+                <span className="text-[10px] text-red-400 font-bold">CRITICAL</span>
+              </div>
+              <div className="text-slate-400 text-[11px]">ETA: <strong className="text-emerald-400">{ambA.currentIntersectionEta || 43}s</strong></div>
+              <div className="text-slate-400 text-[11px]">Distance: <strong className="text-white">{ambA.distanceToConflict || 555}m</strong></div>
+              <div className="text-[10px] text-emerald-400 font-bold mt-1">PRIORITY 01</div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 font-mono">
-              <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-center">
-                <div className="text-lg font-extrabold text-emerald-400">2</div>
-                <div className="text-[10px] text-slate-400 leading-tight">Ambulances Coordinated</div>
+            <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-bold text-white">AMB-208</span>
+                <span className="text-[10px] text-red-400 font-bold">CRITICAL</span>
               </div>
-
-              <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-center">
-                <div className="text-lg font-extrabold text-teal-300">1</div>
-                <div className="text-[10px] text-slate-400 leading-tight">Conflict Node Resolved</div>
-              </div>
-
-              <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-center">
-                <div className="text-lg font-extrabold text-cyan-400">2m 18s</div>
-                <div className="text-[10px] text-slate-400 leading-tight">Est. Delay Avoided</div>
-              </div>
+              <div className="text-slate-400 text-[11px]">ETA: <strong className="text-amber-400">{ambB.currentIntersectionEta || 50}s</strong></div>
+              <div className="text-slate-400 text-[11px]">Distance: <strong className="text-white">{ambB.distanceToConflict || 555}m</strong></div>
+              <div className="text-[10px] text-slate-300 font-bold mt-1">PRIORITY 02</div>
             </div>
+          </div>
 
-            <div className="text-[10px] font-mono text-slate-400 text-center pt-1">
-              resQClear: “Clear the way. Save lives.” • Simulation Prototype
+          {/* Traffic Signal Simulation Indicator */}
+          <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between font-mono text-xs">
+            <div className="flex items-center space-x-2">
+              <Icons.TrafficLight className="w-4 h-4 text-emerald-400" />
+              <span className="text-slate-400">INT-04 SIGNAL PHASE:</span>
+            </div>
+            <strong className="text-emerald-400">{conflictState.signalPhase || 'NORMAL CYCLE'}</strong>
+          </div>
+
+          {/* Metrics Summary */}
+          <div className="grid grid-cols-3 gap-2 font-mono text-center">
+            <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+              <div className="text-base font-extrabold text-white">2</div>
+              <div className="text-[9px] text-slate-400">Ambulances Coordinated</div>
+            </div>
+            <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+              <div className="text-base font-extrabold text-teal-300">1</div>
+              <div className="text-[9px] text-slate-400">Conflict Junction</div>
+            </div>
+            <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+              <div className="text-base font-extrabold text-emerald-400">2m 18s</div>
+              <div className="text-[9px] text-slate-400">Est. Delay Avoided</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Footer Controls */}
-      <div className="flex items-center justify-between pt-4 border-t border-slate-800 text-xs font-mono text-slate-400">
+      {/* Bottom Footer Navigation */}
+      <div className="flex items-center justify-between pt-3 border-t border-slate-800 text-xs font-mono text-slate-400">
         <button
           onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
           disabled={currentSlide === 0}
           className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed border border-slate-800 text-white font-bold transition-all"
         >
-          ← Previous Step
+          ← Previous
         </button>
 
-        <span className="hidden sm:inline">Use controls or run scenario to observe dynamic progression</span>
+        <span className="hidden sm:inline">resQClear: “Clear the way. Save lives.” • Simulation Prototype</span>
 
         <button
           onClick={() => setCurrentSlide(Math.min(narrativeSteps.length - 1, currentSlide + 1))}
           disabled={currentSlide === narrativeSteps.length - 1}
           className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-30 disabled:cursor-not-allowed text-slate-950 font-bold transition-all"
         >
-          Next Step →
+          Next →
         </button>
       </div>
     </div>
@@ -3428,11 +4165,12 @@ window.PresentationMode = PresentationMode;
 
 /* ===== START FILE: TopNav.js ===== */
 // resQClear Operations Center Top Navigation Bar
+// Enterprise Control Room Styling & Real-Time Telemetry Badges
 // [React hooks initialized at top level]
 
 function TopNav({ simState, onLaunchScenario, onTogglePresentation, onToggleSound, soundEnabled, onOpenLanding }) {
   const [timeStr, setTimeStr] = useState('');
-  const { conflictState = {}, scenarioRunning = false } = simState || {};
+  const { conflictState = {}, scenarioRunning = false, scenarioStep = 1, networkStatus = {} } = simState || {};
 
   useEffect(() => {
     const updateTime = () => {
@@ -3444,91 +4182,106 @@ function TopNav({ simState, onLaunchScenario, onTogglePresentation, onToggleSoun
     return () => clearInterval(timer);
   }, []);
 
-  const getSystemStatus = () => {
-    if (conflictState.stage === 'DETECTED' || conflictState.stage === 'RESOLVING') {
-      return { text: 'AI CONFLICT ARBITRATION ACTIVE', color: 'text-red-400', bg: 'bg-red-500/15', border: 'border-red-500/40', dot: 'bg-red-500 animate-ping' };
-    }
-    if (conflictState.stage === 'PRIORITY_A' || conflictState.stage === 'PRIORITY_B') {
-      return { text: 'SIMULATED EMERGENCY CORRIDOR ENGAGED', color: 'text-emerald-400', bg: 'bg-emerald-500/15', border: 'border-emerald-500/40', dot: 'bg-emerald-400 animate-pulse' };
-    }
-    return { text: 'GRID NORMAL • 6 SIGNALS ONLINE', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', dot: 'bg-emerald-400' };
-  };
-
-  const status = getSystemStatus();
-
   return (
-    <header className="h-16 border-b border-slate-800 bg-slate-950/90 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between z-30 sticky top-0">
-      {/* Left: Logo & Persistent SIMULATION MODE Badge */}
+    <header className="h-16 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between z-30 sticky top-0 flex-shrink-0">
+      {/* Left: Logo & Core Status Indicators */}
       <div className="flex items-center space-x-4">
-        <div onClick={onOpenLanding} className="cursor-pointer" title="Go to Landing Page">
+        <div onClick={onOpenLanding} className="cursor-pointer" title="Go to resQClear Landing Page">
           <ResQClearLogo size="default" />
         </div>
 
-        <div className="hidden lg:flex items-center space-x-2 px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-[11px] font-mono">
+        {/* Status Indicators Pill Group */}
+        <div className="hidden xl:flex items-center space-x-3 pl-3 border-l border-slate-800 text-[11px] font-mono">
+          <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 font-bold">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>SIMULATION ACTIVE</span>
+          </div>
+
+          <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-300">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+            <span>CHENNAI DIGITAL TWIN</span>
+          </div>
+
+          <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-300">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <span>{networkStatus.intersectionsOnline || 6} INTERSECTIONS ONLINE</span>
+          </div>
+
+          <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-300">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <span>SYSTEM HEALTH: NORMAL</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Middle: Compact Status Badge for Medium Screens */}
+      <div className="hidden md:flex xl:hidden items-center space-x-2">
+        <div className="flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-mono bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span className="text-white font-bold">SIMULATION MODE</span>
-          <span className="text-slate-500">|</span>
-          <span className="text-slate-400">CHENNAI METRO GRID</span>
+          <span>SIMULATION ACTIVE • 6 SIGNALS ONLINE</span>
         </div>
       </div>
 
-      {/* Middle: Live System Status Pill */}
-      <div className="hidden md:flex items-center space-x-3">
-        <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-mono font-semibold border ${status.bg} ${status.border} ${status.color}`}>
-          <span className={`w-2 h-2 rounded-full ${status.dot}`}></span>
-          <span>{status.text}</span>
-        </div>
-      </div>
-
-      {/* Right: Clock, Presentation Mode, Audio, User Profile */}
-      <div className="flex items-center space-x-3 sm:space-x-4">
+      {/* Right: Clock, Action Buttons, Audio, User Profile */}
+      <div className="flex items-center space-x-2 sm:space-x-3">
         {/* Live Clock */}
-        <div className="hidden sm:flex items-center space-x-2 font-mono text-xs text-slate-300 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800">
-          <span className="text-slate-400">IST</span>
-          <span className="text-emerald-400 font-bold">{timeStr || '18:42:00'}</span>
+        <div className="hidden sm:flex items-center space-x-2 font-mono text-xs text-slate-300 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800 shadow-inner">
+          <span className="text-slate-400 text-[10px]">IST</span>
+          <span className="text-emerald-400 font-bold tracking-wider">{timeStr || '13:55:32'}</span>
         </div>
 
-        {/* Hero Scenario Trigger */}
+        {/* SCENARIO DEMO Button */}
         <button
           onClick={onLaunchScenario}
-          className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-red-500/20 to-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 text-xs font-mono font-bold transition-all"
-          title="Run Dual Ambulance Conflict Scenario"
+          className={`px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center space-x-2 transition-all border ${
+            scenarioRunning
+              ? 'bg-gradient-to-r from-red-500/30 to-emerald-500/30 text-emerald-300 border-emerald-500 ring-2 ring-emerald-500/40 animate-pulse'
+              : 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border-emerald-500/40 hover:border-emerald-400 shadow-lg shadow-emerald-950/40'
+          }`}
+          title="Run Automated Dual Ambulance Conflict Demo"
         >
           <Icons.Zap className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Scenario Demo</span>
+          <span className="hidden sm:inline">SCENARIO DEMO</span>
+          <span className="sm:hidden">DEMO</span>
+          {scenarioRunning && (
+            <span className="px-1.5 py-0.2 rounded bg-emerald-500 text-slate-950 text-[9px] font-extrabold">
+              {scenarioStep}/16
+            </span>
+          )}
         </button>
 
-        {/* Presentation Mode Toggle */}
+        {/* PRESENTATION MODE Button */}
         <button
           onClick={onTogglePresentation}
-          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-purple-500/10 text-purple-300 border border-purple-500/30 hover:bg-purple-500/20 text-xs font-mono font-bold transition-all"
-          title="Startup Presentation Pitch Mode"
+          className="px-3 py-1.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 hover:border-purple-400 text-xs font-mono font-bold transition-all flex items-center space-x-1.5"
+          title="Startup Pitch Presentation Mode"
         >
           <Icons.Presentation className="w-3.5 h-3.5 text-purple-400" />
-          <span className="hidden md:inline">Pitch Mode</span>
+          <span className="hidden md:inline">PRESENTATION MODE</span>
+          <span className="md:hidden">PITCH</span>
         </button>
 
-        {/* Audio Toggle */}
+        {/* Radio Audio Toggle */}
         <button
           onClick={onToggleSound}
           className={`p-2 rounded-xl border transition-all ${
             soundEnabled
-              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-              : 'bg-slate-900 text-slate-500 border-slate-800'
+              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20'
+              : 'bg-slate-900 text-slate-500 border-slate-800 hover:text-slate-300'
           }`}
-          title={soundEnabled ? 'Radio Audio On' : 'Radio Audio Muted'}
+          title={soundEnabled ? 'Radio SFX On' : 'Radio SFX Muted'}
         >
           {soundEnabled ? <Icons.Volume2 className="w-4 h-4" /> : <Icons.VolumeX className="w-4 h-4" />}
         </button>
 
-        {/* User Profile */}
-        <div className="flex items-center space-x-2.5 pl-2 border-l border-slate-800">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-slate-950 font-bold text-xs shadow-inner">
-            SR
+        {/* User Operator Profile */}
+        <div className="flex items-center space-x-2 pl-2 border-l border-slate-800">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-slate-950 font-bold text-xs shadow-inner">
+            OP
           </div>
-          <div className="hidden xl:block text-left text-xs font-mono">
-            <div className="text-white font-bold leading-tight">Cmdr. S. Ramanathan</div>
-            <div className="text-[10px] text-slate-400">Emergency Ops Lead</div>
+          <div className="hidden 2xl:block text-left text-xs font-mono leading-tight">
+            <div className="text-white font-bold">Chennai Ops Desk</div>
+            <div className="text-[10px] text-slate-400">Emergency Corridor Lead</div>
           </div>
         </div>
       </div>
@@ -3542,25 +4295,26 @@ window.TopNav = TopNav;
 
 /* ===== START FILE: Sidebar.js ===== */
 // resQClear Operations Center Left Sidebar Navigation
+// Clean Enterprise Proportions, Active Badges, and Section Organization
 // [React hooks initialized at top level]
 
 function Sidebar({ currentTab, setTab, simState, onTogglePresentation, onOpenLanding }) {
-  const { ambulances = [], conflictState = {} } = simState || {};
+  const { ambulances = [], conflictState = {}, networkStatus = {} } = simState || {};
   const hasConflict = conflictState.stage && conflictState.stage !== 'IDLE';
 
   const navItems = [
     { id: 'overview', label: 'Overview & Map', icon: Icons.Compass, badge: 'LIVE' },
     { id: 'conflict', label: 'Conflict Engine', icon: Icons.ShieldAlert, badge: hasConflict ? 'ALERT' : null, alert: hasConflict },
     { id: 'ambulances', label: 'Ambulances', icon: Icons.Ambulance, badge: ambulances.length },
-    { id: 'network', label: 'Traffic Network', icon: Icons.TrafficLight, badge: '6' },
-    { id: 'hospitals', label: 'Hospitals', icon: Icons.Hospital, badge: '3' },
+    { id: 'network', label: 'Traffic Network', icon: Icons.TrafficLight, badge: `${networkStatus.intersectionsOnline || 6}` },
+    { id: 'hospitals', label: 'Hospitals', icon: Icons.Hospital, badge: `${networkStatus.hospitalsAvailable || 3}` },
     { id: 'analytics', label: 'Analytics', icon: Icons.BarChart3 },
     { id: 'settings', label: 'Settings', icon: Icons.Settings }
   ];
 
   return (
-    <aside className="w-64 border-r border-slate-800 bg-slate-950/80 backdrop-blur-md flex flex-col justify-between p-4 flex-shrink-0">
-      {/* Top Nav Items */}
+    <aside className="w-64 border-r border-slate-800 bg-slate-950/85 backdrop-blur-md flex flex-col justify-between p-4 flex-shrink-0">
+      {/* Top Navigation Items */}
       <div className="space-y-6">
         <div className="space-y-1">
           <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest px-3 mb-2">
@@ -3619,8 +4373,8 @@ function Sidebar({ currentTab, setTab, simState, onTogglePresentation, onOpenLan
           <span>Landing Page</span>
         </button>
 
-        <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-[10px] font-mono text-slate-400 leading-tight text-center">
-          resQClear Prototype v1.2 • AI-V2X Sim
+        <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-[10px] font-mono text-slate-500 leading-tight text-center">
+          resQClear Prototype v2.0 • Digital Twin
         </div>
       </div>
     </aside>
@@ -3632,7 +4386,8 @@ window.Sidebar = Sidebar;
 /* ===== END FILE: Sidebar.js ===== */
 
 /* ===== START FILE: LandingPage.js ===== */
-// resQClear Landing Page Component
+// resQClear Product Landing Page Component
+// Enterprise Architecture, 6-Stage How It Works, Phased Roadmap, and Simulated Impact
 // [React hooks initialized at top level]
 
 function LandingPage({ onLaunchDemo, onLaunchScenario }) {
@@ -3644,19 +4399,19 @@ function LandingPage({ onLaunchDemo, onLaunchScenario }) {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-black">
       {/* Top Header */}
-      <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/95 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <ResQClearLogo />
             <span className="hidden sm:inline-block px-2.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-mono text-emerald-400 font-bold">
-              SIMULATION MODE
+              DIGITAL TWIN SIMULATION
             </span>
           </div>
           
           <nav className="hidden md:flex items-center space-x-7 text-xs font-mono font-medium text-slate-300">
             <button onClick={() => scrollToSection('problem')} className="hover:text-emerald-400 transition-colors">Problem</button>
             <button onClick={() => scrollToSection('how-it-works')} className="hover:text-emerald-400 transition-colors">How It Works</button>
-            <button onClick={() => scrollToSection('conflict-demo')} className="hover:text-emerald-400 transition-colors">Conflict Resolution</button>
+            <button onClick={() => scrollToSection('conflict-demo')} className="hover:text-emerald-400 transition-colors">Conflict Engine</button>
             <button onClick={() => scrollToSection('roadmap')} className="hover:text-emerald-400 transition-colors">Roadmap</button>
             <button onClick={() => scrollToSection('impact')} className="hover:text-emerald-400 transition-colors">Simulated Impact</button>
           </nav>
@@ -3664,16 +4419,16 @@ function LandingPage({ onLaunchDemo, onLaunchScenario }) {
           <div className="flex items-center space-x-3">
             <button
               onClick={() => onLaunchScenario()}
-              className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-amber-300 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 transition-all"
+              className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition-all"
             >
-              <Icons.Zap className="w-3.5 h-3.5 text-amber-400" />
-              <span>Auto Scenario</span>
+              <Icons.Zap className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Scenario Demo</span>
             </button>
             <button
               onClick={() => onLaunchDemo()}
               className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-mono font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40"
             >
-              <span>Launch Live Demo</span>
+              <span>Launch Live Dashboard</span>
               <Icons.ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -3700,7 +4455,7 @@ function LandingPage({ onLaunchDemo, onLaunchScenario }) {
             </h1>
 
             <p className="mt-6 text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
-              An AI-assisted emergency traffic coordination platform designed to coordinate ambulance movement through congested urban intersections and formulate dynamic corridor priority.
+              AI-assisted emergency traffic coordination for safer and more efficient ambulance movement through congested urban intersections.
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -3709,24 +4464,24 @@ function LandingPage({ onLaunchDemo, onLaunchScenario }) {
                 className="w-full sm:w-auto inline-flex items-center justify-center space-x-2.5 px-7 py-3.5 rounded-xl font-bold font-mono text-sm bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-xl shadow-emerald-500/30 hover:scale-[1.02]"
               >
                 <Icons.Play className="w-4 h-4 text-slate-950" />
-                <span>Launch Live Demo</span>
+                <span>Launch Live Dashboard</span>
               </button>
               <button
                 onClick={() => scrollToSection('how-it-works')}
                 className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-3.5 rounded-xl font-medium font-mono text-sm bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700/80 transition-all"
               >
-                <span>See How It Works</span>
+                <span>How resQClear Works</span>
               </button>
             </div>
 
             <div className="mt-6 text-xs font-mono text-slate-400 flex items-center justify-center space-x-2">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-              <span>Simulation Prototype • Zero Paid API Keys Required • Visual Signal Simulation</span>
+              <span>Digital Twin Simulation Prototype • Simulated Signal Control • Chennai Metro Grid</span>
             </div>
           </div>
 
           {/* Interactive Hero Scenario Visual Preview Box */}
-          <div className="mt-14 relative rounded-2xl p-1 bg-gradient-to-b from-emerald-500/30 via-slate-800/40 to-slate-900/80 shadow-2xl shadow-emerald-950/50">
+          <div id="conflict-demo" className="mt-14 relative rounded-2xl p-1 bg-gradient-to-b from-emerald-500/30 via-slate-800/40 to-slate-900/80 shadow-2xl shadow-emerald-950/50">
             <div className="relative rounded-[14px] bg-slate-950 p-4 sm:p-6 overflow-hidden border border-slate-800">
               <div className="flex flex-wrap items-center justify-between pb-4 mb-4 border-b border-slate-800/80 text-xs font-mono">
                 <div className="flex items-center space-x-3">
@@ -3738,7 +4493,7 @@ function LandingPage({ onLaunchDemo, onLaunchScenario }) {
                   <span className="text-slate-300">CENTRAL CONFLICT JUNCTION (INT-04)</span>
                 </div>
                 <div className="flex items-center space-x-4 mt-2 sm:mt-0 text-slate-400">
-                  <span>UNITS DETECTED: <strong className="text-white">2 ALS</strong></span>
+                  <span>UNITS CONVERGING: <strong className="text-white">AMB-104 & AMB-208</strong></span>
                   <button
                     onClick={() => onLaunchScenario()}
                     className="px-2.5 py-1 rounded bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30 font-bold transition-all"
@@ -3752,38 +4507,38 @@ function LandingPage({ onLaunchDemo, onLaunchScenario }) {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
                 <div className="lg:col-span-7 h-64 bg-slate-900/90 rounded-xl border border-slate-800 p-4 relative overflow-hidden flex flex-col justify-between">
                   <div className="flex items-center justify-between z-10 text-xs font-mono">
-                    <span className="text-slate-300">SCENARIO: DUAL AMBULANCE CONVERGENCE</span>
-                    <span className="text-red-400 font-bold animate-pulse">HIGH CONFLICT RISK</span>
+                    <span className="text-slate-300">SCENARIO: DUAL CRITICAL CONVERGENCE</span>
+                    <span className="text-red-400 font-bold animate-pulse">⚠ CONFLICT DETECTED</span>
                   </div>
 
                   <div className="relative flex items-center justify-center py-4">
                     <div className="text-center space-y-2 font-mono">
                       <div className="text-xs text-red-400 font-bold flex items-center justify-center space-x-1">
                         <span>🚑 AMB-104 (North)</span>
-                        <span className="text-slate-500">↓ (43s ETA)</span>
+                        <span className="text-slate-500">↓ (ETA: 43s | Dist: 555m)</span>
                       </div>
                       <div className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-slate-950 border border-emerald-500/40 text-emerald-400 font-bold text-xs shadow-lg">
-                        🚦 INTERSECTION 4 • AI ARBITRATION (A → B)
+                        🚦 INT-04 • SEQUENTIAL CLEARANCE (01: AMB-104 → 02: AMB-208)
                       </div>
                       <div className="text-xs text-amber-400 font-bold flex items-center justify-center space-x-1">
                         <span>🚑 AMB-208 (South)</span>
-                        <span className="text-slate-500">↑ (50s ETA)</span>
+                        <span className="text-slate-500">↑ (ETA: 50s | Dist: 555m)</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="z-10 flex items-center justify-between text-[11px] font-mono bg-slate-950/90 p-2 rounded-lg border border-slate-800 text-slate-400">
-                    <span>ARBITRATION: <strong className="text-emerald-400">AMB-104 Priority 01</strong></span>
-                    <span>CONFIDENCE: <strong className="text-white">96% (Simulation Estimate)</strong></span>
+                    <span>RECOMMENDED SEQUENCE: <strong className="text-emerald-400">01 → AMB-104 | 02 → AMB-208</strong></span>
+                    <span>CONFIDENCE: <strong className="text-white">96% (SIMULATION ESTIMATE)</strong></span>
                   </div>
                 </div>
 
                 <div className="lg:col-span-5 space-y-3 font-mono text-xs">
                   <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
-                    <div className="text-[10px] text-slate-400 uppercase">Decision Model</div>
-                    <div className="text-white font-bold mt-1">Sequential Corridor Priority</div>
+                    <div className="text-[10px] text-slate-400 uppercase">Decision Logic</div>
+                    <div className="text-white font-bold mt-1">Sequential Corridor Clearance</div>
                     <p className="text-slate-400 text-[11px] mt-1 font-sans">
-                      AMB-104 reaches the conflict zone earlier. Sequential clearance minimizes intersection occupancy conflict without manual police intervention.
+                      "AMB-104 is predicted to reach the conflict zone 7 seconds earlier. Sequential clearance reduces the probability of simultaneous intersection occupancy."
                     </p>
                   </div>
 
@@ -3804,35 +4559,35 @@ function LandingPage({ onLaunchDemo, onLaunchScenario }) {
         </div>
       </section>
 
-      {/* Requirement 13: "From Detection to Coordination" (Why resQClear?) */}
+      {/* 20. PRODUCT EXPLANATION: HOW resQClear WORKS (6 Stages) */}
       <section id="how-it-works" className="py-16 bg-slate-900/50 border-y border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h2 className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest">
-              HOW RESQCLEAR WORKS
+              SYSTEM ARCHITECTURE
             </h2>
             <h3 className="text-2xl sm:text-3xl font-extrabold text-white mt-2">
-              From Detection to Coordination
+              HOW resQClear WORKS
             </h3>
             <p className="text-sm text-slate-400 mt-2 font-sans">
-              A streamlined 5-stage coordination lifecycle explaining the platform in 20 seconds.
+              From detection to safe sequence coordination across congested urban grids.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 font-mono text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3.5 font-mono text-xs">
             {RESQCLEAR_DATA.howItWorksSteps.map((step) => (
               <div
                 key={step.step}
-                className="p-5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col justify-between hover:border-emerald-500/40 transition-all group"
+                className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col justify-between hover:border-emerald-500/40 transition-all group"
               >
                 <div>
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-3">
                     <span className="w-7 h-7 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold text-xs">
                       {step.step}
                     </span>
-                    <span className="text-[10px] text-slate-500">STAGE 0{step.step}</span>
+                    <span className="text-[9px] text-slate-500">STAGE 0{step.step}</span>
                   </div>
-                  <h4 className="font-extrabold text-white text-sm tracking-wide mb-2 group-hover:text-emerald-400 transition-colors">
+                  <h4 className="font-extrabold text-white text-sm tracking-wide mb-1.5 group-hover:text-emerald-400 transition-colors">
                     {step.name}
                   </h4>
                   <p className="text-slate-400 text-xs font-sans leading-relaxed">
@@ -3845,69 +4600,94 @@ function LandingPage({ onLaunchDemo, onLaunchScenario }) {
         </div>
       </section>
 
-      {/* Problem & Solution Section */}
+      {/* 13. BEFORE vs AFTER COMPARISON SECTION */}
       <section id="problem" className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-            {/* The Problem */}
-            <div className="p-8 rounded-3xl bg-slate-900/80 border border-red-500/20 flex flex-col justify-between">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <h2 className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-widest">
+              COMPARATIVE EVALUATION
+            </h2>
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-white mt-2">
+              BEFORE vs AFTER resQClear
+            </h3>
+            <p className="text-xs font-mono text-amber-400 mt-2">
+              SIMULATION RESULT • Empirical comparison across urban corridors
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch font-mono">
+            {/* WITHOUT resQClear */}
+            <div className="p-8 rounded-3xl bg-slate-900/80 border border-red-500/25 flex flex-col justify-between space-y-6">
               <div>
-                <div className="flex items-center space-x-2 text-red-400 text-xs font-mono font-bold uppercase mb-3">
+                <div className="flex items-center space-x-2 text-red-400 text-xs font-bold uppercase mb-2">
                   <Icons.AlertTriangle className="w-4 h-4" />
-                  <span>The Urban Emergency Problem</span>
+                  <span>WITHOUT resQClear</span>
                 </div>
-                <h3 className="text-2xl font-extrabold text-white leading-snug">
-                  Ambulances lose critical minutes at congested intersections and cross-axis bottlenecks.
+                <h3 className="text-2xl font-extrabold text-white leading-snug font-sans">
+                  Uncoordinated Emergency Transit
                 </h3>
-                <p className="mt-4 text-sm text-slate-300 leading-relaxed font-sans">
-                  Traditional sirens rely solely on civilian yielding and line-of-sight visual reaction. In high-density urban grids, blocked intersections, red-light queues, and simultaneous multi-ambulance dispatches create severe bottlenecks when seconds matter most.
-                </p>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-slate-800 text-xs font-mono text-slate-400">
-                Simulated Average Urban Transit Delay: <strong className="text-red-400">+8.5 to 14.2 min during peak hours</strong>
-              </div>
-            </div>
-
-            {/* The Solution */}
-            <div className="p-8 rounded-3xl bg-slate-900/80 border border-emerald-500/30 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center space-x-2 text-emerald-400 text-xs font-mono font-bold uppercase mb-3">
-                  <Icons.ShieldCheck className="w-4 h-4" />
-                  <span>The resQClear Solution</span>
-                </div>
-                <h3 className="text-2xl font-extrabold text-white leading-snug">
-                  AI-assisted route coordination and simulated green-wave emergency corridor sequencing.
-                </h3>
-                <ul className="mt-4 space-y-2 text-xs font-mono text-slate-300">
-                  <li className="flex items-center space-x-2">
-                    <Icons.CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                    <span>Real-time connected ambulance tracking & ETA forecasting</span>
+                <ul className="mt-4 space-y-2.5 text-xs text-slate-300 font-sans">
+                  <li className="flex items-center space-x-2 text-slate-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                    <span><strong>Traffic congestion:</strong> Ambulances stuck behind dense vehicle queues.</span>
                   </li>
-                  <li className="flex items-center space-x-2">
-                    <Icons.CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                    <span>Multi-ambulance intersection collision & priority arbitration</span>
+                  <li className="flex items-center space-x-2 text-slate-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                    <span><strong>Intersection waiting:</strong> Complete stops at red-light phases and cross-traffic.</span>
                   </li>
-                  <li className="flex items-center space-x-2">
-                    <Icons.CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                    <span>Dynamic signal phase management (Simulated green waves)</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <Icons.CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                    <span>Direct hospital ER telemetry & trauma bay pre-notification</span>
+                  <li className="flex items-center space-x-2 text-slate-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                    <span><strong>Uncoordinated movement:</strong> Multi-ambulance deadlocks at common junctions.</span>
                   </li>
                 </ul>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-800 text-xs font-mono text-emerald-400">
-                Estimated Delay Avoided: <strong>2m 18s per critical corridor trip (Simulation Estimate)</strong>
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs">
+                <div className="flex justify-between items-center text-slate-400">
+                  <span>Baseline Simulated ETA:</span>
+                  <strong className="text-red-400 text-base">08:34 min</strong>
+                </div>
+              </div>
+            </div>
+
+            {/* WITH resQClear */}
+            <div className="p-8 rounded-3xl bg-slate-900/80 border border-emerald-500/30 flex flex-col justify-between space-y-6">
+              <div>
+                <div className="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase mb-2">
+                  <Icons.ShieldCheck className="w-4 h-4" />
+                  <span>WITH resQClear</span>
+                </div>
+                <h3 className="text-2xl font-extrabold text-white leading-snug font-sans">
+                  AI-Assisted Emergency Coordination
+                </h3>
+                <ul className="mt-4 space-y-2.5 text-xs text-slate-300 font-sans">
+                  <li className="flex items-center space-x-2 text-slate-300">
+                    <Icons.CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    <span><strong>Coordinated sequence:</strong> Automated priority arbitration at conflict nodes.</span>
+                  </li>
+                  <li className="flex items-center space-x-2 text-slate-300">
+                    <Icons.CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    <span><strong>Emergency corridor:</strong> Dynamic simulated green wave preserving momentum.</span>
+                  </li>
+                  <li className="flex items-center space-x-2 text-slate-300">
+                    <Icons.CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    <span><strong>Reduced simulated delay:</strong> 2m 18s saved per critical route trip.</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-950 border border-emerald-500/30 text-xs">
+                <div className="flex justify-between items-center text-slate-300">
+                  <span>Optimized Simulated ETA:</span>
+                  <strong className="text-emerald-400 text-base">06:16 min (-02:18)</strong>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Requirement 18: Future Roadmap Section */}
+      {/* 21. FUTURE ROADMAP SECTION */}
       <section id="roadmap" className="py-16 bg-slate-900/40 border-y border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
@@ -3918,12 +4698,12 @@ function LandingPage({ onLaunchDemo, onLaunchScenario }) {
               From Simulation to Infrastructure Integration
             </h3>
             <p className="text-sm text-slate-400 mt-2 font-sans">
-              Our phased approach ensures safety, regulatory alignment, and empirical validation before real-world infrastructure interfacing.
+              Phased evolution to ensure rigorous safety and regulatory alignment before civic deployment.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 font-mono text-xs">
-            {RESQCLEAR_DATA.productRoadmap.map((p, idx) => (
+            {RESQCLEAR_DATA.productRoadmap.map((p) => (
               <div
                 key={p.phase}
                 className={`p-5 rounded-2xl border flex flex-col justify-between ${
@@ -3969,19 +4749,19 @@ function LandingPage({ onLaunchDemo, onLaunchScenario }) {
             <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800">
               <div className="text-2xl sm:text-3xl font-extrabold text-white">12</div>
               <div className="text-[11px] text-slate-300 mt-1">Emergency Events</div>
-              <span className="inline-block mt-2 text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">SIMULATION</span>
+              <span className="inline-block mt-2 text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">DEMO DATA</span>
             </div>
 
             <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800">
               <div className="text-2xl sm:text-3xl font-extrabold text-cyan-400">4</div>
               <div className="text-[11px] text-slate-300 mt-1">Intersections Coordinated</div>
-              <span className="inline-block mt-2 text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">SIMULATION</span>
+              <span className="inline-block mt-2 text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">DEMO DATA</span>
             </div>
 
             <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800">
               <div className="text-2xl sm:text-3xl font-extrabold text-teal-300">2</div>
               <div className="text-[11px] text-slate-300 mt-1">Ambulances Coordinated</div>
-              <span className="inline-block mt-2 text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">SIMULATION</span>
+              <span className="inline-block mt-2 text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">DEMO DATA</span>
             </div>
 
             <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800">
@@ -3993,13 +4773,13 @@ function LandingPage({ onLaunchDemo, onLaunchScenario }) {
             <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800">
               <div className="text-2xl sm:text-3xl font-extrabold text-purple-400">96%</div>
               <div className="text-[11px] text-slate-300 mt-1">Decision Confidence</div>
-              <span className="inline-block mt-2 text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">SIMULATION</span>
+              <span className="inline-block mt-2 text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">SIMULATION ESTIMATE</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Persistent Disclaimer Footer */}
+      {/* Persistent Credibility Disclaimer Footer */}
       <footer className="mt-auto border-t border-slate-800/80 bg-slate-950 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-400 text-center md:text-left">
           <div className="flex items-center space-x-3">
@@ -4008,7 +4788,7 @@ function LandingPage({ onLaunchDemo, onLaunchScenario }) {
           </div>
 
           <div className="max-w-xl text-[11px] text-slate-400 leading-normal">
-            resQClear is a simulation prototype. Traffic-signal actions shown in this demo are not connected to real-world traffic infrastructure.
+            resQClear is currently a digital twin simulation prototype. Signal actions and telemetry shown are simulated and not connected to real government traffic signals, live ambulances, or municipal infrastructure.
           </div>
         </div>
       </footer>
@@ -4022,6 +4802,7 @@ window.LandingPage = LandingPage;
 
 /* ===== START FILE: app.js ===== */
 // resQClear Root Application Component
+// Master Controller for Digital Twin Simulation, Operations Dashboard, & Pitch Deck
 // [React hooks initialized at top level]
 
 function App() {
@@ -4078,7 +4859,7 @@ function App() {
       ) : (
         /* 2. Operations Center Live Dashboard */
         <div className="min-h-screen flex flex-col bg-slate-950">
-          {/* Top Bar */}
+          {/* Top Navigation Bar */}
           <TopNav
             simState={simState}
             onLaunchScenario={() => window.simulationEngine.runEmergencyScenario()}
@@ -4190,7 +4971,7 @@ function App() {
               )}
 
               {/* Mandatory Simulation Disclaimer Footer */}
-              <div className="mt-auto pt-4 pb-2 border-t border-slate-900 text-center text-xs font-mono text-slate-400">
+              <div className="mt-auto pt-4 pb-2 border-t border-slate-900 text-center text-xs font-mono text-slate-500">
                 “resQClear is a simulation prototype. Traffic-signal actions shown in this demo are not connected to real-world traffic infrastructure.”
               </div>
             </main>
@@ -4215,6 +4996,86 @@ function App() {
           onExit={() => setIsPresentationMode(false)}
           onRunScenario={() => window.simulationEngine.runEmergencyScenario()}
         />
+      )}
+
+      {/* 4. 18. SCENARIO DEMO COMPLETION MODAL */}
+      {simState.scenarioCompleteModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="max-w-xl w-full bg-slate-900 border border-emerald-500/50 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-center relative overflow-hidden font-sans">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-72 h-32 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none"></div>
+
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-xs font-bold">
+              <Icons.CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>SIMULATION COMPLETE</span>
+            </div>
+
+            <div>
+              <div className="text-xs font-mono text-slate-400 uppercase tracking-widest mb-1">RESQCLEAR</div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
+                MULTI-AMBULANCE CONFLICT RESOLVED
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300 mt-2">
+                Coordinated 2 critical emergency vehicles sequentially through a single shared intersection without cross-axis deadlock.
+              </p>
+            </div>
+
+            {/* Impact Metric Summary Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
+              <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800">
+                <div className="text-xl font-extrabold text-white">2</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Emergency Vehicles Coordinated</div>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800">
+                <div className="text-xl font-extrabold text-teal-300">1</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Conflict Junction (INT-04)</div>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800">
+                <div className="text-xl font-extrabold text-cyan-300">2</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Emergency Corridors</div>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-slate-950 border border-emerald-500/30">
+                <div className="text-xl font-extrabold text-emerald-400">2m 18s</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Estimated Delay Avoided</div>
+              </div>
+            </div>
+
+            <div className="text-[11px] font-mono text-slate-500 border-t border-slate-800/80 pt-3">
+              Simulation Estimate • Prototype demonstration data
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+              <button
+                onClick={() => {
+                  window.simulationEngine.closeScenarioCompleteModal();
+                  window.simulationEngine.runEmergencyScenario();
+                }}
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-bold text-xs transition-all shadow-lg shadow-emerald-500/20"
+              >
+                Re-Run Scenario Demo
+              </button>
+
+              <button
+                onClick={() => {
+                  window.simulationEngine.closeScenarioCompleteModal();
+                  setTab('analytics');
+                }}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-mono font-bold text-xs border border-slate-700 transition-all"
+              >
+                Explore Analytics
+              </button>
+
+              <button
+                onClick={() => window.simulationEngine.closeScenarioCompleteModal()}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-900 text-slate-300 font-mono text-xs border border-slate-800 transition-all"
+              >
+                Close Summary
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

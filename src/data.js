@@ -1,6 +1,27 @@
 // resQClear City Map, Fleet, Hospital, and Network Simulation Data
+// Enterprise Operations Center & Digital Twin Prototype
 
 const RESQCLEAR_DATA = {
+  system: {
+    name: 'resQClear',
+    subtitle: 'EMERGENCY TRAFFIC COORDINATION',
+    tagline: 'Clear the way. Save lives.',
+    corePositioning: 'AI-assisted emergency traffic coordination for safer and more efficient ambulance movement through congested urban intersections.',
+    mode: 'DIGITAL TWIN SIMULATION',
+    city: 'CHENNAI DIGITAL TWIN',
+    version: '2.0.0-PROTOTYPE',
+    disclaimer: 'resQClear is currently a digital twin simulation prototype. Signal actions and telemetry shown are simulated and not connected to real government traffic signals, live ambulances, or municipal infrastructure.'
+  },
+
+  networkSummary: {
+    intersectionsOnline: 6,
+    ambulancesTracked: 3,
+    hospitalsAvailable: 3,
+    congestionZonesDetected: 4,
+    activeConflicts: 1,
+    systemHealth: 'NORMAL'
+  },
+
   hospitals: [
     {
       id: 'hosp-1',
@@ -19,12 +40,14 @@ const RESQCLEAR_DATA = {
       icuFree: 4,
       specialty: 'Cardiac / Trauma Resuscitation',
       leadDoctor: 'Dr. K. Senthil Nathan',
-      integrationNote: 'Hospital notification simulated',
+      integrationNote: 'Simulated arrival notification generated (Not connected to hospital ER systems)',
+      notificationSent: true,
+      notificationText: 'Simulated Notification: AMB-104 ETA 06:42 min — Cardiac Bay Reserved',
       readiness: [
-        { item: 'Cath Lab 02 Pre-warmed', done: true },
+        { item: 'Cath Lab 02 Pre-warmed & Staffed', done: true },
         { item: 'Cardiology Triage Team Alerted', done: true },
         { item: 'Rapid ER Bay 1 Reserved', done: true },
-        { item: 'Direct Telemetry Connected (Simulated)', done: true }
+        { item: 'Direct Telemetry Feed Initialized (Simulated)', done: true }
       ]
     },
     {
@@ -44,10 +67,12 @@ const RESQCLEAR_DATA = {
       icuFree: 2,
       specialty: 'Polytrauma & Neurosurgery',
       leadDoctor: 'Dr. Priya Ramakrishnan',
-      integrationNote: 'Hospital notification simulated',
+      integrationNote: 'Simulated arrival notification generated (Not connected to hospital ER systems)',
+      notificationSent: true,
+      notificationText: 'Simulated Notification: AMB-208 ETA 08:15 min — Trauma Suite 04 Prepped',
       readiness: [
         { item: 'Surgical Suite 04 Prepped', done: true },
-        { item: 'Blood Bank Cross-match 4 Units O-', done: true },
+        { item: 'Blood Bank Cross-match 4 Units O- on Standby', done: true },
         { item: 'CT Neuro-Scan on Priority Standby', done: true },
         { item: 'Code Red Resuscitation Team Stationed', done: true }
       ]
@@ -69,7 +94,9 @@ const RESQCLEAR_DATA = {
       icuFree: 7,
       specialty: 'Acute Medical Care',
       leadDoctor: 'Dr. Anand Kumar',
-      integrationNote: 'Hospital notification simulated',
+      integrationNote: 'Simulated arrival notification generated (Not connected to hospital ER systems)',
+      notificationSent: false,
+      notificationText: 'Simulated Notification: AMB-312 ETA 12:40 min — Urgent Transit Protocol',
       readiness: [
         { item: 'ER Bay 03 Ready', done: true },
         { item: 'Triage Nurse Assigned', done: true }
@@ -82,19 +109,21 @@ const RESQCLEAR_DATA = {
       id: 'AMB-104',
       name: 'Ambulance A',
       status: 'CRITICAL',
-      origin: 'Anna Nagar',
+      subStatus: 'ACUTE CARDIAC',
+      origin: 'Anna Nagar West',
       destination: 'Government Hospital',
       destinationId: 'hosp-1',
-      speed: 46, // km/h
+      speed: 42,
       speedUnit: 'km/h',
       eta: '06:42',
       distance: '3.8 km',
       routeStatus: 'OPTIMIZED',
+      currentState: 'APPROACHING INTERSECTION',
       driver: 'S. Murugan (Paramedic Lead)',
       vehicleModel: 'Force Traveller Advance ALS',
       oxygenLevel: '98%',
       batteryCharge: '94%',
-      triageSource: 'Severity provided by authorized emergency personnel',
+      triageSource: 'Emergency severity provided by authorized emergency personnel',
       patient: {
         condition: 'Acute STEMI (Heart Attack)',
         age: '54 M',
@@ -104,34 +133,27 @@ const RESQCLEAR_DATA = {
       color: '#ef4444',
       trailColor: 'rgba(239, 68, 68, 0.4)',
       corridorColor: '#10b981',
-      // Simulation Path (Coordinates along the road grid)
       path: [
         { x: 120, y: 160, name: 'Anna Nagar West Terminal' },
-        { x: 280, y: 160, name: 'Roundabout Sector 3' },
-        { x: 450, y: 160, name: 'Kilpauk Medical Signal' },
-        { x: 450, y: 350, name: 'Central Conflict Junction (Int. 4)' },
-        { x: 620, y: 350, name: 'Poonamallee Arterial' },
-        { x: 780, y: 350, name: 'Hospital Access Boulevard' },
+        { x: 280, y: 160, name: 'INT-01: Anna Nagar Roundabout' },
+        { x: 450, y: 160, name: 'INT-02: Kilpauk Medical Signal' },
+        { x: 450, y: 350, name: 'INT-04: Central Conflict Junction' },
+        { x: 620, y: 350, name: 'INT-05: Poonamallee Arterial' },
+        { x: 780, y: 350, name: 'INT-06: Hospital Access Boulevard' },
         { x: 780, y: 160, name: 'Government Hospital ER Bay' }
       ],
-      geoPath: [
-        [13.0850, 80.2100],
-        [13.0820, 80.2250],
-        [13.0780, 80.2420],
-        [13.0750, 80.2580],
-        [13.0790, 80.2680],
-        [13.0827, 80.2785]
-      ],
-      progress: 0.05,
-      currentIntersectionEta: 43, // seconds (realistic demo value)
-      distanceToConflict: 180, // meters
-      priorityRank: 1
+      progress: 0.12,
+      currentIntersectionEta: 43,
+      distanceToConflict: 555,
+      priorityRank: 1,
+      approachDirection: 'North Approach (Sector 1)'
     },
     {
       id: 'AMB-208',
       name: 'Ambulance B',
       status: 'CRITICAL',
-      origin: 'T. Nagar',
+      subStatus: 'SEVERE POLYTRAUMA',
+      origin: 'T. Nagar Panagal Park',
       destination: 'Apollo Hospital',
       destinationId: 'hosp-2',
       speed: 40,
@@ -139,11 +161,12 @@ const RESQCLEAR_DATA = {
       eta: '08:15',
       distance: '4.2 km',
       routeStatus: 'OPTIMIZED',
+      currentState: 'APPROACHING INTERSECTION',
       driver: 'R. Vijay (Critical Care Paramedic)',
       vehicleModel: 'Tata Winger Type-D ICU',
       oxygenLevel: '95%',
       batteryCharge: '89%',
-      triageSource: 'Severity provided by authorized emergency personnel',
+      triageSource: 'Emergency severity provided by authorized emergency personnel',
       patient: {
         condition: 'Severe Polytrauma (MVA Collision)',
         age: '29 F',
@@ -155,30 +178,24 @@ const RESQCLEAR_DATA = {
       corridorColor: '#10b981',
       path: [
         { x: 120, y: 540, name: 'T. Nagar Panagal Park' },
-        { x: 280, y: 540, name: 'Usman Road Flyover Base' },
+        { x: 280, y: 540, name: 'INT-03: Usman Road Flyover Base' },
         { x: 450, y: 540, name: 'Anna Salai South Link' },
-        { x: 450, y: 350, name: 'Central Conflict Junction (Int. 4)' },
-        { x: 620, y: 350, name: 'Poonamallee Arterial' },
-        { x: 780, y: 350, name: 'Hospital Access Boulevard' },
+        { x: 450, y: 350, name: 'INT-04: Central Conflict Junction' },
+        { x: 620, y: 350, name: 'INT-05: Poonamallee Arterial' },
+        { x: 780, y: 350, name: 'INT-06: Hospital Access Boulevard' },
         { x: 780, y: 540, name: 'Apollo Emergency Bay' }
       ],
-      geoPath: [
-        [13.0418, 80.2341],
-        [13.0500, 80.2420],
-        [13.0620, 80.2500],
-        [13.0750, 80.2580],
-        [13.0680, 80.2550],
-        [13.0604, 80.2520]
-      ],
-      progress: 0.04,
-      currentIntersectionEta: 50, // seconds (realistic demo value)
-      distanceToConflict: 290, // meters
-      priorityRank: 2
+      progress: 0.10,
+      currentIntersectionEta: 50,
+      distanceToConflict: 555,
+      priorityRank: 2,
+      approachDirection: 'South Approach (Sector 2)'
     },
     {
       id: 'AMB-312',
       name: 'Ambulance C',
       status: 'URGENT',
+      subStatus: 'ACUTE RESPIRATORY',
       origin: 'Guindy Industrial',
       destination: 'Kauvery Hub',
       destinationId: 'hosp-3',
@@ -187,11 +204,12 @@ const RESQCLEAR_DATA = {
       eta: '12:40',
       distance: '5.1 km',
       routeStatus: 'CORRIDOR ACTIVE',
+      currentState: 'IN TRANSIT',
       driver: 'M. Anand (EMS Team)',
       vehicleModel: 'Mahindra Supro Ambulance',
       oxygenLevel: '99%',
       batteryCharge: '96%',
-      triageSource: 'Severity provided by authorized emergency personnel',
+      triageSource: 'Emergency severity provided by authorized emergency personnel',
       patient: {
         condition: 'Acute Respiratory Distress',
         age: '68 M',
@@ -204,18 +222,14 @@ const RESQCLEAR_DATA = {
       path: [
         { x: 120, y: 350, name: 'Guindy Base' },
         { x: 280, y: 350, name: 'Mount Road Sector' },
-        { x: 280, y: 540, name: 'Usman Road Flyover Base' },
+        { x: 280, y: 540, name: 'INT-03: Usman Road Flyover Base' },
         { x: 180, y: 560, name: 'Kauvery Hub ER Bay' }
-      ],
-      geoPath: [
-        [13.0067, 80.2025],
-        [13.0200, 80.2200],
-        [13.0338, 80.2505]
       ],
       progress: 0.35,
       currentIntersectionEta: 75,
       distanceToConflict: 720,
-      priorityRank: 3
+      priorityRank: 3,
+      approachDirection: 'Southwest Link'
     }
   ],
 
@@ -223,49 +237,52 @@ const RESQCLEAR_DATA = {
     {
       id: 'int-1',
       code: 'INT-01',
-      name: 'Anna Nagar Roundabout (INT-01)',
+      name: 'Anna Nagar Roundabout',
       x: 280,
       y: 160,
-      state: 'GREEN',
+      state: 'NORMAL_CYCLE',
       timer: 18,
       northSouth: 'GREEN',
       eastWest: 'RED',
       priorityVehicle: null,
       cooldown: 0,
-      modeLabel: 'NORMAL CYCLE'
+      modeLabel: 'NORMAL CYCLE',
+      simulatedPhase: 'NORMAL CYCLE'
     },
     {
       id: 'int-2',
       code: 'INT-02',
-      name: 'Kilpauk Medical Signal (INT-02)',
+      name: 'Kilpauk Medical Signal',
       x: 450,
       y: 160,
-      state: 'GREEN',
+      state: 'NORMAL_CYCLE',
       timer: 14,
       northSouth: 'GREEN',
       eastWest: 'RED',
       priorityVehicle: null,
       cooldown: 0,
-      modeLabel: 'NORMAL CYCLE'
+      modeLabel: 'NORMAL CYCLE',
+      simulatedPhase: 'NORMAL CYCLE'
     },
     {
       id: 'int-3',
       code: 'INT-03',
-      name: 'T. Nagar Usman Road Cross (INT-03)',
+      name: 'T. Nagar Usman Road Cross',
       x: 280,
       y: 540,
-      state: 'GREEN',
+      state: 'NORMAL_CYCLE',
       timer: 22,
       northSouth: 'RED',
       eastWest: 'GREEN',
       priorityVehicle: null,
       cooldown: 0,
-      modeLabel: 'NORMAL CYCLE'
+      modeLabel: 'NORMAL CYCLE',
+      simulatedPhase: 'NORMAL CYCLE'
     },
     {
       id: 'int-4',
       code: 'INT-04',
-      name: 'Central Conflict Junction (INT-04)',
+      name: 'Central Conflict Junction',
       x: 450,
       y: 350,
       state: 'NORMAL_CYCLE',
@@ -277,35 +294,38 @@ const RESQCLEAR_DATA = {
       hasConflict: false,
       conflictDetails: null,
       cooldown: 0,
-      modeLabel: 'NORMAL CYCLE'
+      modeLabel: 'NORMAL CYCLE',
+      simulatedPhase: 'NORMAL CYCLE'
     },
     {
       id: 'int-5',
       code: 'INT-05',
-      name: 'Poonamallee Arterial Crossing (INT-05)',
+      name: 'Poonamallee Arterial Crossing',
       x: 620,
       y: 350,
-      state: 'GREEN',
+      state: 'NORMAL_CYCLE',
       timer: 20,
       northSouth: 'RED',
       eastWest: 'GREEN',
       priorityVehicle: null,
       cooldown: 0,
-      modeLabel: 'NORMAL CYCLE'
+      modeLabel: 'NORMAL CYCLE',
+      simulatedPhase: 'NORMAL CYCLE'
     },
     {
       id: 'int-6',
       code: 'INT-06',
-      name: 'Govt Hospital North Gate (INT-06)',
+      name: 'Govt Hospital North Gate',
       x: 780,
       y: 350,
-      state: 'GREEN',
+      state: 'NORMAL_CYCLE',
       timer: 15,
       northSouth: 'GREEN',
       eastWest: 'RED',
       priorityVehicle: null,
       cooldown: 0,
-      modeLabel: 'NORMAL CYCLE'
+      modeLabel: 'NORMAL CYCLE',
+      simulatedPhase: 'NORMAL CYCLE'
     }
   ],
 
@@ -319,7 +339,8 @@ const RESQCLEAR_DATA = {
       severity: 'HIGH',
       delayImpact: '+2.4 min',
       color: 'rgba(239, 68, 68, 0.35)',
-      active: true
+      active: true,
+      label: 'CRITICAL CONGESTION'
     },
     {
       id: 'cong-2',
@@ -330,7 +351,183 @@ const RESQCLEAR_DATA = {
       severity: 'MODERATE',
       delayImpact: '+1.8 min',
       color: 'rgba(245, 158, 11, 0.3)',
-      active: true
+      active: true,
+      label: 'MODERATE CONGESTION'
+    },
+    {
+      id: 'cong-3',
+      name: 'Kilpauk North Arterial Dense Queue',
+      x: 350,
+      y: 160,
+      radius: 32,
+      severity: 'MODERATE',
+      delayImpact: '+1.2 min',
+      color: 'rgba(245, 158, 11, 0.25)',
+      active: true,
+      label: 'MODERATE CONGESTION'
+    },
+    {
+      id: 'cong-4',
+      name: 'Poonamallee East Approach',
+      x: 540,
+      y: 350,
+      radius: 30,
+      severity: 'HIGH',
+      delayImpact: '+1.9 min',
+      color: 'rgba(239, 68, 68, 0.3)',
+      active: true,
+      label: 'CRITICAL CONGESTION'
+    }
+  ],
+
+  beforeAfterComparison: {
+    withoutResQClear: {
+      title: 'WITHOUT resQClear',
+      trafficCondition: 'Traffic congestion',
+      intersectionStatus: 'Intersection waiting (Red light queues)',
+      coordination: 'Uncoordinated emergency movement',
+      baselineEta: '08:34',
+      avgDelay: '+2.4 min',
+      riskFactor: 'High probability of intersection deadlock'
+    },
+    withResQClear: {
+      title: 'WITH resQClear',
+      trafficCondition: 'Coordinated sequence',
+      intersectionStatus: 'Simulated emergency corridor',
+      coordination: 'Sequential priority clearance',
+      optimizedEta: '06:16',
+      estimatedDifference: '02:18',
+      riskFactor: 'Conflict resolved via AI-assisted sequence'
+    },
+    metricsSummary: {
+      baselineEta: '08:34',
+      optimizedEta: '06:16',
+      estimatedDifference: '02:18',
+      confidence: '96%',
+      badge: 'SIMULATION RESULT'
+    }
+  },
+
+  decisionFactors: {
+    junction: 'INT-04',
+    ambA: {
+      id: 'AMB-104',
+      eta: '43 sec',
+      distance: '555 m',
+      severity: 'CRITICAL',
+      direction: 'North Approach (Anna Nagar)'
+    },
+    ambB: {
+      id: 'AMB-208',
+      eta: '50 sec',
+      distance: '555 m',
+      severity: 'CRITICAL',
+      direction: 'South Approach (T. Nagar)'
+    },
+    conflictRisk: 'HIGH',
+    factorsList: [
+      { label: 'ETA to Junction', val: 'AMB-104: 43s | AMB-208: 50s (7s difference)' },
+      { label: 'Distance', val: '555m vs 555m (Equal convergence distance)' },
+      { label: 'Approach Direction', val: 'Opposing perpendicular vectors on INT-04' },
+      { label: 'Intersection Occupancy', val: 'Single vehicle capacity per clearance window' },
+      { label: 'Traffic Density', val: 'Anna Salai link: High (+2.4 min density)' },
+      { label: 'Route Conflict Probability', val: 'HIGH (Simultaneous intersection demand)' }
+    ],
+    recommendedSequence: [
+      { rank: '01', vehicle: 'AMB-104', action: 'Immediate Emergency Corridor', reason: 'Reaches junction 7s earlier' },
+      { rank: '02', vehicle: 'AMB-208', action: 'Hold/Controlled Deceleration', reason: 'Clear second sequentially' }
+    ],
+    reasoning: 'Sequential clearance minimizes simultaneous intersection occupancy and preserves momentum without stopping both emergency vehicles.',
+    confidence: '96%',
+    confidenceLabel: 'SIMULATION ESTIMATE'
+  },
+
+  whyExplanation: {
+    title: 'Why This Decision?',
+    summary: 'AMB-104 is predicted to reach the conflict zone 7 seconds earlier. Sequential clearance reduces the probability of simultaneous intersection occupancy.',
+    detailedPoints: [
+      'ETA Delta: AMB-104 arrives in 43 seconds compared to AMB-208 arriving in 50 seconds.',
+      'Momentum Preservation: Granting Priority 01 to AMB-104 allows it to pass through INT-04 without deceleration, clearing the intersection just before AMB-208 arrives.',
+      'Zero Deadlock Guarantee (Simulated): Eliminates the scenario where both ambulances attempt to cross simultaneously, requiring abrupt emergency braking in the intersection.',
+      'Secondary Green Wave: Once AMB-104 clears, INT-04 immediately switches green for AMB-208 (Priority 02).'
+    ],
+    disclaimer: 'This explanation is generated by the resQClear simulation decision model for transparent, explainable emergency coordination.'
+  },
+
+  productRoadmap: [
+    {
+      phase: 'PHASE 1',
+      title: 'Digital Twin Simulation',
+      status: 'CURRENT',
+      isCurrent: true,
+      desc: '60 FPS multi-ambulance conflict engine, corridor simulation, and operations center UI.'
+    },
+    {
+      phase: 'PHASE 2',
+      title: 'Ambulance GPS MVP',
+      status: 'NEXT',
+      isCurrent: false,
+      desc: 'Dedicated telemetry mobile/in-vehicle client with high-precision GPS tracking for paramedics.'
+    },
+    {
+      phase: 'PHASE 3',
+      title: 'Real-Time Traffic Data',
+      status: 'PLANNED',
+      isCurrent: false,
+      desc: 'City-wide traffic sensor mesh and mapping API ingestion for live congestion heatmaps.'
+    },
+    {
+      phase: 'PHASE 4',
+      title: 'Ambulance + Hospital Pilot',
+      status: 'PLANNED',
+      isCurrent: false,
+      desc: 'Controlled trial with participating ambulance fleet operators and receiving trauma centers.'
+    },
+    {
+      phase: 'PHASE 5',
+      title: 'Authorized Traffic Infrastructure Integration',
+      status: 'FUTURE',
+      isCurrent: false,
+      desc: 'Municipal traffic command center API integration subject to regulatory & civic authorization.'
+    }
+  ],
+
+  howItWorksSteps: [
+    {
+      step: '1',
+      name: 'DETECT',
+      desc: 'Detect emergency vehicles and traffic conditions via connected telemetry.',
+      icon: 'Ambulance'
+    },
+    {
+      step: '2',
+      name: 'PREDICT',
+      desc: 'Estimate congestion and arrival times across upcoming intersections.',
+      icon: 'Activity'
+    },
+    {
+      step: '3',
+      name: 'OPTIMIZE',
+      desc: 'Evaluate emergency routes and compare alternative arterial corridors.',
+      icon: 'Navigation'
+    },
+    {
+      step: '4',
+      name: 'RESOLVE',
+      desc: 'Coordinate multiple emergency vehicles approaching conflicting intersections.',
+      icon: 'Cpu'
+    },
+    {
+      step: '5',
+      name: 'COORDINATE',
+      desc: 'Generate an emergency corridor sequence with simulated traffic signal timing.',
+      icon: 'TrafficLight'
+    },
+    {
+      step: '6',
+      name: 'INFORM',
+      desc: 'Provide status and ETA information to authorized stakeholders and receiving ERs.',
+      icon: 'Hospital'
     }
   ],
 
@@ -343,25 +540,11 @@ const RESQCLEAR_DATA = {
     travelDelayReduction: '-32%',
     simulatedTimeSaved: '2.8 min',
     averageResponseTime: '06:14 min',
+    intersectionWaitTime: '4.2 sec',
     totalSimulatedTrips: 1248,
-    corridorStatus: 'SAFE CORRIDOR SEQUENCE COMPLETED'
+    corridorStatus: 'SAFE CORRIDOR SEQUENCE COMPLETED',
+    label: 'DEMO DATA'
   },
-
-  productRoadmap: [
-    { phase: 'PHASE 1', title: 'Digital Twin Simulation', status: 'Current', isCurrent: true, desc: '60 FPS collision conflict arbitration engine & traffic corridor visualization' },
-    { phase: 'PHASE 2', title: 'Ambulance GPS MVP', status: 'Next', isCurrent: false, desc: 'Paramedic vehicle telemetry client with live GPS precision tracking' },
-    { phase: 'PHASE 3', title: 'Real-Time Traffic Data', status: 'Planned', isCurrent: false, desc: 'City-wide traffic sensor and sensor-mesh ingestion feeds' },
-    { phase: 'PHASE 4', title: 'Hospital / Ambulance Pilot', status: 'Planned', isCurrent: false, desc: 'Controlled pilot with partner emergency departments and trauma centers' },
-    { phase: 'PHASE 5', title: 'Authorized Traffic Infrastructure Integration', status: 'Future', isCurrent: false, desc: 'Municipal traffic command center API integration subject to regulatory approval' }
-  ],
-
-  howItWorksSteps: [
-    { step: '1', name: 'DETECT', desc: 'Emergency vehicle detected via connected telemetry', icon: 'Ambulance' },
-    { step: '2', name: 'PREDICT', desc: 'Traffic congestion and ETA to intersection analyzed', icon: 'Activity' },
-    { step: '3', name: 'RESOLVE', desc: 'Conflicting emergency routes coordinated by AI decision model', icon: 'Cpu' },
-    { step: '4', name: 'COORDINATE', desc: 'Emergency corridor sequence simulated with dynamic green wave', icon: 'TrafficLight' },
-    { step: '5', name: 'INFORM', desc: 'Hospital and control-room status updated in real-time', icon: 'Hospital' }
-  ],
 
   analyticsData: {
     hourlyData: [
@@ -391,4 +574,4 @@ const RESQCLEAR_DATA = {
 };
 
 window.RESQCLEAR_DATA = RESQCLEAR_DATA;
-window.AMBUCLEAR_DATA = RESQCLEAR_DATA; // backward compatibility alias
+window.AMBUCLEAR_DATA = RESQCLEAR_DATA;

@@ -1,4 +1,5 @@
 // resQClear Dedicated Simulation Demo Controls Bar
+// Enterprise Control Room Actions: Playback, Hero Scenario, Speed, and Event Injections
 const { useState } = React;
 
 function DemoControls({ simState, onRunScenario, onStart, onPause, onReset, onTriggerA, onTriggerB, onTriggerBoth, onCreateJam, onClearJam, onSetSpeed, onToggleSound, soundEnabled }) {
@@ -6,7 +7,7 @@ function DemoControls({ simState, onRunScenario, onStart, onPause, onReset, onTr
 
   return (
     <div className="glass-panel p-3.5 sm:p-4 rounded-2xl border border-slate-700/80 bg-slate-950/95 shadow-2xl flex flex-wrap items-center justify-between gap-3">
-      {/* Left Group: HERO BUTTON (Run Emergency Scenario) */}
+      {/* Left Group: HERO BUTTON (RUN EMERGENCY SCENARIO) */}
       <div className="flex items-center space-x-3">
         <button
           onClick={onRunScenario}
@@ -25,7 +26,7 @@ function DemoControls({ simState, onRunScenario, onStart, onPause, onReset, onTr
           <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-mono">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
             <span className="text-slate-400">STEP:</span>
-            <span className="text-emerald-400 font-bold">{scenarioStep || 1} / 12</span>
+            <span className="text-emerald-400 font-bold">{scenarioStep || 1} / 16</span>
           </div>
         )}
       </div>

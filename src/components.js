@@ -1,7 +1,7 @@
-// AmbuClear UI Components (React 18)
+// resQClear UI Components & Enterprise SVG Icon Library (React 18)
 const { useState, useEffect, useRef } = React;
 
-// --- ICONS (Clean, scalable SVG Lucide-style icons) ---
+// --- ICONS (Scalable SVG Icons) ---
 const Icons = {
   Ambulance: ({ className = "w-5 h-5", ...props }) => (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -23,6 +23,17 @@ const Icons = {
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
       <line x1="12" y1="8" x2="12" y2="12" />
       <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+  ),
+  ShieldCheck: ({ className = "w-5 h-5", ...props }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <polyline points="9 12 11 14 15 10" />
+    </svg>
+  ),
+  Shield: ({ className = "w-5 h-5", ...props }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
     </svg>
   ),
   Zap: ({ className = "w-5 h-5", ...props }) => (
@@ -166,15 +177,56 @@ const Icons = {
       <polyline points="2 17 12 22 22 17" />
       <polyline points="2 12 12 17 22 12" />
     </svg>
+  ),
+  Lock: ({ className = "w-5 h-5", ...props }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  ),
+  X: ({ className = "w-5 h-5", ...props }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  ),
+  Info: ({ className = "w-5 h-5", ...props }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12.01" y2="8" />
+    </svg>
+  ),
+  HelpCircle: ({ className = "w-5 h-5", ...props }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  ),
+  Crosshair: ({ className = "w-5 h-5", ...props }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="22" y1="12" x2="18" y2="12" />
+      <line x1="6" y1="12" x2="2" y2="12" />
+      <line x1="12" y1="6" x2="12" y2="2" />
+      <line x1="12" y1="22" x2="12" y2="18" />
+    </svg>
+  ),
+  TrendingUp: ({ className = "w-5 h-5", ...props }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+      <polyline points="17 6 23 6 23 12" />
+    </svg>
   )
 };
 
 // --- LOGO COMPONENT ---
 function ResQClearLogo({ size = "default" }) {
-  const isSmall = size === "sm";
+  const isSmall = size === "sm" || size === "small";
   return (
-    <div className="flex items-center space-x-2.5 group cursor-pointer">
-      <div className={`relative flex items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 p-0.5 shadow-lg shadow-emerald-500/20`}>
+    <div className="flex items-center space-x-2.5 select-none">
+      <div className="relative flex items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 p-0.5 shadow-md shadow-emerald-500/20">
         <div className={`bg-slate-950 rounded-[10px] ${isSmall ? 'p-1.5' : 'p-2'} flex items-center justify-center`}>
           <div className="relative">
             <Icons.Ambulance className={`${isSmall ? 'w-4 h-4' : 'w-5 h-5'} text-emerald-400`} />
@@ -188,13 +240,13 @@ function ResQClearLogo({ size = "default" }) {
           <span className={`font-extrabold tracking-tight text-white ${isSmall ? 'text-base' : 'text-xl'}`}>
             resQ<span className="text-emerald-400">Clear</span>
           </span>
-          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-            AI-V2X
+          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold uppercase">
+            PROTOTYPE
           </span>
         </div>
         {!isSmall && (
-          <p className="text-[10px] text-slate-400 tracking-wider uppercase font-mono">
-            Emergency Traffic Coordination
+          <p className="text-[9px] text-slate-400 tracking-wider uppercase font-mono font-medium">
+            EMERGENCY TRAFFIC COORDINATION
           </p>
         )}
       </div>
@@ -202,7 +254,7 @@ function ResQClearLogo({ size = "default" }) {
   );
 }
 
-// Export for app.js
+// Export for app bundle
 window.Icons = Icons;
 window.ResQClearLogo = ResQClearLogo;
-window.AmbuClearLogo = ResQClearLogo; // alias for backwards compatibility
+window.AmbuClearLogo = ResQClearLogo;

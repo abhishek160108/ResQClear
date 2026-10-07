@@ -1,23 +1,24 @@
 // resQClear Operations Center Left Sidebar Navigation
+// Clean Enterprise Proportions, Active Badges, and Section Organization
 const { useState } = React;
 
 function Sidebar({ currentTab, setTab, simState, onTogglePresentation, onOpenLanding }) {
-  const { ambulances = [], conflictState = {} } = simState || {};
+  const { ambulances = [], conflictState = {}, networkStatus = {} } = simState || {};
   const hasConflict = conflictState.stage && conflictState.stage !== 'IDLE';
 
   const navItems = [
     { id: 'overview', label: 'Overview & Map', icon: Icons.Compass, badge: 'LIVE' },
     { id: 'conflict', label: 'Conflict Engine', icon: Icons.ShieldAlert, badge: hasConflict ? 'ALERT' : null, alert: hasConflict },
     { id: 'ambulances', label: 'Ambulances', icon: Icons.Ambulance, badge: ambulances.length },
-    { id: 'network', label: 'Traffic Network', icon: Icons.TrafficLight, badge: '6' },
-    { id: 'hospitals', label: 'Hospitals', icon: Icons.Hospital, badge: '3' },
+    { id: 'network', label: 'Traffic Network', icon: Icons.TrafficLight, badge: `${networkStatus.intersectionsOnline || 6}` },
+    { id: 'hospitals', label: 'Hospitals', icon: Icons.Hospital, badge: `${networkStatus.hospitalsAvailable || 3}` },
     { id: 'analytics', label: 'Analytics', icon: Icons.BarChart3 },
     { id: 'settings', label: 'Settings', icon: Icons.Settings }
   ];
 
   return (
-    <aside className="w-64 border-r border-slate-800 bg-slate-950/80 backdrop-blur-md flex flex-col justify-between p-4 flex-shrink-0">
-      {/* Top Nav Items */}
+    <aside className="w-64 border-r border-slate-800 bg-slate-950/85 backdrop-blur-md flex flex-col justify-between p-4 flex-shrink-0">
+      {/* Top Navigation Items */}
       <div className="space-y-6">
         <div className="space-y-1">
           <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest px-3 mb-2">
@@ -76,8 +77,8 @@ function Sidebar({ currentTab, setTab, simState, onTogglePresentation, onOpenLan
           <span>Landing Page</span>
         </button>
 
-        <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-[10px] font-mono text-slate-400 leading-tight text-center">
-          resQClear Prototype v1.2 • AI-V2X Sim
+        <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-[10px] font-mono text-slate-500 leading-tight text-center">
+          resQClear Prototype v2.0 • Digital Twin
         </div>
       </div>
     </aside>
